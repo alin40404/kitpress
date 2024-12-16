@@ -1,0 +1,111 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Kitpress\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-03-20 10:00+0800\n"
+"PO-Revision-Date: 2024-03-20 10:00+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.0\n"
+"X-Default-Language: true\n"
+
+#: kitpress/utils/ErrorHandler.php:90
+msgid "发生错误，请稍后重试。"
+msgstr "发生错误，请稍后重试。"
+
+#: kitpress/library/Backend.php:145
+msgid "控制器未找到：%s"
+msgstr "控制器未找到：%s"
+
+#: kitpress/library/Backend.php:189
+msgid "后台路由配置错误，缺少路由键：%s"
+msgstr "后台路由配置错误，缺少路由键：%s"
+
+#: kitpress/library/Backend.php:201
+msgid "未找到页面的路由配置：%s"
+msgstr "未找到页面的路由配置：%s"
+
+#: kitpress/utils/ErrorHandler.php:78
+msgctxt "ajax错误提示"
+msgid "发生错误"
+msgstr "发生错误"
+
+#: kitpress/library/Backend.php:123
+msgid "设置"
+msgstr "设置"
+
+#: kitpress/library/Backend.php:124
+msgid "仪表盘"
+msgstr "仪表盘"
+
+#: kitpress/library/Backend.php:125
+msgid "报告"
+msgstr "报告"
+
+#: kitpress/utils/CronManager.php:45
+msgid "每5分钟"
+msgstr "每5分钟"
+
+#: kitpress/utils/CronManager.php:46
+msgid "每10分钟"
+msgstr "每10分钟"
+
+#: kitpress/admin.php:145
+msgid "保存更改"
+msgstr "保存更改"
+
+#: kitpress/admin.php:146
+msgid "取消"
+msgstr "取消"
+
+#: kitpress/Kitpress.php:167
+msgid "成功"
+msgstr "成功"
+
+#: kitpress/Kitpress.php:168
+msgid "失败"
+msgstr "失败"
+
+msgid "方法未找到：%s"
+msgstr "方法未找到：%s"
+
+msgid "方法未找到：%s 或 %s"
+msgstr "方法未找到：%s 或 %s"
+
+msgid "控制器类型无效。预期为字符串，实际为 %1$s。控制器格式应为：%2$s"
+msgstr "控制器类型无效。预期为字符串，实际为 %1$s。控制器格式应为：%2$s"
+
+msgid "控制器格式无效：%1$s。控制器格式应为：%2$s"
+msgstr "控制器格式无效：%1$s。控制器格式应为：%2$s"
+
+msgid "控制器格式无效：%1$s。包含过多的 @ 符号。控制器格式应为：%2$s"
+msgstr "控制器格式无效：%1$s。包含过多的 @ 符号。控制器格式应为：%2$s"
+
+msgid "控制器格式无效：%1$s。控制器名称或方法名称为空。控制器格式应为：%2$s"
+msgstr "控制器格式无效：%1$s。控制器名称或方法名称为空。控制器格式应为：%2$s"
+
+msgid "无法反序列化单例对象"
+msgstr "无法反序列化单例对象"
+
+msgid "无法序列化单例对象"
+msgstr "无法序列化单例对象"
+
+msgid "插件激活失败："
+msgstr "插件激活失败："
+
+msgid "需要 PHP 7.2 或更高版本"
+msgstr "需要 PHP 7.2 或更高版本"
+
+msgid "需要 WordPress 5.0 或更高版本"
+msgstr "需要 WordPress 5.0 或更高版本"
+
+msgid "需要 PHP %s 扩展"
+msgstr "需要 PHP %s 扩展"
+
+msgid "插件卸载失败："
+msgstr "插件卸载失败："

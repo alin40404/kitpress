@@ -1,0 +1,15 @@
+{
+    "name": "your-vendor/kitpress",
+    "description": "Kitpress Framework for WordPress",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "kitpress\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=7.2"
+    },
+    "minimum-stability": "stable"
+}
