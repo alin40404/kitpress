@@ -19,7 +19,7 @@
 
 1. 在项目根目录运行：
 ```bash
-composer require kitpress/kitpress
+composer require alin40404/kitpress
 ```
 
 2. 在您的插件中引入 Composer 的自动加载器：
@@ -46,7 +46,7 @@ composer init
 
 2. 添加 KitPress 依赖：
 ```bash
-composer require kitpress/kitpress
+composer require alin40404/kitpress
 ```
 
 3. 创建主插件文件 `plugin-name.php`：
