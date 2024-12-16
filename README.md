@@ -11,8 +11,23 @@
 - **简化设置**：清晰易懂的代码库，加快开发速度
 - **支持定制**：灵活的配置选项满足您的需求
 - **内置工具**：提供插件开发必需的工具，如设置页面、自定义文章类型等
+- **Composer 支持**：通过 Composer 轻松管理依赖和安装
 
 ## 安装
+
+### 通过 Composer 安装（推荐）
+
+1. 在项目根目录运行：
+```bash
+composer require kitpress/kitpress
+```
+
+2. 在您的插件中引入 Composer 的自动加载器：
+```php
+require_once __DIR__ . '/vendor/autoload.php';
+```
+
+### 手动安装
 
 1. 下载或克隆代码库
 2. 将 `kitpress` 文件夹上传到您的 `/wp-content/plugins/` 目录
@@ -20,46 +35,87 @@
 
 ## 使用方法
 
-### 使用 KitPress 创建插件
+### 使用 Composer 创建新插件
 
-按照以下步骤创建新插件：
+1. 创建新的插件目录并初始化 Composer：
+```bash
+mkdir my-plugin
+cd my-plugin
+composer init
+```
+
+2. 添加 KitPress 依赖：
+```bash
+composer require kitpress/kitpress
+```
+
+3. 创建主插件文件 `plugin-name.php`：
+
+```php
+<?php
+/**
+ * Plugin Name: 我的插件
+ * Description: 插件简短描述
+ * Version: 1.0
+ * Author: 您的名字
+ * License: GPL2
+ */
+
+// 引入 Composer 自动加载器
+require_once __DIR__ . '/vendor/autoload.php';
+
+// 初始化插件
+new My_Plugin_Class();
+```
+
+### 使用 KitPress 创建插件（传统方式）
 
 1. 在 `/wp-content/plugins/` 下创建新文件夹
 2. 在该文件夹内创建名为 `plugin-name.php` 的文件
 3. 通过在插件文件顶部添加以下代码来引入 KitPress：
 
-   ```php
-   <?php
-   /**
-    * Plugin Name: 我的插件
-    * Description: 插件简短描述
-    * Version: 1.0
-    * Author: 您的名字
-    * License: GPL2
-    */
+```php
+<?php
+/**
+ * Plugin Name: 我的插件
+ * Description: 插件简短描述
+ * Version: 1.0
+ * Author: 您的名字
+ * License: GPL2
+ */
 
-   // 引入 KitPress 核心
-   require_once plugin_dir_path(__FILE__) . 'path/to/kitpress/core.php';
+// 引入 KitPress 核心
+require_once plugin_dir_path(__FILE__) . 'path/to/kitpress/core.php';
 
-   // 初始化插件
-   new My_Plugin_Class();
-   ```
-
-4. 使用提供的类和方法添加功能、设置等来自定义您的插件
+// 初始化插件
+new My_Plugin_Class();
+```
 
 ### 扩展 KitPress
 您可以通过创建自己的模块或使用现有模块来扩展 KitPress：
 
-   ```php
-   <?php
-    // 示例：添加自定义文章类型
-    class My_Custom_Post_Type extends KitPress_Module {
-        public function __construct() {
-            parent::__construct();
-            // 在此注册您的自定义文章类型
-        }
+```php
+<?php
+// 示例：添加自定义文章类型
+class My_Custom_Post_Type extends KitPress_Module {
+    public function __construct() {
+        parent::__construct();
+        // 在此注册您的自定义文章类型
     }
-   ```
+}
+```
+
+### 使用 Composer 包
+
+KitPress 支持使用任何 Composer 包来扩展功能。例如：
+
+```bash
+# 添加一个 Composer 包
+composer require vendor/package-name
+
+# 更新所有依赖
+composer update
+```
 
 ### 文档
 有关如何使用 KitPress 的详细文档，请访问 https://kitpress-docs.com
@@ -75,3 +131,9 @@ KitPress 使用 GPLv2 或更高版本许可证。
 
 ### 支持
 如果您需要帮助或有任何问题，欢迎在 GitHub 代码库上提出 issue，或通过官方支持论坛联系社区。
+
+## 系统要求
+
+- PHP 7.4 或更高版本
+- WordPress 5.0 或更高版本
+- Composer 2.0 或更高版本（如果使用 Composer 安装）
