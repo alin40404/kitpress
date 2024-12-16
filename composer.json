@@ -3,6 +3,12 @@
     "description": "Kitpress Framework for WordPress",
     "type": "library",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Allan Chan",
+            "email": "alin40404@gmail.com"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "kitpress\\": "src/"
