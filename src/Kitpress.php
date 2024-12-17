@@ -50,7 +50,7 @@ define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
     'core/traits/ConfigTrait',
     'utils/Log',
     'utils/Config',
-    'utils/Loader',
+//    'utils/Loader',
 ]);
 
 
