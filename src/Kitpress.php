@@ -27,8 +27,9 @@ defined('KITPRESS_PLUGIN_URL') || define('KITPRESS_PLUGIN_URL', plugin_dir_url(d
 define('KITPRESS_CORE_NAMESPACE', KITPRESS_NAME);
 define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
 
-// 引入核心文件
+// 手动引入核心文件
 (function($files = []){
+    return;
     try{
         foreach ($files as $file) {
             $fullPathFile = KITPRESS_PATH  . $file . '.php';
@@ -46,10 +47,10 @@ define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
         );
     }
 })([
-    'core/abstracts/Singleton',
-    'core/traits/ConfigTrait',
-    'utils/Log',
-    'utils/Config',
+//    'core/abstracts/Singleton',
+//    'core/traits/ConfigTrait',
+//    'utils/Log',
+//    'utils/Config',
 //    'utils/Loader',
 ]);
 
@@ -81,7 +82,7 @@ class Kitpress{
     private static function init()
     {
         // 注册自动加载类
-        Loader::register();
+        // Loader::register();
 
         // 载入通用配置文件
         Config::load('app');
