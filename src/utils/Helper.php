@@ -14,7 +14,7 @@ class Helper{
      */
     public static function getMainPluginFile() {
 
-        Log::error(Config::get('app'));
+//        Log::error(Config::get('app'));
         Log::error(Config::get('app.plugin_path'));
 
         if( empty(Config::get('app.plugin_path')) ) ErrorHandler::die('请到配置文件 app.php 配置参数 plugin_path ：插件根目录');

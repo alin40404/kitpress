@@ -4,6 +4,7 @@ namespace kitpress;
 use kitpress\core\abstracts\Initializable;
 use kitpress\core\Installer;
 use kitpress\utils\Config;
+use kitpress\utils\ErrorHandler;
 use kitpress\utils\Loader;
 use kitpress\utils\Session;
 use kitpress\utils\Log;
@@ -62,16 +63,27 @@ if(false){
  */
 class Kitpress{
 
+    /**
+     * 插件根目录
+     * @var null
+     */
+    private static $rootPath = null;
+
     private static $initialized = false;
 
+
+    public static function setRootPath($rootPath){
+        self::$rootPath = $rootPath;
+    }
 
     /**
      * 确保类已经初始化
      * @return void
      */
-    private static function ensureInitialized()
+    private static function ensureInitialized($rootPath = null)
     {
         if (!self::$initialized) {
+            if(is_null(self::$rootPath)) self::setRootPath($rootPath);
             self::init();
             self::$initialized = true;
         }
@@ -86,6 +98,9 @@ class Kitpress{
         // 注册自动加载类
         // Loader::register();
 
+        if(empty(self::$rootPath)) ErrorHandler::die('插件根目录不正确');
+
+        Config::setRootPath(self::$rootPath);
         // 载入通用配置文件
         Config::load('app');
 
@@ -127,8 +142,8 @@ class Kitpress{
      * 激活
      * @return void
      */
-    public static function activate(){
-        self::ensureInitialized();
+    public static function activate($rootPath = null){
+        self::ensureInitialized($rootPath);
         Installer::register();
     }
 
@@ -136,10 +151,12 @@ class Kitpress{
      * 手动执行 plugins_loaded 钩子
      * @return void
      */
-    public static function loaded() {
+    public static function loaded($rootPath = null) {
         // 激活钩子，必须在 plugins_loaded 钩子之前执行
-        self::activate();
-        add_action('plugins_loaded', [__CLASS__, 'run'], 20);
+        self::activate($rootPath);
+        add_action('plugins_loaded', function () use ($rootPath){
+            self::run($rootPath);
+        }, 20);
     }
 
 
@@ -147,8 +164,8 @@ class Kitpress{
      * 直接执行
      * @return Plugin|mixed
      */
-    public static function run(){
-        self::ensureInitialized();
+    public static function run($rootPath = null){
+        self::ensureInitialized($rootPath);
         $instance = Plugin::getInstance();
         self::shutdown();
         return $instance;
