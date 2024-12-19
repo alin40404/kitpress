@@ -1,11 +1,12 @@
 <?php
 namespace kitpress;
 
+use kitpress\core\abstracts\Initializable;
 use kitpress\core\abstracts\Singleton;
 use kitpress\library\Backend;
 use kitpress\library\Frontend;
 use kitpress\utils\Config;
-use kitpress\utils\Session;
+use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -15,6 +16,7 @@ if (!defined('ABSPATH')) {
  * 插件唯一入口类，在所有插件加载完成后执行
  */
 class Plugin extends Singleton {
+	private static $container = [];
 
     protected function __construct() {
         parent::__construct();
@@ -22,6 +24,25 @@ class Plugin extends Singleton {
         $this->init_hooks();
     }
 
+	/**
+	 * 注册一个可初始化的类
+	 * @param Initializable $instance
+	 */
+	public static function registerInitializable(Initializable $instance) {
+		// 检查实例是否已经注册
+		if (!in_array($instance, self::$container, true)) {
+			self::$container[] = $instance;
+		}
+	}
+
+	/**
+	 * 初始化所有注册的可初始化类
+	 */
+	private static function initializeInitializables() {
+		foreach (self::$container as $initializable) {
+			$initializable->init();
+		}
+	}
 
     private function loaded_plugins()
     {
@@ -45,8 +66,12 @@ class Plugin extends Singleton {
      */
     public function init() {
         Frontend::getInstance()->init();
+
         // 在 init 注册时，注册后台路由
         Backend::getInstance() -> registerRoutes();
+
+	    // 初始化所有可初始化类
+	    self::initializeInitializables();
     }
 
     /**

@@ -18,11 +18,16 @@ trait ViewTrait {
      * @param bool $return 是否返回而不是输出
      * @return string|void
      */
-    protected function render($view, $data = [], $return = false) {
+    protected function render($view = null, $data = [], $return = false) {
         // 获取调用类的反射信息
         $calledClass = get_called_class();
         $reflection = new \ReflectionClass($calledClass);
         $className = strtolower($reflection->getShortName());
+
+	    // 如果视图为空，获取当前方法名
+	    if (empty($view)) {
+		    $view = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
+	    }
 
         // 如果视图路径包含 '/'，说明是完整路径，否则使用类名构建路径
         if (strpos($view, '/') === false) {

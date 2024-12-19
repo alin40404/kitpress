@@ -56,7 +56,7 @@ class Backend extends Singleton {
             return;
         }
         foreach ($this->menus as $menu) {
-            if (!isset($menu['parent_slug'])) {
+            if (!isset($menu['parent_slug']) || is_null($menu['parent_slug'])) {
                 add_menu_page(
                     $menu['page_title'] ?? '',
                     $menu['menu_title'] ?? '',

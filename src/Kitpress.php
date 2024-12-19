@@ -1,6 +1,7 @@
 <?php
 namespace kitpress;
 
+use kitpress\core\abstracts\Initializable;
 use kitpress\core\Installer;
 use kitpress\utils\Config;
 use kitpress\utils\Loader;
@@ -27,33 +28,33 @@ defined('KITPRESS_PLUGIN_URL') || define('KITPRESS_PLUGIN_URL', plugin_dir_url(d
 define('KITPRESS_CORE_NAMESPACE', KITPRESS_NAME);
 define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
 
-// 手动引入核心文件
-(function($files = []){
-    return;
-    try{
-        foreach ($files as $file) {
-            $fullPathFile = KITPRESS_PATH  . $file . '.php';
-            if( !file_exists($fullPathFile) ) throw new \Exception($fullPathFile);
-            require_once $fullPathFile;
+if(false){
+// 引入核心文件
+    (function($files = []){
+        try{
+            foreach ($files as $file) {
+                $fullPathFile = KITPRESS_PATH  . $file . '.php';
+                if( !file_exists($fullPathFile) ) throw new \Exception($fullPathFile);
+                require_once $fullPathFile;
+            }
+        }catch (\Exception $e){
+            wp_die(
+                esc_html__('Unable to load Kitpress framework core library file:', KITPRESS_TEXT_DOMAIN) .  $e->getMessage() ,  // 错误消息
+                esc_html__('Kitpress Framework Error', KITPRESS_TEXT_DOMAIN),  // 标题
+                array(
+                    'response' => 500,
+                    'back_link' => true
+                )
+            );
         }
-    }catch (\Exception $e){
-        wp_die(
-            esc_html__('Unable to load Kitpress framework core library file:', KITPRESS_TEXT_DOMAIN) .  $e->getMessage() ,  // 错误消息
-            esc_html__('Kitpress Framework Error', KITPRESS_TEXT_DOMAIN),  // 标题
-            array(
-                'response' => 500,
-                'back_link' => true
-            )
-        );
-    }
-})([
-//    'core/abstracts/Singleton',
-//    'core/traits/ConfigTrait',
-//    'utils/Log',
-//    'utils/Config',
-//    'utils/Loader',
-]);
-
+    })([
+        'core/abstracts/Singleton',
+        'core/traits/ConfigTrait',
+        'utils/Log',
+        'utils/Config',
+        'utils/Loader',
+    ]);
+}
 
 /**
  * 框架唯一入口类，提供外部调用。
@@ -62,6 +63,7 @@ define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
 class Kitpress{
 
     private static $initialized = false;
+
 
     /**
      * 确保类已经初始化
@@ -82,7 +84,7 @@ class Kitpress{
     private static function init()
     {
         // 注册自动加载类
-        // Loader::register();
+        Loader::register();
 
         // 载入通用配置文件
         Config::load('app');
@@ -94,6 +96,16 @@ class Kitpress{
         if (self::needsSession()) {
             Session::start();
         }
+
+	    // 注入初始化类
+	    $initClasses = Config::get('app.init');
+	    if ($initClasses) {
+		    foreach ($initClasses as $className) {
+			    if (class_exists($className) && is_subclass_of($className, Initializable::class)) {
+				    Plugin::registerInitializable(new $className());
+			    }
+		    }
+	    }
     }
 
     /**
@@ -124,7 +136,7 @@ class Kitpress{
      * 手动执行 plugins_loaded 钩子
      * @return void
      */
-    public static function pluginsLoaded() {
+    public static function loaded() {
         // 激活钩子，必须在 plugins_loaded 钩子之前执行
         self::activate();
         add_action('plugins_loaded', [__CLASS__, 'run'], 20);
