@@ -35,7 +35,7 @@ class Loader {
         if (file_exists($file)) {
             require_once $file;
         } else {
-            Log::error("File not found: " . $file);
+            if( Config::get('app.features.debug_mode') ) Log::error("File not found: " . $file);
             return;
         }
 
