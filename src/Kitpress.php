@@ -5,6 +5,7 @@ use kitpress\core\abstracts\Initializable;
 use kitpress\core\Installer;
 use kitpress\utils\Config;
 use kitpress\utils\ErrorHandler;
+use kitpress\utils\Loader;
 use kitpress\utils\Session;
 use kitpress\utils\Log;
 
@@ -99,11 +100,10 @@ class Kitpress{
     private static function init()
     {
         // 注册自动加载类
-        // Loader::register();
+         Loader::register();
 
         if(empty(self::$rootPath)) ErrorHandler::die('插件根目录不正确');
 
-        // Config::setRootPath(self::$rootPath);
         // 载入通用配置文件
         Config::load('app');
 

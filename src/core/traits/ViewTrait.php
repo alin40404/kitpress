@@ -1,6 +1,7 @@
 <?php
 namespace kitpress\core\traits;
 
+use kitpress\Kitpress;
 use kitpress\utils\Config;
 
 trait ViewTrait {

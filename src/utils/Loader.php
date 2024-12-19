@@ -1,5 +1,7 @@
 <?php
 namespace kitpress\utils;
+use kitpress\Kitpress;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -21,11 +23,14 @@ class Loader {
     public static function autoload($class) {
 
         // 处理两个不同的命名空间
-        if (stripos($class, KITPRESS_CORE_NAMESPACE . '\\') === 0) {
-            // kitpress 命名空间的类
-            $relative_class = substr($class, strlen(KITPRESS_CORE_NAMESPACE . '\\'));
-            $file = self::getFilePath($relative_class, 'kitpress');
-        } elseif (stripos($class, Config::get('app.namespace') . '\\') === 0) {
+//        if (stripos($class, KITPRESS_CORE_NAMESPACE . '\\') === 0) {
+//            return;
+//            // kitpress 命名空间的类
+//            $relative_class = substr($class, strlen(KITPRESS_CORE_NAMESPACE . '\\'));;
+//            $file = self::getFilePath($relative_class, 'kitpress');
+//        }
+
+        if (stripos($class, Config::get('app.namespace') . '\\') === 0) {
             // 外部命名空间
             // kitpress_plugin 命名空间的类
             $relative_class = substr($class, strlen(Config::get('app.namespace') . '\\'));
@@ -71,9 +76,9 @@ class Loader {
 
         // 根据类型确定基础路径
         $base_path = Kitpress::getRootPath();
-        if ($type === 'kitpress') {
-            $base_path = KITPRESS_PATH;
-        }
+//        if ($type === 'kitpress') {
+//            $base_path = KITPRESS_PATH;
+//        }
 
         // 组合完整路径
         return $base_path . $directory . $file_name . '.php';

@@ -84,6 +84,7 @@ class Backend extends Singleton {
         $page = $_GET['page'] ?? '';
 
         if (!isset($this->routes['page'])) {
+            // 不报错
             return;
             if(false) return ErrorHandler::die(sprintf(
             /* translators: %s: page route key */
@@ -173,7 +174,7 @@ class Backend extends Singleton {
             $controllerClass = $this->namespace . $controller;
 
             if (!class_exists($controllerClass)) {
-                throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controller));
+                throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controllerClass));
             }
 
             $instance = new $controllerClass();
@@ -203,7 +204,7 @@ class Backend extends Singleton {
             $controllerClass = $this->namespace . $controller;
 
             if (!class_exists($controllerClass)) {
-                throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controller));
+                throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controllerClass ));
             }
 
             // 处理方法名称
