@@ -99,9 +99,9 @@ class Plugin extends Singleton {
      * @return void
      */
     public function loadLanguage() {
-        // 在插件初始化时加载文本域
-        load_plugin_textdomain(Config::get('app.text_domain'), false, Kitpress::getRootPath() . 'languages/');
-        load_plugin_textdomain(KITPRESS_TEXT_DOMAIN, false, KITPRESS_PATH  . 'languages/');
+        // 在插件初始化时加载文本域，使用相对路径。注意函数 load_textdomain 使用绝对路径和文件名
+        load_plugin_textdomain(Config::get('app.text_domain'), false, dirname(plugin_basename(Kitpress::getRootPath())) . 'languages/');
+        load_plugin_textdomain(KITPRESS_TEXT_DOMAIN, false, dirname(plugin_basename(KITPRESS_PATH))  . 'languages/');
     }
 
 }
