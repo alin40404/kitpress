@@ -251,17 +251,19 @@ class Model extends Singleton {
     public function where($conditions, $operator = 'AND') {
         $this->where = '';
         $this->values = [];
-        
-        foreach ($conditions as $key => $condition) {
-            if (is_array($condition)) {
-                // 支持自定义运算符: ['column', 'operator', 'value']
-                list($column, $op, $value) = $condition;
-                $this->where .= ($this->where ? " $operator " : "") . "$column $op %s";
-                $this->values[] = $value;
-            } else {
-                // 默认使用等于运算符
-                $this->where .= ($this->where ? " $operator " : "") . "$key = %s";
-                $this->values[] = $condition;
+
+        if (!empty($conditions) && is_array($conditions)) {
+            foreach ($conditions as $key => $condition) {
+                if (is_array($condition)) {
+                    // 支持自定义运算符: ['column', 'operator', 'value']
+                    list($column, $op, $value) = $condition;
+                    $this->where .= ($this->where ? " $operator " : "") . "$column $op %s";
+                    $this->values[] = $value;
+                } else {
+                    // 默认使用等于运算符
+                    $this->where .= ($this->where ? " $operator " : "") . "$key = %s";
+                    $this->values[] = $condition;
+                }
             }
         }
 
