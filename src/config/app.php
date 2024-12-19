@@ -15,10 +15,6 @@ return [
     'db_version' => '1.0.0',
     // 语言包标识
     'text_domain' => 'kitpress-plugin',
-    // 插件根目录
-    'plugin_path' => '',
-    // 插件URL
-    'plugin_url' => '',
 
     'options' => [// 保存到数据库的常量字段名
         'settings_key' => 'kitpress_plugin_settings',

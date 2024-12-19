@@ -59,7 +59,7 @@ trait ViewTrait {
      * @return string
      */
     protected function getViewFile($view) {
-        return Config::get('app.plugin_path') . $this->viewPath . '/' . $view . '.php';
+        return Kitpress::getRootPath() . $this->viewPath . '/' . $view . '.php';
     }
 
     /**

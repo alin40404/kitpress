@@ -1,6 +1,8 @@
 <?php
 namespace kitpress\utils;
 
+use kitpress\Kitpress;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -13,13 +15,9 @@ class Helper{
      * @throws \Exception
      */
     public static function getMainPluginFile() {
-
-//        Log::error(Config::get('app'));
-        Log::error(Config::get('app.plugin_path'));
-
-        if( empty(Config::get('app.plugin_path')) ) ErrorHandler::die('请到配置文件 app.php 配置参数 plugin_path ：插件根目录');
         // 插件根目录
-        $plugin_dir = Config::get('app.plugin_path');
+        $plugin_dir = Kitpress::getRootPath();
+        if( empty($plugin_dir) ) ErrorHandler::die('插件根目录不正确');
 
         // 插件文件名
         $plugin_name = basename($plugin_dir);

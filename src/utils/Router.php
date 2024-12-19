@@ -13,7 +13,6 @@ class Router {
         load as protected loadResource;
     }
 
-
     /**
      * 加载路由配置
      */

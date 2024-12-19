@@ -75,6 +75,10 @@ class Kitpress{
         self::$rootPath = $rootPath;
     }
 
+    public static function getRootPath(){
+        return self::$rootPath;
+    }
+
     /**
      * 确保类已经初始化
      * @return void
@@ -99,7 +103,7 @@ class Kitpress{
 
         if(empty(self::$rootPath)) ErrorHandler::die('插件根目录不正确');
 
-        Config::setRootPath(self::$rootPath);
+        // Config::setRootPath(self::$rootPath);
         // 载入通用配置文件
         Config::load('app');
 
