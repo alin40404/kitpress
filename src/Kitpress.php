@@ -5,7 +5,6 @@ use kitpress\core\abstracts\Initializable;
 use kitpress\core\Installer;
 use kitpress\utils\Config;
 use kitpress\utils\ErrorHandler;
-use kitpress\utils\Loader;
 use kitpress\utils\Session;
 use kitpress\utils\Log;
 

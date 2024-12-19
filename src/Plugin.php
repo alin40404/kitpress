@@ -6,7 +6,6 @@ use kitpress\core\abstracts\Singleton;
 use kitpress\library\Backend;
 use kitpress\library\Frontend;
 use kitpress\utils\Config;
-use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -20,8 +19,8 @@ class Plugin extends Singleton {
 
     protected function __construct() {
         parent::__construct();
-        $this->loaded_plugins();
-        $this->init_hooks();
+        $this->loadedPlugins();
+        $this->initHooks();
     }
 
 	/**
@@ -36,28 +35,28 @@ class Plugin extends Singleton {
 	}
 
 	/**
-	 * 初始化所有注册的可初始化类
+	 * 初始化所有注册的类
 	 */
-	private static function initializeInitializables() {
+	private static function initializeAll() {
 		foreach (self::$container as $initializable) {
 			$initializable->init();
 		}
 	}
 
-    private function loaded_plugins()
+    private function loadedPlugins()
     {
         // 插件加载后触发
         $this->loadLanguage();
     }
-    private function init_hooks() {
+    private function initHooks() {
         // 同级别注册钩子
         add_action('init', array($this, 'init'));
-        add_action('admin_init', array($this, 'admin_init'));
+        add_action('admin_init', array($this, 'adminInit'));
         add_action('admin_menu', array($this, 'registerAdminMenus'));
         // 加载前台前台
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueueScripts'));
         // 加载前台后台
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueueAdminScripts'));
     }
 
     /**
@@ -71,14 +70,14 @@ class Plugin extends Singleton {
         Backend::getInstance() -> registerRoutes();
 
 	    // 初始化所有可初始化类
-	    self::initializeInitializables();
+	    self::initializeAll();
     }
 
     /**
      * 后台初始化
      * @return void
      */
-    public function admin_init() {
+    public function adminInit() {
         Backend::getInstance() -> init();
     }
 
@@ -87,11 +86,11 @@ class Plugin extends Singleton {
         Backend::getInstance() -> registerAdminMenus();
     }
 
-    public function enqueue_scripts() {
+    public function enqueueScripts() {
         Frontend::getInstance() -> registerAssets();
     }
 
-    public function enqueue_admin_scripts($hook) {
+    public function enqueueAdminScripts($hook) {
         Backend::getInstance() -> registerAssets($hook);
     }
 
