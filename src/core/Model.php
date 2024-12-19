@@ -246,7 +246,7 @@ class Model extends Singleton {
      * WHERE条件查询
      * @param array $conditions 查询条件
      * @param string $operator 条件运算符 (AND/OR)
-     * @return array
+     * @return $this
      */
     public function where($conditions, $operator = 'AND') {
         $this->where = '';
