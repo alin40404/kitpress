@@ -70,7 +70,7 @@ class Loader {
         }
 
         // 根据类型确定基础路径
-        $base_path = KITPRESS_PLUGIN_PATH;
+        $base_path = Config::get('app.plugin_path');
         if ($type === 'kitpress') {
             $base_path = KITPRESS_PATH;
         }

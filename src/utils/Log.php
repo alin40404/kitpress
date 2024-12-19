@@ -35,6 +35,11 @@ class Log extends Singleton {
 
         $instance = self::getInstance();
 
+         // 如果是数组或对象，转换为字符串
+         if (is_array($message) || is_object($message)) {
+            $message = print_r($message, true);
+        }
+
         $logMessage = sprintf('[%s] %s',
             $instance->requestId,
             $message

@@ -84,7 +84,7 @@ class Kitpress{
     private static function init()
     {
         // 注册自动加载类
-        Loader::register();
+        // Loader::register();
 
         // 载入通用配置文件
         Config::load('app');

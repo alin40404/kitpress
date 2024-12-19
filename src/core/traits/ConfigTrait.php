@@ -33,14 +33,28 @@ trait ConfigTrait {
     private static $customPath = null;
 
     /**
+     * 插件根目录
+     * @var null
+     */
+    private static $rootPath = null;
+
+    public static function setRootPath($path)
+    {
+        self::$rootPath = $path;
+        return static::class;
+    }
+
+    /**
      * 初始化配置路径
      */
-    private static function init($module) {
+    private static function init($module)
+    {
         $defaultPath = KITPRESS_PATH . $module;
-        $customPath = Config::get('app.plugin_path') . $module;
+        $customPath = (self::$rootPath ?? Config::get('app.plugin_path')) . $module;
 
         self::$defaultPath = rtrim($defaultPath, '/') . '/';
         self::$customPath = rtrim($customPath, '/') . '/';
+
     }
 
     /**

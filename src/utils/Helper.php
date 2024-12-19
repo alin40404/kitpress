@@ -13,7 +13,11 @@ class Helper{
      * @throws \Exception
      */
     public static function getMainPluginFile() {
-        if( empty(Config::get('app.plugin_path')) ) ErrorHandler::die('请配置到配置文件 app.php 配置参数 plugin_path ：插件根目录');
+
+        Log::error(Config::get('app'));
+        Log::error(Config::get('app.plugin_path'));
+
+        if( empty(Config::get('app.plugin_path')) ) ErrorHandler::die('请到配置文件 app.php 配置参数 plugin_path ：插件根目录');
         // 插件根目录
         $plugin_dir = Config::get('app.plugin_path');
 
