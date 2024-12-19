@@ -20,9 +20,9 @@ define('KITPRESS___FILE__', __FILE__ );
 // 框架根目录
 define('KITPRESS_PATH', plugin_dir_path(KITPRESS___FILE__));
 // 插件根目录
-defined('KITPRESS_PLUGIN_PATH') || define('KITPRESS_PLUGIN_PATH', plugin_dir_path(dirname(KITPRESS___FILE__)));
+// defined('KITPRESS_PLUGIN_PATH') || define('KITPRESS_PLUGIN_PATH', plugin_dir_path(dirname(KITPRESS___FILE__)));
 // 插件URL
-defined('KITPRESS_PLUGIN_URL') || define('KITPRESS_PLUGIN_URL', plugin_dir_url(dirname(KITPRESS___FILE__)));
+// defined('KITPRESS_PLUGIN_URL') || define('KITPRESS_PLUGIN_URL', plugin_dir_url(dirname(KITPRESS___FILE__)));
 
 // 框架命名空间
 define('KITPRESS_CORE_NAMESPACE', KITPRESS_NAME);

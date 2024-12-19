@@ -1,6 +1,8 @@
 <?php
 namespace kitpress\core\traits;
 
+use kitpress\utils\Config;
+
 trait ViewTrait {
     /** @var string 视图文件的基础路径 */
     protected string $viewPath = '';
@@ -57,7 +59,7 @@ trait ViewTrait {
      * @return string
      */
     protected function getViewFile($view) {
-        return KITPRESS_PLUGIN_PATH . $this->viewPath . '/' . $view . '.php';
+        return Config::get('app.plugin_path') . $this->viewPath . '/' . $view . '.php';
     }
 
     /**

@@ -1,6 +1,8 @@
 <?php
 namespace kitpress\core\traits;
 
+use kitpress\utils\Config;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -35,7 +37,7 @@ trait ConfigTrait {
      */
     private static function init($module) {
         $defaultPath = KITPRESS_PATH . $module;
-        $customPath = KITPRESS_PLUGIN_PATH . $module;
+        $customPath = Config::get('app.plugin_path') . $module;
 
         self::$defaultPath = rtrim($defaultPath, '/') . '/';
         self::$customPath = rtrim($customPath, '/') . '/';

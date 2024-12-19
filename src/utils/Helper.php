@@ -13,8 +13,9 @@ class Helper{
      * @throws \Exception
      */
     public static function getMainPluginFile() {
+        if( empty(Config::get('app.plugin_path')) ) ErrorHandler::die('请配置到配置文件 app.php 配置参数 plugin_path ：插件根目录');
         // 插件根目录
-        $plugin_dir = KITPRESS_PLUGIN_PATH;
+        $plugin_dir = Config::get('app.plugin_path');
 
         // 插件文件名
         $plugin_name = basename($plugin_dir);
