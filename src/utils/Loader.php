@@ -22,19 +22,11 @@ class Loader {
      */
     public static function autoload($class) {
 
-        // 处理两个不同的命名空间
-//        if (stripos($class, KITPRESS_CORE_NAMESPACE . '\\') === 0) {
-//            return;
-//            // kitpress 命名空间的类
-//            $relative_class = substr($class, strlen(KITPRESS_CORE_NAMESPACE . '\\'));;
-//            $file = self::getFilePath($relative_class, 'kitpress');
-//        }
-
         if (stripos($class, Config::get('app.namespace') . '\\') === 0) {
             // 外部命名空间
             // kitpress_plugin 命名空间的类
             $relative_class = substr($class, strlen(Config::get('app.namespace') . '\\'));
-            $file = self::getFilePath($relative_class, 'plugin');
+            $file = self::getFilePath($relative_class);
         } else {
             return;
         }
@@ -59,7 +51,7 @@ class Loader {
      * @param string $type 命名空间类型 ('kitpress' 或 'plugin')
      * @return string 文件完整路径
      */
-    private static function getFilePath($class, $type) {
+    private static function getFilePath($class) {
         // 将命名空间分隔符转换为目录分隔符
         $path_parts = explode('\\', $class);
 
@@ -76,9 +68,6 @@ class Loader {
 
         // 根据类型确定基础路径
         $base_path = Kitpress::getRootPath();
-//        if ($type === 'kitpress') {
-//            $base_path = KITPRESS_PATH;
-//        }
 
         // 组合完整路径
         return $base_path . $directory . $file_name . '.php';
