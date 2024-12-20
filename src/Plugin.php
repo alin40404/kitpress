@@ -6,6 +6,7 @@ use kitpress\core\abstracts\Singleton;
 use kitpress\library\Backend;
 use kitpress\library\Frontend;
 use kitpress\utils\Config;
+use kitpress\utils\Lang;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -48,6 +49,7 @@ class Plugin extends Singleton {
         // 插件加载后触发
         $this->loadLanguage();
     }
+
     private function initHooks() {
         // 同级别注册钩子
         add_action('init', array($this, 'init'));
@@ -105,6 +107,9 @@ class Plugin extends Singleton {
 
         load_textdomain($text_domain, Kitpress::getRootPath() . 'languages/' . $text_domain . '-' . $locale . '.mo');
         load_textdomain(KITPRESS_TEXT_DOMAIN, KITPRESS_PATH  . 'languages/' . KITPRESS_TEXT_DOMAIN . '-' . $locale . '.mo');
+
+        // 初始化语言包
+        Lang::init();
     }
 
 }
