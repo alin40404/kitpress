@@ -244,30 +244,117 @@ class Model extends Singleton {
 
     /**
      * WHERE条件查询
-     * @param array $conditions 查询条件
-     * @param string $operator 条件运算符 (AND/OR)
+     * 支持以下调用方式:
+     * 1. where(['column' => 'value'])                     // 数组形式，默认使用 AND
+     * 2. where(['column', 'operator', 'value'])          // 数组形式，指定运算符
+     * 3. where('column', 'value')                        // 键值对形式
+     * 4. where('column', 'operator', 'value')           // 指定运算符形式
+     * 5. where(['column' => 'value'], 'OR')             // 数组形式，指定连接符
+     * 
+     * @param array|string $conditions 查询条件
+     * @param string|mixed $operatorOrValue 运算符或值
+     * @param mixed $value 值(可选)
+     * @param string $chainOperator 条件连接符 (AND/OR)
      * @return $this
      */
-    public function where($conditions, $operator = 'AND') {
-        $this->where = '';
-        $this->values = [];
+    public function where($conditions, $operatorOrValue = null, $value = null, $chainOperator = 'AND') {
+        // 如果是第一次调用where，重置条件
+        if (empty($this->where)) {
+            $this->where = '';
+            $this->values = [];
+        }
 
-        if (!empty($conditions) && is_array($conditions)) {
-            foreach ($conditions as $key => $condition) {
-                if (is_array($condition)) {
-                    // 支持自定义运算符: ['column', 'operator', 'value']
-                    list($column, $op, $value) = $condition;
-                    $this->where .= ($this->where ? " $operator " : "") . "$column $op %s";
-                    $this->values[] = $value;
-                } else {
-                    // 默认使用等于运算符
-                    $this->where .= ($this->where ? " $operator " : "") . "$key = %s";
-                    $this->values[] = $condition;
+        // 处理数组形式的调用
+        if (is_array($conditions)) {
+            // 处理 where(['column', 'operator', 'value']) 形式
+            if (isset($conditions[0]) && isset($conditions[1])) {
+                $column = $conditions[0];
+                $operator = $conditions[1];
+                $value = $conditions[2] ?? null;
+                $this->addWhereCondition($column, $operator, $value, $chainOperator);
+            } 
+            // 处理 where(['column' => 'value']) 形式
+            else {
+                foreach ($conditions as $key => $condition) {
+                    if (is_array($condition)) {
+                        // 支持嵌套数组条件: ['column', 'operator', 'value']
+                        $this->addWhereCondition(
+                            $condition[0], 
+                            $condition[1], 
+                            $condition[2], 
+                            $chainOperator
+                        );
+                    } else {
+                        // 普通键值对
+                        $this->addWhereCondition($key, '=', $condition, $chainOperator);
+                    }
                 }
+            }
+
+            // 如果第二个参数是连接符
+            if (is_string($operatorOrValue) && in_array(strtoupper($operatorOrValue), ['AND', 'OR'])) {
+                $chainOperator = $operatorOrValue;
+            }
+        }
+        // 处理 where('column', 'value') 或 where('column', 'operator', 'value') 形式
+        else {
+            if ($value === null) {
+                // where('column', 'value') 形式
+                $this->addWhereCondition($conditions, '=', $operatorOrValue, $chainOperator);
+            } else {
+                // where('column', 'operator', 'value') 形式
+                $this->addWhereCondition($conditions, $operatorOrValue, $value, $chainOperator);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * 添加WHERE条件
+     * @param string $column 字段名
+     * @param string $operator 运算符
+     * @param mixed $value 值
+     * @param string $chainOperator 条件连接符 (AND/OR)
+     */
+    protected function addWhereCondition($column, $operator, $value, $chainOperator = 'AND') {
+        // 验证运算符
+        $validOperators = ['=', '!=', '>', '>=', '<', '<=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN'];
+        $operator = strtoupper($operator);
+        
+        if (!in_array($operator, $validOperators)) {
+            // 如果不是有效的运算符，假定它是值，使用等号运算符
+            $value = $operator;
+            $operator = '=';
+        }
+
+        // 添加连接符
+        if (!empty($this->where)) {
+            $this->where .= " $chainOperator ";
+        }
+
+        // 特殊处理 IN 和 NOT IN
+        if (in_array($operator, ['IN', 'NOT IN'])) {
+            if (!is_array($value)) {
+                $value = [$value];
+            }
+            $placeholders = implode(',', array_fill(0, count($value), '%s'));
+            $this->where .= "$column $operator ($placeholders)";
+            $this->values = array_merge($this->values, $value);
+        }
+        // 特殊处理 BETWEEN 和 NOT BETWEEN
+        else if (in_array($operator, ['BETWEEN', 'NOT BETWEEN'])) {
+            if (!is_array($value) || count($value) !== 2) {
+                throw new \InvalidArgumentException("BETWEEN operator requires an array with exactly 2 values");
+            }
+            $this->where .= "$column $operator %s AND %s";
+            $this->values = array_merge($this->values, $value);
+        }
+        // 处理其他运算符
+        else {
+            $this->where .= "$column $operator %s";
+            $this->values[] = $value;
+        }
     }
 
     /**
@@ -364,7 +451,7 @@ class Model extends Singleton {
     }
 
     /**
-     * 执行查询并返回结果
+     * 执行查询并返回结��
      * @return array
      */
     public function get() {
