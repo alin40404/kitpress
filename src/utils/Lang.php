@@ -1,25 +1,16 @@
 <?php
 namespace kitpress\utils;
 
-use kitpress\core\abstracts\Singleton;
-
-
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Lang extends Singleton {
-
-    public function __construct() {
-        parent::__construct();
-        self::init();
-    }
-
+class Lang {
     /**
      * 存储当前文本域
      * @var string
      */
-    private $textDomain = '';
+    private static $textDomain = '';
 
     /**
      * 初始化文本域
@@ -27,9 +18,7 @@ class Lang extends Singleton {
      * @return static
      */
     public static function init($domain = '') {
-        $instance = self::getInstance();
-        $instance->textDomain = $domain ?: Config::get('app.text_domain');
-        return $instance;
+        self::$textDomain = $domain ?: Config::get('app.text_domain');
     }
 
     /**
@@ -38,7 +27,7 @@ class Lang extends Singleton {
      * @return string
      */
     public static function __($text) {
-        return \__($text, self::getInstance()->textDomain);
+        return \__($text, self::$textDomain);
     }
 
     /**
@@ -55,7 +44,7 @@ class Lang extends Singleton {
      * @param string $text 需要翻译的文本
      */
     public static function _e($text) {
-        \_e($text, self::getInstance()->textDomain);
+        \_e($text, self::$textDomain);
     }
 
     /**
@@ -66,7 +55,7 @@ class Lang extends Singleton {
      * @return string
      */
     public static function _n($single, $plural, $number) {
-        return \_n($single, $plural, $number, self::getInstance()->textDomain);
+        return \_n($single, $plural, $number, self::$textDomain);
     }
 
     /**
@@ -74,6 +63,6 @@ class Lang extends Singleton {
      * @return string
      */
     public static function getDomain() {
-        return self::getInstance()->textDomain;
+        return self::$textDomain;
     }
 }
