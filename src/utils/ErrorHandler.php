@@ -27,7 +27,7 @@ class ErrorHandler {
     protected static function getErrorConfig($error_code, array $context = []) {
         $error = Config::get('app.messages.errors.' . $error_code, [
             'message' => $error_code,
-            'title' => __('Error', KITPRESS_TEXT_DOMAIN),
+            'title' => Lang::kit('Error'),
             'type' => 'error'
         ]);
 

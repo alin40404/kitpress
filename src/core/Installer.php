@@ -3,6 +3,7 @@ namespace kitpress\core;
 use kitpress\utils\Config;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Helper;
+use kitpress\utils\Lang;
 use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {
@@ -81,9 +82,8 @@ class Installer {
 
             if( Config::get('app.features.debug_mode') )  Log::error('Installer::activate 执行完成');
         } catch (\Exception $e) {
-            if (defined('WP_DEBUG') && WP_DEBUG) Log::error(__('插件激活失败：', KITPRESS_TEXT_DOMAIN) . $e->getMessage());
             deactivate_plugins(self::getPluginsName());
-            ErrorHandler::die(__('插件激活失败：', KITPRESS_TEXT_DOMAIN) . $e->getMessage());
+            ErrorHandler::die(Lang::kit('插件激活失败：') . $e->getMessage());
         }
     }
 
@@ -115,8 +115,7 @@ class Installer {
             wp_cache_flush();
 
         } catch (\Exception $e) {
-            if (defined('WP_DEBUG') && WP_DEBUG) Log::error(__('插件卸载失败：', KITPRESS_TEXT_DOMAIN) . $e->getMessage());
-            ErrorHandler::die(__('插件卸载失败：', KITPRESS_TEXT_DOMAIN) . $e->getMessage());
+            ErrorHandler::die(Lang::kit('插件卸载失败：') . $e->getMessage());
         }
     }
 
@@ -127,19 +126,19 @@ class Installer {
     private static function check_requirements() {
         // PHP 版本检查
         if (version_compare(PHP_VERSION, '7.2', '<')) {
-            throw new \Exception(__('需要 PHP 7.2 或更高版本', KITPRESS_TEXT_DOMAIN));
+            throw new \Exception(Lang::kit('需要 PHP 7.2 或更高版本'));
         }
 
         // WordPress 版本检查
         if (version_compare($GLOBALS['wp_version'], '5.0', '<')) {
-            throw new \Exception(__('需要 WordPress 5.0 或更高版本', KITPRESS_TEXT_DOMAIN));
+            throw new \Exception(Lang::kit('需要 WordPress 5.0 或更高版本'));
         }
 
         // 检查必要的PHP扩展
         $required_extensions = ['mysqli', 'json', 'curl'];
         foreach ($required_extensions as $ext) {
             if (!extension_loaded($ext)) {
-                throw new \Exception(sprintf(__('需要 PHP %s 扩展', KITPRESS_TEXT_DOMAIN), $ext));
+                throw new \Exception(sprintf(Lang::kit('需要 PHP %s 扩展'), $ext));
             }
         }
     }
@@ -375,7 +374,7 @@ class Installer {
             if (Config::get('app.features.debug_mode')) {
                 Log::error('创建选项失败: ' . $e->getMessage());
             }
-            throw new \Exception(__('创建插件选项失败', KITPRESS_TEXT_DOMAIN));
+            throw new \Exception(Lang::kit('创建插件选项失败'));
         }
     }
 

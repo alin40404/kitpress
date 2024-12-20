@@ -4,6 +4,7 @@ namespace kitpress\library;
 use kitpress\core\abstracts\Singleton;
 use kitpress\utils\Config;
 use kitpress\utils\ErrorHandler;
+use kitpress\utils\Lang;
 use kitpress\utils\Router;
 
 class Backend extends Singleton {
@@ -88,7 +89,7 @@ class Backend extends Singleton {
             return;
             if(false) return ErrorHandler::die(sprintf(
             /* translators: %s: page route key */
-                __('后台路由配置错误，缺少路由键：%s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('后台路由配置错误，缺少路由键：%s'),
                 'page'
             ));
         }
@@ -107,7 +108,7 @@ class Backend extends Singleton {
 
                 // 检查控制器类是否存在
                 if (!class_exists($controllerClass)) {
-                    throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controller));
+                    throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controller));
                 }
 
                 // 实例化控制器
@@ -119,9 +120,7 @@ class Backend extends Singleton {
                 }
 
             } catch (\Exception $e) {
-                // 忽略报错
                 return;
-                // ErrorHandler::die($e->getMessage());
             }
         }
     }
@@ -139,7 +138,7 @@ class Backend extends Singleton {
         if (!isset($this->routes['page'])) {
             return ErrorHandler::die(sprintf(
                 /* translators: %s: page route key */
-                __('后台路由配置错误，缺少路由键：%s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('后台路由配置错误，缺少路由键：%s'),
                 'page'
             ));
         }
@@ -150,7 +149,7 @@ class Backend extends Singleton {
         }else{// 未配置
             return ErrorHandler::die(sprintf(
                 /* translators: %s: page slug */
-                __('未找到页面的路由配置: %s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('未找到页面的路由配置: %s'),
                 $page
             ));
         }
@@ -166,7 +165,7 @@ class Backend extends Singleton {
         try {
             // 获取对应类型的路由配置
             if (!isset($this->routes[$type][$action])) {
-                throw new \Exception(sprintf(__('Route not found: %s', KITPRESS_TEXT_DOMAIN), $action));
+                throw new \Exception(sprintf(Lang::kit('Route not found: %s'), $action));
             }
 
             $handler = $this->routes[$type][$action];
@@ -174,18 +173,18 @@ class Backend extends Singleton {
             $controllerClass = $this->namespace . $controller;
 
             if (!class_exists($controllerClass)) {
-                throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controllerClass));
+                throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controllerClass));
             }
 
             $instance = new $controllerClass();
             if (!method_exists($instance, $method)) {
-                throw new \Exception(sprintf(__('方法未找到：%s', KITPRESS_TEXT_DOMAIN), $method));
+                throw new \Exception(sprintf(Lang::kit('方法未找到：%s'), $method));
             }
 
             call_user_func([$instance, $method]);
 
         } catch (\Exception $e) {
-            $message = __('发生错误', KITPRESS_TEXT_DOMAIN);
+            $message = Lang::kit('发生错误');
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 $message = $e->getMessage();
             }
@@ -204,7 +203,7 @@ class Backend extends Singleton {
             $controllerClass = $this->namespace . $controller;
 
             if (!class_exists($controllerClass)) {
-                throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controllerClass ));
+                throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controllerClass ));
             }
 
             // 处理方法名称
@@ -230,7 +229,7 @@ class Backend extends Singleton {
                     // 两种风格都不存在时抛出异常
                     else {
                         throw new \Exception(sprintf(
-                            __('方法未找到：%s 或 %s', KITPRESS_TEXT_DOMAIN),
+                            Lang::kit('方法未找到：%s 或 %s'),
                             $underscoreMethod,
                             $camelMethod
                         ));
@@ -242,7 +241,7 @@ class Backend extends Singleton {
                         $method = $underscoreMethod;
                     } else {
                         throw new \Exception(sprintf(
-                            __('方法未找到：%s', KITPRESS_TEXT_DOMAIN),
+                            Lang::kit('方法未找到：%s'),
                             $underscoreMethod
                         ));
                     }
@@ -250,7 +249,7 @@ class Backend extends Singleton {
             } else {
                 $instance = new $controllerClass();
                 if (!method_exists($instance, $method)) {
-                    throw new \Exception(sprintf(__('方法未找到：%s', KITPRESS_TEXT_DOMAIN), $method));
+                    throw new \Exception(sprintf(Lang::kit('方法未找到：%s'), $method));
                 }
             }
 
@@ -260,7 +259,7 @@ class Backend extends Singleton {
             if (defined('WP_DEBUG') && WP_DEBUG) {
                 ErrorHandler::die($e->getMessage());
             }
-            ErrorHandler::die(__('发生错误，请稍后重试。', KITPRESS_TEXT_DOMAIN));
+            ErrorHandler::die(Lang::kit('发生错误，请稍后重试。'));
         }
     }
 
@@ -274,7 +273,7 @@ class Backend extends Singleton {
         if (!is_string($handler)) {
             throw new \Exception(sprintf(
             /* translators: %1$s: handler type, %2$s: expected format */
-                __('控制器类型无效。预期为字符串，实际为 %1$s。控制器格式应为：%2$s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('控制器类型无效。预期为字符串，实际为 %1$s。控制器格式应为：%2$s'),
                 gettype($handler),
                 'MyController@myMethod'
             ));
@@ -283,7 +282,7 @@ class Backend extends Singleton {
         if (strpos($handler, '@') === false) {
             throw new \Exception(sprintf(
             /* translators: %1$s: invalid handler, %2$s: expected format */
-                __('控制器格式无效："%1$s"。控制器格式应为：%2$s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('控制器格式无效："%1$s"。控制器格式应为：%2$s'),
                 $handler,
                 'MyController@myMethod'
             ));
@@ -293,7 +292,7 @@ class Backend extends Singleton {
         if (count($parts) !== 2) {
             throw new \Exception(sprintf(
             /* translators: %1$s: invalid handler, %2$s: expected format */
-                __('控制器格式无效："%1$s"。包含过多的 "@" 符号。控制器格式应为：%2$s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('控制器格式无效："%1$s"。包含过多的 "@" 符号。控制器格式应为：%2$s'),
                 $handler,
                 'MyController@myMethod'
             ));
@@ -303,7 +302,7 @@ class Backend extends Singleton {
         if (empty($controller) || empty($method)) {
             throw new \Exception(sprintf(
             /* translators: %1$s: invalid handler, %2$s: expected format */
-                __('控制器格式无效："%1$s"。控制器名称或方法名称为空。控制器格式应为：%2$s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('控制器格式无效："%1$s"。控制器名称或方法名称为空。控制器格式应为：%2$s'),
                 $handler,
                 'MyController@myMethod'
             ));

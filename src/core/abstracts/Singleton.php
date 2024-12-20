@@ -1,6 +1,8 @@
 <?php
 namespace kitpress\core\abstracts;
 
+use kitpress\utils\Lang;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -29,11 +31,11 @@ abstract class Singleton {
 
     // 防止反序列化
     private function __wakeup() {
-        throw new \Exception(__('无法反序列化单例对象', KITPRESS_TEXT_DOMAIN));
+        throw new \Exception(Lang::kit('无法反序列化单例对象'));
     }
 
     // 防止通过 serialize() 序列化
     private function __sleep() {
-        throw new \Exception(__('无法序列化单例对象', KITPRESS_TEXT_DOMAIN));
+        throw new \Exception(Lang::kit('无法序列化单例对象'));
     }
 }

@@ -3,6 +3,7 @@ namespace kitpress\core\abstracts;
 
 use kitpress\core\Model;
 use kitpress\core\traits\ViewTrait;
+use kitpress\utils\Lang;
 
 abstract class Controller {
     use ViewTrait;
@@ -93,17 +94,17 @@ abstract class Controller {
         switch ($rule) {
             case 'required':
                 if (empty($value)) {
-                    return sprintf(__('%s is required', KITPRESS_TEXT_DOMAIN ), $field);
+                    return sprintf(Lang::kit('%s is required' ), $field);
                 }
                 break;
             case 'email':
                 if (!empty($value) && !is_email($value)) {
-                    return sprintf(__('%s must be a valid email', KITPRESS_TEXT_DOMAIN), $field);
+                    return sprintf(Lang::kit('%s must be a valid email'), $field);
                 }
                 break;
             case 'numeric':
                 if (!empty($value) && !is_numeric($value)) {
-                    return sprintf(__('%s must be numeric', KITPRESS_TEXT_DOMAIN), $field);
+                    return sprintf(Lang::kit('%s must be numeric'), $field);
                 }
                 break;
         }

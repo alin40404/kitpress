@@ -3,6 +3,7 @@ namespace kitpress\library;
 
 use kitpress\core\abstracts\Singleton;
 use kitpress\utils\Config;
+use kitpress\utils\Lang;
 use kitpress\utils\Log;
 use kitpress\utils\Router;
 
@@ -113,7 +114,7 @@ class Frontend extends Singleton {
                     $controllerClass = $this->namespace . $controller;
 
                     if (!class_exists($controllerClass)) {
-                        throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controller));
+                        throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controller));
                     }
 
                     $instance = new $controllerClass();
@@ -147,13 +148,13 @@ class Frontend extends Singleton {
             $controllerClass = $this->namespace . $controller;
 
             if (!class_exists($controllerClass)) {
-                throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controller));
+                throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controller));
             }
 
             $instance = new $controllerClass();
 
             if (!method_exists($instance, $method)) {
-                throw new \Exception(sprintf(__('方法未找到：%s', KITPRESS_TEXT_DOMAIN), $method));
+                throw new \Exception(sprintf(Lang::kit('方法未找到：%s'), $method));
             }
 
             // 调用控制器方法，传入短代码属性和内容
@@ -178,13 +179,13 @@ class Frontend extends Singleton {
             $controllerClass = $this->namespace . $controller;
 
             if (!class_exists($controllerClass)) {
-                throw new \Exception(sprintf(__('控制器未找到： %s', KITPRESS_TEXT_DOMAIN), $controller));
+                throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controller));
             }
 
             $instance = new $controllerClass();
 
             if (!method_exists($instance, $method)) {
-                throw new \Exception(sprintf(__('方法未找到：%s', KITPRESS_TEXT_DOMAIN), $method));
+                throw new \Exception(sprintf(Lang::kit('方法未找到：%s'), $method));
             }
 
             // 调用控制器方法
@@ -208,7 +209,7 @@ class Frontend extends Singleton {
         if (!is_string($handler)) {
             throw new \Exception(sprintf(
             /* translators: %1$s: handler type, %2$s: expected format */
-                __('控制器类型无效。预期为字符串，实际为 %1$s。控制器格式应为：%2$s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('控制器类型无效。预期为字符串，实际为 %1$s。控制器格式应为：%2$s'),
                 gettype($handler),
                 'MyController@myMethod'
             ));
@@ -217,7 +218,7 @@ class Frontend extends Singleton {
         if (strpos($handler, '@') === false) {
             throw new \Exception(sprintf(
             /* translators: %1$s: invalid handler, %2$s: expected format */
-                __('控制器格式无效："%1$s"。控制器格式应为：%2$s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('控制器格式无效："%1$s"。控制器格式应为：%2$s'),
                 $handler,
                 'MyController@myMethod'
             ));
@@ -227,7 +228,7 @@ class Frontend extends Singleton {
         if (count($parts) !== 2) {
             throw new \Exception(sprintf(
             /* translators: %1$s: invalid handler, %2$s: expected format */
-                __('控制器格式无效："%1$s"。包含过多的 "@" 符号。控制器格式应为：%2$s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('控制器格式无效："%1$s"。包含过多的 "@" 符号。控制器格式应为：%2$s'),
                 $handler,
                 'MyController@myMethod'
             ));
@@ -237,7 +238,7 @@ class Frontend extends Singleton {
         if (empty($controller) || empty($method)) {
             throw new \Exception(sprintf(
             /* translators: %1$s: invalid handler, %2$s: expected format */
-                __('控制器格式无效："%1$s"。控制器名称或方法名称为空。控制器格式应为：%2$s', KITPRESS_TEXT_DOMAIN),
+                Lang::kit('控制器格式无效："%1$s"。控制器名称或方法名称为空。控制器格式应为：%2$s'),
                 $handler,
                 'MyController@myMethod'
             ));
