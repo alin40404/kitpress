@@ -79,7 +79,7 @@ class Kitpress{
         Config::load('app');
 
         // 开启调试模式，打印框架运行轨迹
-        if( Config::get('app.features.debug_mode') ) Log::error('Kitpress 正在初始化...');
+        Log::debug('Kitpress 正在初始化...');
 
         // 配置开启会话
         if (self::needsSession()) {

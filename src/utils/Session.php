@@ -13,9 +13,24 @@ class Session
     private static $initialized = false;
 
     /**
-     * @var string 会话数据前缀，用于避免冲突
+     * @var string 会话数据基础前缀
      */
-    private static $prefix = 'kitpress_';
+    private static $basePrefix = 'kitpress_';
+
+    /**
+     * @var string 完整的会话前缀
+     */
+    private static $prefix;
+
+    /**
+     * 初始化前缀
+     */
+    private static function initPrefix()
+    {
+        if (empty(self::$prefix)) {
+            self::$prefix = self::$basePrefix . Config::get('app.key', '');
+        }
+    }
 
     /**
      * 初始化会话
@@ -24,6 +39,7 @@ class Session
     {
         if (!self::$initialized) {
             self::initSessionPath();
+            self::initPrefix();
 
             if (!session_id() && !headers_sent()) {
                 session_start();
@@ -33,9 +49,9 @@ class Session
                 $_SESSION[self::$prefix] = [];
             }
 
-            if (Config::get('app.features.debug_mode')) {
-                Log::debug('Session started with path: ' . session_save_path());
-            }
+            Log::debug('Session 已开启');
+            Log::debug('Session 开启 path: ' . session_save_path());
+            Log::debug('Session 开启 prefix: ' . self::$prefix);
 
             self::$initialized = true;
         }
