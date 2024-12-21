@@ -5,6 +5,7 @@ use kitpress\utils\ErrorHandler;
 use kitpress\utils\Helper;
 use kitpress\utils\Lang;
 use kitpress\utils\Log;
+use kitpress\utils\Session;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -27,22 +28,27 @@ class Installer {
     }
 
     /**
-     * 注册激活钩子
+     * 注册插件的激活和停用钩子
+     * @return void
      */
     public static function register() {
 
         register_activation_hook(
-            self::getPluginsName() ,  // 插件主文件路径
+            self::getPluginsName() ,
             [self::class, 'activate']
         );
 
+        register_deactivation_hook(
+            self::getPluginsName(),
+            [self::class, 'deactivate']
+        );
     }
 
     /**
      * 激活插件时执行
      */
     public static function activate() {
-        self::uninstall();
+        self::deactivate();
         try {
             Log::debug('Installer::activate 执行开始');
 
@@ -80,6 +86,9 @@ class Installer {
             // 9. 清理缓存
             wp_cache_flush();
 
+            // 启动Session垃圾回收
+            Session::activate();
+
             Log::debug('Installer::activate 执行完成');
         } catch (\Exception $e) {
             deactivate_plugins(self::getPluginsName());
@@ -90,7 +99,7 @@ class Installer {
     /**
      * 卸载插件
      */
-    public static function uninstall() {
+    public static function deactivate() {
         self::loadConfig();
 
         // 检查是否允许删除数据
@@ -113,6 +122,9 @@ class Installer {
 
             // 5. 清理缓存
             wp_cache_flush();
+
+            // session 计划任务
+            Session::deactivate();
 
         } catch (\Exception $e) {
             ErrorHandler::die(Lang::kit('插件卸载失败：') . $e->getMessage());

@@ -5,8 +5,6 @@ if (!defined('ABSPATH')) {
 }
 
 return [
-    // 插件标识，默认插件文件名
-    'key' => 'kitpress',
     // 外部命名空间
     'namespace' => 'KitpressPlugin',
     // 当前版本

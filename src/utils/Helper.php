@@ -10,17 +10,38 @@ if (!defined('ABSPATH')) {
 class Helper{
 
     /**
+     * 获取插件根目录
+     * @return null
+     */
+    protected static function getPluginRootPath()
+    {
+        // 插件根目录
+        $plugin_dir = Kitpress::getRootPath();
+        if( empty($plugin_dir) ) ErrorHandler::die(Lang::kit('插件根目录不正确'));
+        return $plugin_dir;
+    }
+
+    /**
+     * 获取插件key，把插件文件夹名称作为插件的key
+     * @return string
+     */
+    public static function key() {
+        $plugin_dir = self::getPluginRootPath();
+        // 插件文件名
+        return basename($plugin_dir);
+    }
+
+    /**
      * 获取插件主文件路径
      * @return string
      * @throws \Exception
      */
     public static function getMainPluginFile() {
-        // 插件根目录
-        $plugin_dir = Kitpress::getRootPath();
-        if( empty($plugin_dir) ) ErrorHandler::die(Lang::kit('插件根目录不正确'));
+
+        $plugin_dir = self::getPluginRootPath();
 
         // 插件文件名
-        $plugin_name = basename($plugin_dir);
+        $plugin_name = self::key();
 
         $file_name = $plugin_dir . $plugin_name . '.php';
         // 如果没找到，抛出异常
@@ -29,5 +50,8 @@ class Helper{
         } 
         return $file_name;
     }
+
+
+
 
 }
