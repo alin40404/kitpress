@@ -33,6 +33,42 @@ class Session
     }
 
     /**
+     * 初始化会话保存路径
+     * @return string 最终使用的会话路径
+     */
+    private static function initSessionPath()
+    {
+        $currentPath = session_save_path();
+
+        // 如果当前路径为空或不可写
+        if (empty($currentPath) || !is_writable($currentPath)) {
+            $tempDir = sys_get_temp_dir();
+            $sessionPath = $tempDir . DIRECTORY_SEPARATOR . 'kitpress_sessions';
+
+            // 创建目录（如果不存在）
+            if (!file_exists($sessionPath)) {
+                wp_mkdir_p($sessionPath);
+                Log::debug('Session directory created', [
+                    'path' => $sessionPath,
+                    'original_path' => $currentPath
+                ]);
+            }
+
+            session_save_path($sessionPath);
+            Log::debug('Session path changed', [
+                'from' => $currentPath ?: 'empty',
+                'to' => $sessionPath
+            ]);
+        } else {
+            Log::debug('Using existing session path', [
+                'path' => $currentPath
+            ]);
+        }
+
+        return session_save_path();
+    }
+
+    /**
      * 初始化会话
      */
     public static function start()
@@ -50,31 +86,8 @@ class Session
             }
 
             Log::debug('Session 已开启');
-            Log::debug('Session 开启 path: ' . session_save_path());
-            Log::debug('Session 开启 prefix: ' . self::$prefix);
 
             self::$initialized = true;
-        }
-    }
-
-    /**
-     * 初始化会话保存路径
-     */
-    private static function initSessionPath()
-    {
-        $currentPath = session_save_path();
-
-        // 如果当前路径为空或不可写
-        if (empty($currentPath) || !is_writable($currentPath)) {
-            $tempDir = sys_get_temp_dir();
-            $sessionPath = $tempDir . DIRECTORY_SEPARATOR . 'kitpress_sessions';
-
-            // 创建目录（如果不存在）
-            if (!file_exists($sessionPath)) {
-                mkdir($sessionPath, 0755, true);
-            }
-
-            session_save_path($sessionPath);
         }
     }
 
