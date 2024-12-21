@@ -48,19 +48,19 @@ class Session
             // 创建目录（如果不存在）
             if (!file_exists($sessionPath)) {
                 wp_mkdir_p($sessionPath);
-                Log::debug('Session directory created', [
-                    'path' => $sessionPath,
-                    'original_path' => $currentPath
+                Log::debug('Session directory created: {from} to {to}', [
+                    'from' => $currentPath ?: 'empty',
+                    'to' => $sessionPath
                 ]);
             }
 
             session_save_path($sessionPath);
-            Log::debug('Session path changed', [
+            Log::debug('Session path changed: {from} to {to}', [
                 'from' => $currentPath ?: 'empty',
                 'to' => $sessionPath
             ]);
         } else {
-            Log::debug('Using existing session path', [
+            Log::debug('Using existing session path: {path}', [
                 'path' => $currentPath
             ]);
         }
