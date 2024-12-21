@@ -31,6 +31,19 @@ return [
     'session' => [
         'backend' => true,     // 后台是否启用会话
         'frontend' => false,   // 前台是否启用会话
+        'name' => 'kitsessid',
+        'lifetime' => 7 * 24 * 3600,  // 7天，单位：秒
+        'gc' => [
+            'probability' => 0,        // 禁用 PHP 自带的垃圾回收
+            'divisor' => 100
+        ],
+        'cookie' => [
+            'path' => '/',
+            'domain' => '',
+            'secure' => false,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]
     ],
 
     'database' => [
