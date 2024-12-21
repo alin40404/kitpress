@@ -20,6 +20,23 @@ class Log
     const DEBUG     = 'debug';     // 调试信息
 
     /**
+     * @var string 当前请求的ID
+     */
+    private static $requestId = null;
+
+    /**
+     * 获取当前请求的ID
+     * @return string
+     */
+    protected static function getRequestId()
+    {
+        if (self::$requestId === null) {
+            self::$requestId = substr(uniqid(), -6) . mt_rand(100, 999);
+        }
+        return self::$requestId;
+    }
+
+    /**
      * 记录调试信息
      * @param string $message 日志消息
      * @param array $context 上下文数据
@@ -102,7 +119,7 @@ class Log
     /**
      * 记录日志的核心方法
      * @param string $level 日志级别
-     * @param string $message 日志消息
+     * @param mixed $message 日志消息（支持字符串、数组、对象）
      * @param array $context 上下文数据
      */
     protected static function log($level, $message, array $context = [])
@@ -112,13 +129,17 @@ class Log
             return;
         }
 
-        // 格式化消息
+        // 处理消息内容
+        $message = self::formatMessage($message);
+
+        // 格式化上下文数据
         $message = self::interpolate($message, $context);
 
         // 添加时间戳和级别
         $log_entry = sprintf(
-            '[%s] %s: %s',
+            '[%s] [%s] %s: %s',
             date('Y-m-d H:i:s'),
+            self::getRequestInfo(),
             strtoupper($level),
             $message
         );
@@ -133,6 +154,129 @@ class Log
         if (in_array($level, [self::EMERGENCY, self::ALERT, self::CRITICAL, self::ERROR])) {
             error_log($log_entry);
         }
+    }
+
+    /**
+     * 获取请求的详细信息
+     * @return string
+     */
+    protected static function getRequestInfo()
+    {
+        $info = [
+            self::getRequestId(),
+            isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI'
+        ];
+
+        // 添加简化的路径信息
+        if (PHP_SAPI === 'cli') {
+            $info[] = basename($_SERVER['PHP_SELF']);
+        } else {
+            $path = isset($_SERVER['REQUEST_URI']) ?
+                parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) : '-';
+            // 只保留最后两段路径
+            $pathParts = array_slice(array_filter(explode('/', $path)), -2);
+            $info[] = implode('/', $pathParts);
+        }
+
+        return implode('|', $info);
+    }
+
+    /**
+     * 格式化消息内容
+     * @param mixed $message
+     * @return string
+     */
+    protected static function formatMessage($message)
+    {
+        if (is_string($message)) {
+            return $message;
+        }
+
+        if (is_array($message)) {
+            return self::formatArray($message);
+        }
+
+        if (is_object($message)) {
+            return self::formatObject($message);
+        }
+
+        if (is_bool($message)) {
+            return $message ? 'true' : 'false';
+        }
+
+        if (is_null($message)) {
+            return 'null';
+        }
+
+        return (string) $message;
+    }
+
+    /**
+     * 格式化数组
+     * @param array $array
+     * @param int $depth 当前深度
+     * @param int $maxDepth 最大深度
+     * @return string
+     */
+    protected static function formatArray(array $array, $depth = 0, $maxDepth = 3)
+    {
+        if ($depth >= $maxDepth) {
+            return '[Array...]';
+        }
+
+        $output = [];
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $value = self::formatArray($value, $depth + 1, $maxDepth);
+            } elseif (is_object($value)) {
+                $value = self::formatObject($value, $depth + 1, $maxDepth);
+            } else {
+                $value = self::formatMessage($value);
+            }
+            $output[] = "$key: $value";
+        }
+
+        return '{ ' . implode(', ', $output) . ' }';
+    }
+
+    /**
+     * 格式化对象
+     * @param object $object
+     * @param int $depth 当前深度
+     * @param int $maxDepth 最大深度
+     * @return string
+     */
+    protected static function formatObject($object, $depth = 0, $maxDepth = 3)
+    {
+        if ($depth >= $maxDepth) {
+            return get_class($object) . '{...}';
+        }
+
+        // 如果对象实现了 __toString 方法
+        if (method_exists($object, '__toString')) {
+            return (string) $object;
+        }
+
+        // 如果是异常对象
+        if ($object instanceof \Throwable) {
+            return sprintf(
+                '%s: %s in %s:%d',
+                get_class($object),
+                $object->getMessage(),
+                $object->getFile(),
+                $object->getLine()
+            );
+        }
+
+        // 处理普通对象
+        $className = get_class($object);
+        $attributes = get_object_vars($object);
+
+        return sprintf(
+            '%s%s',
+            $className,
+            self::formatArray($attributes, $depth + 1, $maxDepth)
+        );
     }
 
     /**
