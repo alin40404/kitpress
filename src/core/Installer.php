@@ -44,7 +44,7 @@ class Installer {
     public static function activate() {
         self::uninstall();
         try {
-            if( Config::get('app.features.debug_mode') )  Log::error('Installer::activate 执行开始');
+            Log::debug('Installer::activate 执行开始');
 
             self::loadConfig();
 
@@ -80,7 +80,7 @@ class Installer {
             // 9. 清理缓存
             wp_cache_flush();
 
-            if( Config::get('app.features.debug_mode') )  Log::error('Installer::activate 执行完成');
+            Log::debug('Installer::activate 执行完成');
         } catch (\Exception $e) {
             deactivate_plugins(self::getPluginsName());
             ErrorHandler::die(Lang::kit('插件激活失败：') . $e->getMessage());
@@ -242,7 +242,7 @@ class Installer {
 
         dbDelta($sql);
 
-        if ($wpdb->last_error && Config::get('app.features.debug_mode')) {
+        if ($wpdb->last_error) {
             Log::error("更新表 {$table_name} 失败: " . $wpdb->last_error);
         }
     }
@@ -282,7 +282,7 @@ class Installer {
                         self::get_column_formats($record)
                     );
 
-                    if ($wpdb->last_error && Config::get('app.features.debug_mode')) {
+                    if ($wpdb->last_error) {
                         Log::error("插入数据到 {$table_name} 失败: " . $wpdb->last_error);
                     }
                 }
@@ -309,7 +309,7 @@ class Installer {
                     'no'  // 是否自动加载
                 );
 
-                if (!$result && Config::get('app.features.debug_mode')) {
+                if (!$result) {
                     Log::error('Failed to create settings option');
                 }
             }
@@ -371,9 +371,7 @@ class Installer {
             }
 
         } catch (\Exception $e) {
-            if (Config::get('app.features.debug_mode')) {
-                Log::error('创建选项失败: ' . $e->getMessage());
-            }
+            Log::error('创建选项失败: ' . $e->getMessage());
             throw new \Exception(Lang::kit('创建插件选项失败'));
         }
     }

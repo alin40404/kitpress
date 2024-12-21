@@ -35,12 +35,12 @@ class Loader {
         if (file_exists($file)) {
             require_once $file;
         } else {
-            if( Config::get('app.features.debug_mode') ) Log::error("File not found: " . $file);
+            Log::critical("File not found: " . $file);
             return;
         }
 
         // 添加调试信息
-        if( Config::get('app.features.debug_mode') )  Log::error("正在尝试加载类: " . $class);
+        Log::debug("正在尝试加载类: " . $class);
     }
 
 

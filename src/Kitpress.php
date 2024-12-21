@@ -149,9 +149,7 @@ class Kitpress{
     {
         // 在合适的位置添加关闭钩子
         register_shutdown_function(function() {
-            if(Config::get('app.features.debug_mode')) {
-                Log::error('Kitpress 已执行完毕');
-            }
+            Log::debug('Kitpress 已执行完毕');
         });
     }
 }
