@@ -308,6 +308,11 @@ class Log
      */
     protected static function createProtectionFiles($dir)
     {
+        // 只在 kitpress-logs 目录下创建保护文件
+        if (strpos($dir, 'kitpress-logs') === false) {
+            return;
+        }
+
         // 创建 .htaccess 文件
         $htaccess = $dir . '/.htaccess';
         if (!file_exists($htaccess)) {
