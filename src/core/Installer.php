@@ -48,7 +48,6 @@ class Installer {
      * 激活插件时执行
      */
     public static function activate() {
-        self::deactivate();
         try {
             Log::debug('Installer::activate 执行开始');
 
@@ -315,71 +314,20 @@ class Installer {
             $features = Config::get('app.features');
             $options = Config::get('app.options');
 
-            // 创建基础设置选项
-            if (false === get_option($options['settings_key'])) {
-                $result = add_option(
-                    $options['settings_key'],
-                    $features,
-                    '',  // 描述
-                    'no'  // 是否自动加载
-                );
-
-                if (!$result) {
-                    Log::error('Failed to create settings option');
-                }
+            if(!isset($options['db_version'])) $options['db_version'] = Config::get('app.db_version');
+            if(!isset($options['uninstall'])) $options['uninstall'] = $features['delete_data_on_uninstall'] ?? false;
+            if(!isset($options['meta'])){
+                $options['meta'] = [
+                    'version' => Config::get('app.version'),
+                    'installed_at' => current_time('timestamp'),
+                    'last_updated' => current_time('timestamp')
+                ];
             }
+            if(!isset($options['license'])) $options['license'] = '';
+            $options['settings'] = $features;
 
-            // 创建数据库版本选项
-            if (false === get_option($options['db_version_key'])) {
-                add_option(
-                    $options['db_version_key'],
-                    Config::get('app.db_version'),
-                    '',
-                    'no'
-                );
-            }
-
-            // 创建卸载选项
-            if (false === get_option($options['uninstall_key'])) {
-                add_option(
-                    $options['uninstall_key'],
-                    Config::get('app.features.delete_data_on_uninstall', false),
-                    '',
-                    'no'
-                );
-            }
-
-            // 创建插件元数据选项
-            $plugin_meta = [
-                'version' => Config::get('app.version'),
-                'installed_at' => current_time('timestamp'),
-                'last_updated' => current_time('timestamp')
-            ];
-
-            if (false === get_option($options['plugin_meta_key'])) {
-                add_option(
-                    $options['plugin_meta_key'],
-                    $plugin_meta,
-                    '',
-                    'no'
-                );
-            }
-
-            // 创建许可证选项(如果需要)
-            if (Config::get('app.features.requires_license', false)) {
-                if (false === get_option($options['license_key'])) {
-                    add_option(
-                        $options['license_key'],
-                        '',
-                        '',
-                        'no'
-                    );
-                }
-            }
-
-            // 创建自定义选项
-            $custom_options = Config::get('app.custom_options', []);
-            foreach ($custom_options as $key => $default_value) {
+            foreach ($options as $key => $default_value) {
+                $key = Helper::optionKey($key);
                 if (false === get_option($key)) {
                     add_option($key, $default_value, '', 'no');
                 }

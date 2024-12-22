@@ -74,4 +74,15 @@ class Helper{
         } 
         return $file_name;
     }
+
+    public static function optionKey($key = '')
+    {
+       if(empty($key)) return '';
+       return KITPRESS_NAME . '_' . self::key() . '_' . $key;
+    }
+
+    public static function getOption($key = ''){
+        if(empty($key)) return '';
+        return \get_option(self::optionKey($key));
+    }
 }

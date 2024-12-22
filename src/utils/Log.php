@@ -344,6 +344,12 @@ class Log
         if (!file_exists($index)) {
             file_put_contents($index, '<?php // Silence is golden');
         }
+
+        // 创建 .gitignore 文件
+        $gitignore = $dir . '/.gitignore';
+        if (!file_exists($gitignore)) {
+            file_put_contents($gitignore, "*.log\n");
+        }
     }
 
     /**
