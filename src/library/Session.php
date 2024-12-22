@@ -94,7 +94,7 @@ class Session extends Singleton {
     private function setCookie() {
         if (!\headers_sent()) {
             $cookie_path = defined('COOKIEPATH') ? COOKIEPATH : '/';
-            \wp_set_cookie($this->cookie, $this->session_id, [
+            \setcookie($this->cookie, $this->session_id, [
                 'expires'  => time() + $this->cookie_expires,
                 'secure'   => \is_ssl(),
                 'httponly' => true,
@@ -151,33 +151,79 @@ class Session extends Singleton {
     }
 
     /**
-     * 获取会话数据
+     * 获取会话数据，支持点号分隔的多级键值
      */
     public function get($key, $default = null) {
-        return isset($this->data[$key]) ? $this->data[$key] : $default;
+        $segments = explode('.', $key);
+        $data = $this->data;
+
+        foreach ($segments as $segment) {
+            if (!is_array($data) || !isset($data[$segment])) {
+                return $default;
+            }
+            $data = $data[$segment];
+        }
+
+        return $data;
     }
 
     /**
-     * 设置会话数据
+     * 设置会话数据，支持点号分隔的多级键值
      */
     public function set($key, $value) {
-        $this->data[$key] = $value;
+        $segments = explode('.', $key);
+        $data = &$this->data;
+
+        foreach ($segments as $i => $segment) {
+            if ($i === count($segments) - 1) {
+                $data[$segment] = $value;
+            } else {
+                if (!isset($data[$segment]) || !is_array($data[$segment])) {
+                    $data[$segment] = [];
+                }
+                $data = &$data[$segment];
+            }
+        }
+
         return $this;
     }
 
     /**
-     * 删除会话数据
+     * 删除会话数据，支持点号分隔的多级键值
      */
     public function delete($key) {
-        unset($this->data[$key]);
+        $segments = explode('.', $key);
+        $data = &$this->data;
+
+        // 遍历到倒数第二层
+        $lastSegment = array_pop($segments);
+        foreach ($segments as $segment) {
+            if (!is_array($data) || !isset($data[$segment])) {
+                return $this;
+            }
+            $data = &$data[$segment];
+        }
+
+        // 删除最后一层的键
+        unset($data[$lastSegment]);
         return $this;
     }
 
     /**
-     * 检查会话数据是否存在
+     * 检查会话数据是否存在，支持点号分隔的多级键值
      */
     public function has($key) {
-        return isset($this->data[$key]);
+        $segments = explode('.', $key);
+        $data = $this->data;
+
+        foreach ($segments as $segment) {
+            if (!is_array($data) || !isset($data[$segment])) {
+                return false;
+            }
+            $data = $data[$segment];
+        }
+
+        return true;
     }
 
     /**

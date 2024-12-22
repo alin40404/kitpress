@@ -137,7 +137,7 @@ class Installer {
     /**
      * 检查系统要求
      */
-    private static function check_requirements() {
+    public static function check_requirements() {
         // PHP 版本检查
         if (version_compare(PHP_VERSION, '7.4', '<')) {
             throw new \Exception(Lang::kit('需要 PHP 7.4 或更高版本'));
@@ -179,15 +179,15 @@ class Installer {
     /**
      * 执行升级
      */
-    private static function upgrade($from_version) {
+    public static function upgrade($from_version) {
         $versions = Config::get('database.versions', []);
 
         foreach ($versions as $version => $schema) {
             if (version_compare($from_version, $version, '<')) {
                 // 更新数据表
                 if (!empty($schema['tables'])) {
-                    foreach ($schema['tables'] as $table => $definition) {
-                        self::update_table($table, $definition);
+                    foreach ($schema['tables'] as $definition) {
+                        self::update_table($definition);
                     }
                 }
 
@@ -207,7 +207,7 @@ class Installer {
     /**
      * 创建数据表
      */
-    private static function create_tables($tables) {
+    public static function create_tables($tables) {
 
         global $wpdb;
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -234,7 +234,7 @@ class Installer {
     /**
      * 更新数据表
      */
-    private static function update_table($table, $definition) {
+    public static function update_table($definition) {
         global $wpdb;
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
@@ -261,13 +261,22 @@ class Installer {
         }
     }
 
+    private static function getFullTableName($table_name)
+    {
+        global $wpdb;
+        return  $wpdb->prefix . Config::get('app.database.prefix') . $table_name;
+    }
+
     /**
      * 检查表是否存在
      * @param string $table_name 完整的表名
      * @return bool
      */
-    private static function table_exists($table_name) {
+    public static function table_exists($table_name,$is_full = false) {
         global $wpdb;
+
+        if($is_full == false) $table_name = self::getFullTableName($table_name);
+
         $query = $wpdb->prepare(
             "SHOW TABLES LIKE %s",
             $wpdb->esc_like($table_name)
