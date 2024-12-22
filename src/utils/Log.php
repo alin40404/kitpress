@@ -409,38 +409,89 @@ class Log
     }
 
     /**
+     * 获取日志目录路径
+     * @return string
+     * @throws \Exception
+     */
+    public static function getLogDir()
+    {
+        try {
+            // 获取上传目录
+            $upload_dir = wp_upload_dir();
+            if (is_wp_error($upload_dir)) {
+                throw new \Exception('Failed to get WordPress upload directory');
+            }
+
+            // 构建并标准化路径
+            $plugin_name = sanitize_file_name(basename(Kitpress::getRootPath()));
+            $log_dir = wp_normalize_path(
+                trailingslashit($upload_dir['basedir']) . 'kitpress-logs/' . $plugin_name
+            );
+
+            // 确保路径在 WordPress 允许的范围内
+            if (!self::isInWordPressPath($log_dir)) {
+                throw new \Exception('Log directory is outside WordPress directory');
+            }
+
+            // 确保目录存在并受保护
+            if (!is_dir($log_dir)) {
+                self::createSecureDirectory($log_dir);
+            }
+
+            return $log_dir;
+        } catch (\Exception $e) {
+            // 记录错误并返回默认目录
+            error_log('Log directory creation failed: ' . $e->getMessage());
+            return trailingslashit(WP_CONTENT_DIR) . 'logs';
+        }
+    }
+
+    /**
      * 获取日志文件路径
      * @param string $level 日志级别
      * @return string
      */
     protected static function getLogFile($level)
     {
-        $upload_dir = wp_upload_dir();
-        $plugin_name = basename(Kitpress::getRootPath());
-        $log_dir = $upload_dir['basedir'] . '/kitpress-logs/' . $plugin_name;
+        try {
+            // 获取日志目录
+            $log_dir = self::getLogDir();
 
-        // 创建安全的目录结构
-        self::createSecureDirectory($log_dir);
+            // 构建日志文件名
+            $filename = sprintf(
+                '%s-%s.log',
+                date('Y-m-d'),
+                sanitize_file_name($level)
+            );
 
-        // 按日期和级别分文件
-        return sprintf(
-            '%s/%s-%s.log',
-            $log_dir,
-            date('Y-m-d'),
-            $level
-        );
+            // 构建完整路径
+            $log_file = wp_normalize_path($log_dir . '/' . $filename);
+
+            // 确保父目录存在
+            $parent_dir = dirname($log_file);
+            if (!is_dir($parent_dir)) {
+                self::createSecureDirectory($parent_dir);
+            }
+
+            // 确保文件可写
+            if (!is_file($log_file)) {
+                touch($log_file);
+                chmod($log_file, 0644);
+            }
+
+            // 最后一次验证路径安全性
+            if (!self::isInWordPressPath($log_file)) {
+                throw new \Exception('Log file path is outside WordPress directory');
+            }
+
+            return $log_file;
+        } catch (\Exception $e) {
+            // 如果出现任何错误，使用 WordPress 默认日志
+            error_log('Log file creation failed: ' . $e->getMessage());
+            return WP_CONTENT_DIR . '/debug.log';
+        }
     }
 
-    /**
-     * 获取日志目录路径
-     * @return string
-     */
-    public static function getLogDir()
-    {
-        $upload_dir = wp_upload_dir();
-        $plugin_name = basename(Kitpress::getRootPath());
-        return $upload_dir['basedir'] . '/kitpress-logs/' . $plugin_name;
-    }
 
     /**
      * 获取指定插件的所有日志文件
