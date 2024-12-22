@@ -23,57 +23,13 @@ class Cron {
     }
 
     /**
-     * 注册所有计划任务
-     */
-    private static function registerTasks() {
-        $tasks = Config::get('cron.tasks', []);
-
-        foreach ($tasks as $taskKey => $task) {
-            if (!self::validateTask($task)) {
-                Log::error("Invalid task configuration for {$taskKey}");
-                continue;
-            }
-
-            $task['hook'] = KITPRESS_NAME . '_' . Helper::key() . $taskKey;
-
-            // 注册回调
-            \add_action($task['hook'], function() use ($task) {
-                try {
-                    if (is_array($task['callback'])) {
-                        // 处理 [类,方法] 格式
-                        if (is_string($task['callback'][0])) {
-                            // 静态方法调用
-                            call_user_func_array($task['callback'], $task['args'] ?? []);
-                        } else {
-                            // 实例方法调用
-                            $instance = $task['callback'][0];
-                            $method = $task['callback'][1];
-                            call_user_func_array([$instance, $method], $task['args'] ?? []);
-                        }
-                    } else {
-                        // 处理字符串格式的回调
-                        call_user_func_array($task['callback'], $task['args'] ?? []);
-                    }
-                } catch (\Exception $e) {
-                    Log::error("Task execution failed: {$task['hook']} - " . $e->getMessage());
-                }
-            });
-
-            // 调度任务
-            if (!\wp_next_scheduled($task['hook'])) {
-                \wp_schedule_event(time(), $task['recurrence'], $task['hook']);
-            }
-        }
-    }
-
-    /**
      * 验证任务配置
      * @param array $task 任务配置
      * @return bool
      */
     private static function validateTask($task) {
         // 检查必要字段
-        if (!isset($task['hook'], $task['recurrence'], $task['callback'])) {
+        if (!isset($task['recurrence'], $task['callback'])) {
             return false;
         }
 
@@ -92,6 +48,59 @@ class Cron {
         }
 
         return is_callable($task['callback']);
+    }
+
+    /**
+     * 生成任务钩子名称
+     * @param string $taskKey 任务键名
+     * @return string
+     */
+    private static function generateHookName($taskKey) {
+        return KITPRESS_NAME . '_' . Helper::key() . '_' . $taskKey;
+    }
+
+    /**
+     * 注册所有计划任务
+     */
+    private static function registerTasks() {
+        $tasks = Config::get('cron.tasks', []);
+
+        foreach ($tasks as $taskKey => $task) {
+            if (!self::validateTask($task)) {
+                Log::error("Invalid task configuration for {$taskKey}");
+                continue;
+            }
+
+            $hookName = self::generateHookName($taskKey);
+
+            // 注册回调
+            \add_action($hookName, function() use ($task) {
+                try {
+                    if (is_array($task['callback'])) {
+                        // 处理 [类,方法] 格式
+                        if (is_string($task['callback'][0])) {
+                            // 静态方法调用
+                            call_user_func_array($task['callback'], $task['args'] ?? []);
+                        } else {
+                            // 实例方法调用
+                            $instance = $task['callback'][0];
+                            $method = $task['callback'][1];
+                            call_user_func_array([$instance, $method], $task['args'] ?? []);
+                        }
+                    } else {
+                        // 处理字符串格式的回调
+                        call_user_func_array($task['callback'], $task['args'] ?? []);
+                    }
+                } catch (\Exception $e) {
+                    Log::error("Task execution failed: {$hookName} - " . $e->getMessage());
+                }
+            });
+
+            // 调度任务
+            if (!\wp_next_scheduled($hookName)) {
+                \wp_schedule_event(time(), $task['recurrence'], $hookName);
+            }
+        }
     }
 
     /**
@@ -120,10 +129,11 @@ class Cron {
     public static function deactivate() {
         $tasks = Config::get('cron.tasks', []);
 
-        foreach ($tasks as $task) {
-            $timestamp = \wp_next_scheduled($task['hook']);
+        foreach ($tasks as $taskKey => $task) {
+            $hookName = self::generateHookName($taskKey);
+            $timestamp = \wp_next_scheduled($hookName);
             if ($timestamp) {
-                \wp_unschedule_event($timestamp, $task['hook']);
+                \wp_unschedule_event($timestamp, $hookName);
             }
         }
     }
@@ -170,7 +180,8 @@ class Cron {
         }
 
         $task = $tasks[$taskKey];
-        $nextRun = \wp_next_scheduled($task['hook']);
+        $hookName = self::generateHookName($taskKey);
+        $nextRun = \wp_next_scheduled($hookName);
 
         return [
             'is_scheduled' => (bool)$nextRun,
