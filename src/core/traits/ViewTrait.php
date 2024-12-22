@@ -2,7 +2,7 @@
 namespace kitpress\core\traits;
 
 use kitpress\Kitpress;
-use kitpress\utils\Config;
+use kitpress\library\Config;
 
 trait ViewTrait {
     /** @var string 视图文件的基础路径 */

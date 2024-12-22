@@ -3,11 +3,11 @@ namespace kitpress;
 
 use kitpress\core\abstracts\Initializable;
 use kitpress\core\Installer;
-use kitpress\utils\Config;
+use kitpress\library\Config;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Lang;
 use kitpress\utils\Loader;
-use kitpress\utils\Session;
+use kitpress\library\Session;
 use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {

@@ -1,11 +1,11 @@
 <?php
 namespace kitpress\core;
-use kitpress\utils\Config;
+use kitpress\library\Config;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Helper;
 use kitpress\utils\Lang;
 use kitpress\utils\Log;
-use kitpress\utils\Session;
+use kitpress\library\Session;
 
 if (!defined('ABSPATH')) {
     exit;

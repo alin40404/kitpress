@@ -5,7 +5,7 @@ use kitpress\core\abstracts\Initializable;
 use kitpress\core\abstracts\Singleton;
 use kitpress\library\Backend;
 use kitpress\library\Frontend;
-use kitpress\utils\Config;
+use kitpress\library\Config;
 use kitpress\utils\Lang;
 
 if (!defined('ABSPATH')) {

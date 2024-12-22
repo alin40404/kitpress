@@ -2,7 +2,7 @@
 namespace kitpress\library;
 
 use kitpress\core\abstracts\Singleton;
-use kitpress\utils\Config;
+use kitpress\library\Config;
 use kitpress\utils\Lang;
 use kitpress\utils\Log;
 use kitpress\utils\Router;
