@@ -42,14 +42,14 @@ class SessionModel extends Model {
      */
     public function saveSessionData($session_id, $key, $value, $expiry) {
         $this->ensureTableExists();
-        return $this->insert(
+        return $this->insertOrUpdate(
             [
                 'session_id'    => $session_id,
                 'session_key'   => $key,
                 'session_value' => \maybe_serialize($value),
                 'session_expiry' => $expiry
             ],
-            ['%s', '%s', '%s', '%d']
+            ['session_value', 'session_expiry']
         );
     }
 
