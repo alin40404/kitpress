@@ -27,6 +27,7 @@ return [
     ],
 
     'session' => [
+        'enabled' => false, // 是否启用 session
         'table' => 'sessions',
         'cookie' => 'kp_session',
         'expires' => 48 * 60,

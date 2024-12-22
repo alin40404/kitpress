@@ -6,6 +6,7 @@ use kitpress\core\abstracts\Singleton;
 use kitpress\library\Backend;
 use kitpress\library\Frontend;
 use kitpress\library\Config;
+use kitpress\utils\Cron;
 use kitpress\utils\Lang;
 
 if (!defined('ABSPATH')) {
@@ -73,6 +74,9 @@ class Plugin extends Singleton {
 
 	    // 初始化所有可初始化类
 	    self::initializeAll();
+
+        // 计划任务初始化
+        Cron::init();
     }
 
     /**

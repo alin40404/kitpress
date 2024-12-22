@@ -1,11 +1,11 @@
 <?php
 namespace kitpress\core;
 use kitpress\library\Config;
+use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Helper;
 use kitpress\utils\Lang;
 use kitpress\utils\Log;
-use kitpress\library\Session;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -126,8 +126,8 @@ class Installer {
             // 5. 清理缓存
             wp_cache_flush();
 
-            // session 计划任务
-            Session::deactivate();
+            // 计划任务
+            Cron::deactivate();
 
         } catch (\Exception $e) {
             ErrorHandler::die(Lang::kit('插件卸载失败：') . $e->getMessage());

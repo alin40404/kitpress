@@ -66,6 +66,10 @@ class Cron {
         $tasks = Config::get('cron.tasks', []);
 
         foreach ($tasks as $taskKey => $task) {
+            // 未开启 session
+            if ($taskKey === 'session_cleanup' && Config::get('app.session.enabled') == false ) {
+                continue;
+            }
             if (!self::validateTask($task)) {
                 Log::error("Invalid task configuration for {$taskKey}");
                 continue;
