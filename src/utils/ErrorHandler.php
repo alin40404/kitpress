@@ -33,14 +33,39 @@ class ErrorHandler {
 
     /**
      * 显示管理员通知
-     * @param string $error_code 错误代码
+     * @param string|array $error 错误代码或错误配置数组
      * @param array $context 上下文数据
      * @param int $priority 优先级
      * @return void
      */
-    public static function showAdminNotice($error_code, array $context = [], $priority = 10) {
-        add_action('admin_notices', function() use ($error_code, $context) {
-            $error = self::getErrorConfig($error_code, $context);
+    public static function showAdminNotice($error, array $context = [], $priority = 10) {
+        add_action('admin_notices', function() use ($error, $context) {
+            // 如果是字符串，则视为错误代码
+            if (is_string($error)) {
+                $error = self::getErrorConfig($error, $context);
+            } 
+            // 如果是数组，则补充默认值
+            else if (is_array($error)) {
+                $error = array_merge([
+                    'message' => Lang::kit('Error'),
+                    'title' => Lang::kit('Error'),
+                    'type' => 'error'
+                ], $error);
+
+                // 处理上下文数据
+                if (!empty($context) && is_string($error['message'])) {
+                    try {
+                        $error['message'] = vsprintf($error['message'], $context);
+                    } catch (\Throwable $e) {
+                        self::logError('Error message formatting failed', [
+                            'message' => $error['message'],
+                            'context' => $context,
+                            'exception' => $e->getMessage()
+                        ]);
+                    }
+                }
+            }
+
             self::renderNotice($error);
         }, $priority);
     }
