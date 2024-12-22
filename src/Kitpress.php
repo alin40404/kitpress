@@ -73,7 +73,12 @@ class Kitpress{
         if(empty(self::$rootPath)) ErrorHandler::die(Lang::kit('插件根目录不正确'));
 
         // 载入通用配置文件
-        Config::load('app');
+        Config::load([
+            'app',
+            'database',
+            'menu',
+            'cron',
+        ]);
 
         // 开启调试模式，打印框架运行轨迹
         Log::debug('Kitpress 正在初始化...');
