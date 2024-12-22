@@ -78,7 +78,6 @@ class Kitpress{
         // 开启调试模式，打印框架运行轨迹
         Log::debug('Kitpress 正在初始化...');
 
-
 	    // 注入初始化类
 	    $initClasses = Config::get('app.init');
 	    if ($initClasses) {

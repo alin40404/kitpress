@@ -2,6 +2,7 @@
 namespace kitpress\utils;
 
 use kitpress\Kitpress;
+use kitpress\library\Config;
 
 if (!defined('ABSPATH')) {
     exit;

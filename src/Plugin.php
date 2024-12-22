@@ -56,9 +56,9 @@ class Plugin extends Singleton {
         add_action('init', array($this, 'init'));
         add_action('admin_init', array($this, 'adminInit'));
         add_action('admin_menu', array($this, 'registerAdminMenus'));
-        // 加载前台前台
+        // 加载前台资源
         add_action('wp_enqueue_scripts', array($this, 'enqueueScripts'));
-        // 加载前台后台
+        // 加载后台资源
         add_action('admin_enqueue_scripts', array($this, 'enqueueAdminScripts'));
     }
 
@@ -75,7 +75,7 @@ class Plugin extends Singleton {
 	    // 初始化所有可初始化类
 	    self::initializeAll();
 
-        // 计划任务初始化
+        // 初始化计划任务
         Cron::init();
     }
 

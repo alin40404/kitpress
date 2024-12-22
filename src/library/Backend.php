@@ -2,10 +2,9 @@
 namespace kitpress\library;
 
 use kitpress\core\abstracts\Singleton;
-use kitpress\library\Config;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Lang;
-use kitpress\utils\Router;
+
 
 class Backend extends Singleton {
     private $routes = [];
