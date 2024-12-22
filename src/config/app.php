@@ -27,21 +27,9 @@ return [
     ],
 
     'session' => [
-        'backend' => true,     // 后台是否启用会话
-        'frontend' => false,   // 前台是否启用会话
-        'name' => 'kitsessid',
-        'lifetime' => 7 * 24 * 3600,  // 7天，单位：秒
-        'gc' => [
-            'probability' => 0,        // 禁用 PHP 自带的垃圾回收
-            'divisor' => 100
-        ],
-        'cookie' => [
-            'path' => '/',
-            'domain' => '',
-            'secure' => false,
-            'httponly' => true,
-            'samesite' => 'Lax'
-        ]
+        'table' => 'sessions',
+        'cookie' => 'kp_session',
+        'expires' => 48 * 60,
     ],
 
     'database' => [
@@ -50,31 +38,10 @@ return [
 
     // 默认值
     'features' => [
-        'auto_load' => true,
         'debug_mode' => false,
         'per_page' => 10,
         'delete_data_on_uninstall' => false,
         'requires_license' => false,
-    ],
-
-    'messages' => [
-        'errors' => [
-            'custom_error' => [
-                'message' => '发生错误：%s 和 %s',
-                'title' => '自定义错误',
-                'type' => 'warning'
-            ],
-            'php_version' => [
-                'message' => '【' . KITPRESS_NAME . '】需要PHP 7.4或更高版本',
-                'title' => '版本检查失败',
-                'type' => 'error',
-            ],
-            'wp_version' => [
-                'message' => '【' . KITPRESS_NAME . '】需要WordPress 5.0或更高版本',
-                'title' => '版本检查失败',
-                'type' => 'error',
-            ]
-        ]
     ],
 
 	'init' => [

@@ -3,42 +3,24 @@ if (!defined('ABSPATH')) {
     exit;
 }
 return [
-
+    'versions' => [
+        // 框架核心表 (kp_开头)
+        'kp_101' => [
+            'tables' => [
+                'sessions' => [
+                    'name' => 'sessions',
+                    'columns' => [
+                        'session_id' => 'VARCHAR(40) NOT NULL',
+                        'session_key' => 'VARCHAR(255) NOT NULL',
+                        'session_value' => 'LONGTEXT NOT NULL',
+                        'session_expiry' => 'BIGINT UNSIGNED NOT NULL',
+                        'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+                        'updated_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+                        'PRIMARY KEY' => '(session_id, session_key)',
+                        'KEY session_expiry' => '(session_expiry)'
+                    ]
+                ]
+            ]
+        ],
+    ]
 ];
-
-//return [
-//    'versions' => [
-//        '100' => [
-//            'tables' => [
-//                'items' => [
-//                    'name' => 'items',
-//                    'columns' => [
-//                        'id' => 'bigint(20) unsigned NOT NULL AUTO_INCREMENT',
-//                        'title' => 'varchar(255) NOT NULL',
-//                        'created_at' => 'datetime DEFAULT CURRENT_TIMESTAMP',
-//                        'PRIMARY KEY' => '(id)'
-//                    ]
-//                ]
-//            ],
-//
-//            'default_data' => [
-//                'surveys' => [
-//                    [
-//                        'title' => '示例九宫格调查',
-//                        'description' => '这是一个默认的九宫格调查示例',
-//                        'status' => 'published'
-//                    ]
-//                ]
-//            ],
-//        ],
-//        '110' => [
-//            'tables' => [
-//                'items' => [
-//                    'add_columns' => [
-//                        'status' => 'varchar(20) DEFAULT "draft"'
-//                    ]
-//                ]
-//            ]
-//        ]
-//    ]
-//];

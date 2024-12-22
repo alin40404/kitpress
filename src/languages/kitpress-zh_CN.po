@@ -98,8 +98,8 @@ msgstr "无法序列化单例对象"
 msgid "插件激活失败："
 msgstr "插件激活失败："
 
-msgid "需要 PHP 7.2 或更高版本"
-msgstr "需要 PHP 7.2 或更高版本"
+msgid "需要 PHP 7.4 或更高版本"
+msgstr "需要 PHP 7.4 或更高版本"
 
 msgid "需要 WordPress 5.0 或更高版本"
 msgstr "需要 WordPress 5.0 或更高版本"
@@ -109,3 +109,28 @@ msgstr "需要 PHP %s 扩展"
 
 msgid "插件卸载失败："
 msgstr "插件卸载失败："
+
+msgid "您没有执行此操作的权限"
+msgstr "您没有执行此操作的权限"
+
+msgid "权限错误"
+msgstr "权限错误"
+
+msgid "无效的请求"
+msgstr "无效的请求"
+
+msgid "请求错误"
+msgstr "请求错误"
+
+msgid "【%s】需要PHP 7.4或更高版本"
+msgstr "【%s】需要PHP 7.4或更高版本"
+
+msgid "【%s】需要WordPress 5.0或更高版本"
+msgstr "【%s】需要WordPress 5.0或更高版本"
+
+msgid "版本检查失败"
+msgstr "版本检查失败"
+
+msgid "错误"
+msgstr "错误"
+

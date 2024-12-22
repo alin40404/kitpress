@@ -3,7 +3,7 @@ namespace kitpress\utils;
 if (!defined('ABSPATH')) {
     exit;
 }
-class CronManager {
+class Cron {
     /**
      * 初始化定时任务
      */

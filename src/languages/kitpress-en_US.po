@@ -101,8 +101,8 @@ msgstr "Cannot serialize singleton"
 msgid "插件激活失败："
 msgstr "Plugin activation failed: "
 
-msgid "需要 PHP 7.2 或更高版本"
-msgstr "PHP 7.2 or higher is required"
+msgid "需要 PHP 7.4 或更高版本"
+msgstr "PHP 7.4 or higher is required"
 
 msgid "需要 WordPress 5.0 或更高版本"
 msgstr "WordPress 5.0 or higher is required"
@@ -112,3 +112,27 @@ msgstr "PHP %s extension is required"
 
 msgid "插件卸载失败："
 msgstr "Plugin uninstall error: "
+
+msgid "您没有执行此操作的权限"
+msgstr "You do not have permission to perform this action"
+
+msgid "权限错误"
+msgstr "Permission Error"
+
+msgid "无效的请求"
+msgstr "Invalid Request"
+
+msgid "请求错误"
+msgstr "Request Error"
+
+msgid "【%s】需要PHP 7.4或更高版本"
+msgstr "%s requires PHP 7.4 or higher"
+
+msgid "【%s】需要WordPress 5.0或更高版本"
+msgstr "%s requires WordPress 5.0 or higher"
+
+msgid "版本检查失败"
+msgstr "Version Check Failed"
+
+msgid "错误"
+msgstr "Error"

@@ -2,25 +2,15 @@
 namespace kitpress\core\traits;
 
 use kitpress\Kitpress;
-use kitpress\utils\Config;
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * 配置管理特性
+ */
 trait ConfigTrait {
-    /**
-     * 配置存储
-     * @var array
-     */
-    private static $items = [];
-
-    /**
-     * 已加载的配置文件记录
-     * @var array
-     */
-    private static $loaded = [];
-
     /**
      * 框架默认路径
      * @var string
@@ -35,16 +25,15 @@ trait ConfigTrait {
 
     /**
      * 插件根目录
-     * @var null
+     * @var string|null
      */
     private static $rootPath = null;
 
-
     /**
      * 初始化配置路径
+     * @param string $module 模块名称
      */
-    private static function init($module)
-    {
+    private function init($module) {
         self::$rootPath = Kitpress::getRootPath();
 
         $defaultPath = KITPRESS_PATH . $module;
@@ -52,73 +41,55 @@ trait ConfigTrait {
 
         self::$defaultPath = rtrim($defaultPath, '/') . '/';
         self::$customPath = rtrim($customPath, '/') . '/';
-
     }
 
     /**
      * 加载配置文件
+     * @param string|array $names 配置文件名
+     * @param string $module 模块名称
      */
-    public static function load($names, $module) {
+    protected function load($names, $module) {
         // 初始化路径
-        self::init($module);
+        $this->init($module);
 
         foreach ((array)$names as $name) {
-            if (isset(self::$loaded[$name])) {
+            if (isset(static::$loaded[$name])) {
                 continue;
             }
 
             // 加载默认配置
-            $default = self::loadFile(self::$defaultPath . $name . '.php');
+            $default = $this->loadFile(self::$defaultPath . $name . '.php');
 
             // 加载自定义配置
-            $custom = self::loadFile(self::$customPath . $name . '.php');
+            $custom = $this->loadFile(self::$customPath . $name . '.php');
 
             // 合并配置
-            self::$items[$name] = self::merge((array)$default, (array)$custom);
-            self::$loaded[$name] = true;
+            static::$items = $this->merge((array)$default, (array)$custom);
+            static::$loaded[$name] = true;
         }
-    }
-
-    /**
-     * 获取配置值
-     */
-    public static function get($key = null, $default = null) {
-        if (is_null($key)) {
-            return self::$items;
-        }
-        return self::getValue(self::$items, $key, $default);
-    }
-
-    /**
-     * 设置配置值
-     */
-    public static function set($key, $value) {
-        self::setValue(self::$items, $key, $value);
-    }
-
-    /**
-     * 检查配置是否存在
-     */
-    public static function has($key) {
-        return self::getValue(self::$items, $key) !== null;
     }
 
     /**
      * 加载配置文件
+     * @param string $path 文件路径
+     * @return array
      */
-    private static function loadFile($path) {
+    private function loadFile($path) {
         return file_exists($path) ? require $path : [];
     }
 
     /**
      * 递归合并配置数组
+     * @param array $default 默认配置
+     * @param array $custom 自定义配置
+     * @return array
      */
-    private static function merge($default, $custom) {
+    private function merge($default, $custom) {
         $merged = $default;
         if (is_array($custom) && !empty($custom)) {
             foreach ($custom as $key => $value) {
                 if (is_array($value) && isset($merged[$key]) && is_array($merged[$key])) {
-                    $merged[$key] = self::merge($merged[$key], $value);
+                    $merged[$key] = $this->merge($merged[$key], $value);
                 } else {
                     $merged[$key] = $value;
                 }
@@ -129,8 +100,12 @@ trait ConfigTrait {
 
     /**
      * 使用点号路径获取数组值
+     * @param array $array 数组
+     * @param string|null $key 键名
+     * @param mixed $default 默认值
+     * @return mixed
      */
-    private static function getValue($array, $key, $default = null) {
+    protected function getValue($array, $key, $default = null) {
         if (is_null($key)) {
             return $array;
         }
@@ -147,8 +122,11 @@ trait ConfigTrait {
 
     /**
      * 使用点号路径设置数组值
+     * @param array $array 数组
+     * @param string $key 键名
+     * @param mixed $value 值
      */
-    private static function setValue(&$array, $key, $value) {
+    protected function setValue(&$array, $key, $value) {
         $keys = explode('.', $key);
         $current = &$array;
 
@@ -167,13 +145,5 @@ trait ConfigTrait {
         }
 
         $current[array_shift($keys)] = $value;
-    }
-
-    /**
-     * 重置配置（用于测试）
-     */
-    public static function reset() {
-        self::$items = [];
-        self::$loaded = [];
     }
 }

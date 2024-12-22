@@ -292,13 +292,32 @@ class Log
         }
 
         $replace = [];
+        $unmatchedPairs = [];
         foreach ($context as $key => $val) {
-            if (!is_array($val) && (!is_object($val) || method_exists($val, '__toString'))) {
-                $replace['{' . $key . '}'] = $val;
+            // 格式化值
+            $formattedVal = (!is_array($val) && (!is_object($val) || method_exists($val, '__toString')))
+                ? (string)$val
+                : self::formatMessage($val);
+
+            // 检查是否有对应的占位符
+            $placeholder = '{' . $key . '}';
+            if (strpos($message, $placeholder) !== false) {
+                $replace[$placeholder] = $formattedVal;
+            } else {
+                // 没有找到占位符，将 key 和 value 存储起来
+                $unmatchedPairs[] = $key . '=' . $formattedVal;
             }
         }
 
-        return strtr($message, $replace);
+        // 先替换占位符
+        $result = strtr($message, $replace);
+
+        // 如果有未匹配的键值对，添加到消息末尾
+        if (!empty($unmatchedPairs)) {
+            $result .= ' [' . implode(', ', $unmatchedPairs) . ']';
+        }
+
+        return $result;
     }
 
 

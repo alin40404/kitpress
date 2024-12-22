@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
 }
 
 // 定义框架基础常量
-define('KITPRESS_VERSION', '1.0.202412');
+define('KITPRESS_VERSION', '1.0.1');
 define('KITPRESS_NAME', 'kitpress');
 define('KITPRESS___FILE__', __FILE__ );
 
@@ -24,9 +24,6 @@ define('KITPRESS_PATH', plugin_dir_path(KITPRESS___FILE__));
 // 框架命名空间
 define('KITPRESS_CORE_NAMESPACE', KITPRESS_NAME);
 define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
-
-
-
 
 /**
  * 框架唯一入口类，提供外部调用。
@@ -81,10 +78,6 @@ class Kitpress{
         // 开启调试模式，打印框架运行轨迹
         Log::debug('Kitpress 正在初始化...');
 
-        // 配置开启会话
-        if (self::needsSession()) {
-            Session::start();
-        }
 
 	    // 注入初始化类
 	    $initClasses = Config::get('app.init');
@@ -95,21 +88,6 @@ class Kitpress{
 			    }
 		    }
 	    }
-    }
-
-    /**
-     * 判断是否需要开启会话
-     * @return boolean
-     */
-    private static function needsSession()
-    {
-         // 判断是否在后台
-         $isAdmin = is_admin();
-        
-         // 根据前后台分别获取对应的会话配置
-         return $isAdmin 
-             ? Config::get('app.session.backend', true)    // 后台默认开启
-             : Config::get('app.session.frontend', false); // 前台默认关闭
     }
 
     /**
@@ -147,8 +125,9 @@ class Kitpress{
 
     public static function shutdown()
     {
-        // 在合适的位置添加关闭钩子
-        register_shutdown_function(function() {
+        // WordPress 钩子系统
+        add_action('shutdown', function () {
+            Session::getInstance()->saveSession();
             Log::debug('Kitpress 已执行完毕');
         });
     }

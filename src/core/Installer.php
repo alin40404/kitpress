@@ -55,12 +55,14 @@ class Installer {
             self::loadConfig();
 
             $db_version = str_replace('.','' ,Config::get('app.db_version'));
+            $kp_version = str_replace('.','' ,KITPRESS_VERSION);
 
             // 1. 检查系统要求
             self::check_requirements();
 
             // 2. 创建数据表
             self::create_tables(Config::get('database.versions.'. $db_version .'.tables', []));
+            self::create_tables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
 
             // 3. 插入默认数据
             self::insert_default_data(Config::get('database.versions.'. $db_version .'.default_data', []));
@@ -86,9 +88,6 @@ class Installer {
             // 9. 清理缓存
             wp_cache_flush();
 
-            // 启动Session垃圾回收
-            Session::activate();
-
             Log::debug('Installer::activate 执行完成');
         } catch (\Exception $e) {
             deactivate_plugins(self::getPluginsName());
@@ -108,8 +107,12 @@ class Installer {
         }
 
         try {
+            $db_version = str_replace('.','' ,Config::get('app.db_version'));
+            $kp_version = str_replace('.','' ,KITPRESS_VERSION);
+
             // 1. 删除数据表
-            self::drop_tables();
+            self::drop_tables(Config::get('database.versions.'. $db_version .'.tables', []));
+            self::drop_tables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
 
             // 2. 删除选项
             self::delete_options();
@@ -137,8 +140,8 @@ class Installer {
      */
     private static function check_requirements() {
         // PHP 版本检查
-        if (version_compare(PHP_VERSION, '7.2', '<')) {
-            throw new \Exception(Lang::kit('需要 PHP 7.2 或更高版本'));
+        if (version_compare(PHP_VERSION, '7.4', '<')) {
+            throw new \Exception(Lang::kit('需要 PHP 7.4 或更高版本'));
         }
 
         // WordPress 版本检查
@@ -447,12 +450,14 @@ class Installer {
     /**
      * 删除数据表
      */
-    private static function drop_tables() {
+    private static function drop_tables($tables = []) {
         global $wpdb;
 
-        $db_version = str_replace('.','' ,Config::get('app.db_version'));
+        if(empty($tables)){
+            $db_version = str_replace('.','' ,Config::get('app.db_version'));
+            $tables = Config::get('database.versions.'. $db_version .'.tables', []);
+        }
 
-        $tables = Config::get('database.versions.'. $db_version .'.tables', []);
         foreach ($tables as $table => $definition) {
             $table_name = $wpdb->prefix . Config::get('app.database.prefix') . $definition['name'];
             $wpdb->query("DROP TABLE IF EXISTS {$table_name}");
