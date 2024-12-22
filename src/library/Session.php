@@ -127,35 +127,39 @@ class Session extends Singleton {
     /**
      * 保存会话数据（优化版）
      */
-    public function saveSession() {
-        // 移除清理操作，只保存当前会话
-        foreach ($this->data as $key => $value) {
-            $this->model->saveSessionData(
-                $this->session_id,
+    public static function saveSession() {
+        $instance = self::getInstance();
+        foreach ($instance->data as $key => $value) {
+            $instance->model->saveSessionData(
+                $instance->session_id,
                 $key,
                 $value,
-                time() + $this->cookie_expires
+                time() + $instance->cookie_expires
             );
         }
 
-        // 更新缓存
-        $this->cache->set('session_' . $this->session_id, $this->data, 3600);
+        $instance->cache->set('session_' . $instance->session_id, $instance->data, 3600);
     }
 
     /**
      * 清理过期会话（新方法）
      * 建议通过计划任务调用此方法
      */
-    public function cleanExpiredSessions() {
-        $this->model->cleanExpiredSessions();
+    public static function cleanExpiredSessions() {
+        $instance = self::getInstance();
+        $instance->model->cleanExpiredSessions();
     }
 
     /**
      * 获取会话数据，支持点号分隔的多级键值
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
      */
-    public function get($key, $default = null) {
+    public static function get($key, $default = null) {
+        $instance = self::getInstance();
         $segments = explode('.', $key);
-        $data = $this->data;
+        $data = $instance->data;
 
         foreach ($segments as $segment) {
             if (!is_array($data) || !isset($data[$segment])) {
@@ -170,9 +174,10 @@ class Session extends Singleton {
     /**
      * 设置会话数据，支持点号分隔的多级键值
      */
-    public function set($key, $value) {
+    public static function set($key, $value) {
+        $instance = self::getInstance();
         $segments = explode('.', $key);
-        $data = &$this->data;
+        $data = &$instance->data;
 
         foreach ($segments as $i => $segment) {
             if ($i === count($segments) - 1) {
@@ -185,36 +190,38 @@ class Session extends Singleton {
             }
         }
 
-        return $this;
+        return $instance;
     }
+
 
     /**
      * 删除会话数据，支持点号分隔的多级键值
      */
-    public function delete($key) {
+    public static function delete($key) {
+        $instance = self::getInstance();
         $segments = explode('.', $key);
-        $data = &$this->data;
+        $data = &$instance->data;
 
-        // 遍历到倒数第二层
         $lastSegment = array_pop($segments);
         foreach ($segments as $segment) {
             if (!is_array($data) || !isset($data[$segment])) {
-                return $this;
+                return $instance;
             }
             $data = &$data[$segment];
         }
 
-        // 删除最后一层的键
         unset($data[$lastSegment]);
-        return $this;
+        return $instance;
     }
+
 
     /**
      * 检查会话数据是否存在，支持点号分隔的多级键值
      */
-    public function has($key) {
+    public static function has($key) {
+        $instance = self::getInstance();
         $segments = explode('.', $key);
-        $data = $this->data;
+        $data = $instance->data;
 
         foreach ($segments as $segment) {
             if (!is_array($data) || !isset($data[$segment])) {
@@ -229,36 +236,42 @@ class Session extends Singleton {
     /**
      * 清空会话数据
      */
-    public function clear() {
-        $this->data = [];
-        return $this;
+    public static function clear() {
+        $instance = self::getInstance();
+        $instance->data = [];
+        return $instance;
     }
+
 
     /**
      * 获取所有会话数据
      */
-    public function all() {
-        return $this->data;
+    public static function all() {
+        $instance = self::getInstance();
+        return $instance->data;
     }
 
     /**
      * 销毁会话
      */
-    public function destroy() {
-        $this->clear();
-        \wp_delete_cookie($this->cookie);
-        
-        $this->model->deleteSession($this->session_id);
-        $this->cache->delete('session_' . $this->session_id);
+    public static function destroy() {
+        $instance = self::getInstance();
+        $instance->clear();
+        \wp_delete_cookie($instance->cookie);
+
+        $instance->model->deleteSession($instance->session_id);
+        $instance->cache->delete('session_' . $instance->session_id);
     }
 
     /**
      * 重新生成会话ID
      */
-    public function regenerate() {
-        $this->destroy();
-        $this->session_id = $this->generateSessionId();
-        $this->setCookie();
-        return $this;
+    public static function regenerate() {
+        $instance = self::getInstance();
+        $instance->destroy();
+        $instance->session_id = $instance->generateSessionId();
+        $instance->setCookie();
+        return $instance;
     }
+
 }
