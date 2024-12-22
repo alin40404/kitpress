@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
  */
 class Config extends Singleton {
     use ConfigTrait {
-//        load as protected loadResource;
+        load as protected loadResource;
     }
 
     /**
@@ -21,7 +21,7 @@ class Config extends Singleton {
      * @param string|array $names 配置文件名
      */
     public static function load($names) {
-        static::getInstance()->load($names, 'config');
+        static::getInstance()->loadResource($names, 'config');
     }
 
     /**

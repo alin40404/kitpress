@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
  */
 class Router extends Singleton {
     use ConfigTrait {
-//        load as protected loadResource;
+        load as protected loadResource;
     }
 
     /**
@@ -21,7 +21,7 @@ class Router extends Singleton {
      * @param string|array $names 路由文件名
      */
     public static function load($names) {
-        static::getInstance()->load($names, 'routes');
+        static::getInstance()->loadResource($names, 'routes');
     }
 
     /**
