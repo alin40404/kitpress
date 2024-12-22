@@ -76,7 +76,7 @@ trait ConfigTrait {
             $custom = $this->loadFile($this->customPath . $name . '.php');
 
             // 合并配置
-            $this->items = $this->merge((array)$default, (array)$custom);
+            $this->items[$name] = $this->merge((array)$default, (array)$custom);
             $this->loaded[$name] = true;
         }
     }
