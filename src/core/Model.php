@@ -68,6 +68,33 @@ class Model extends Singleton {
         $this->table = $this->prefix . $this->plugin_prefix . $tableName;
     }
 
+    public function getTable() {
+        return $this->table;
+    }
+
+    public function getTableName() {
+        // 如果显式设置了 table_name，直接返回
+        if (!empty($this->table_name)) {
+            return $this->table_name;
+        }
+
+        // 如果设置了完整表名，移除两个前缀
+        if (!empty($this->table)) {
+            $table = $this->table;
+            // 移除 WordPress 前缀
+            if (strpos($table, $this->prefix) === 0) {
+                $table = substr($table, strlen($this->prefix));
+            }
+            // 移除插件前缀
+            if (strpos($table, $this->plugin_prefix) === 0) {
+                $table = substr($table, strlen($this->plugin_prefix));
+            }
+            return $table;
+        }
+
+        return '';
+    }
+
     public function find($id) {
         return $this->wpdb->get_row($this->wpdb->prepare(
             "SELECT * FROM {$this->table} WHERE id = %d",
