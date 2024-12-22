@@ -12,35 +12,47 @@ if (!defined('ABSPATH')) {
  */
 trait ConfigTrait {
     /**
+     * 配置存储
+     * @var array
+     */
+    protected $items = [];
+
+    /**
+     * 已加载的配置文件记录
+     * @var array
+     */
+    protected $loaded = [];
+
+    /**
      * 框架默认路径
      * @var string
      */
-    private static $defaultPath = null;
+    private $defaultPath = null;
 
     /**
      * 自定义路径
      * @var string
      */
-    private static $customPath = null;
+    private $customPath = null;
 
     /**
      * 插件根目录
      * @var string|null
      */
-    private static $rootPath = null;
+    private $rootPath = null;
 
     /**
      * 初始化配置路径
      * @param string $module 模块名称
      */
-    private function init($module) {
-        self::$rootPath = Kitpress::getRootPath();
+    protected function init($module) {
+        $this->rootPath = Kitpress::getRootPath();
 
         $defaultPath = KITPRESS_PATH . $module;
-        $customPath = self::$rootPath . $module;
+        $customPath = $this->rootPath . $module;
 
-        self::$defaultPath = rtrim($defaultPath, '/') . '/';
-        self::$customPath = rtrim($customPath, '/') . '/';
+        $this->defaultPath = rtrim($defaultPath, '/') . '/';
+        $this->customPath = rtrim($customPath, '/') . '/';
     }
 
     /**
@@ -53,19 +65,19 @@ trait ConfigTrait {
         $this->init($module);
 
         foreach ((array)$names as $name) {
-            if (isset(static::$loaded[$name])) {
+            if (isset($this->loaded[$name])) {
                 continue;
             }
 
             // 加载默认配置
-            $default = $this->loadFile(self::$defaultPath . $name . '.php');
+            $default = $this->loadFile($this->defaultPath . $name . '.php');
 
             // 加载自定义配置
-            $custom = $this->loadFile(self::$customPath . $name . '.php');
+            $custom = $this->loadFile($this->customPath . $name . '.php');
 
             // 合并配置
-            static::$items = $this->merge((array)$default, (array)$custom);
-            static::$loaded[$name] = true;
+            $this->items = $this->merge((array)$default, (array)$custom);
+            $this->loaded[$name] = true;
         }
     }
 
