@@ -2,6 +2,7 @@
 namespace kitpress\library;
 
 use kitpress\core\abstracts\Singleton;
+use kitpress\utils\Lang;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -73,11 +74,11 @@ class RestApi extends Singleton {
      */
     private function validateEndpointConfig(array $config): void {
         if (!isset($config['callback'])) {
-            throw new \InvalidArgumentException('Endpoint callback is required');
+            throw new \InvalidArgumentException(Lang::kit('端点回调函数是必需的'));
         }
 
         if (isset($config['callback']) && strpos($config['callback'], '@') === false) {
-            throw new \InvalidArgumentException('Invalid callback format. Use "Controller@method"');
+            throw new \InvalidArgumentException(Lang::kit('无效的回调函数格式，请使用 "Controller@method"'));
         }
     }
 
@@ -128,19 +129,19 @@ class RestApi extends Singleton {
                 $controllerClass = $this->namespace . $controller;
 
                 if (!class_exists($controllerClass)) {
-                    throw new \RuntimeException("Controller {$controller} not found");
+                    throw new \RuntimeException(sprintf(Lang::kit('控制器未找到： %s'), $controllerClass));
                 }
 
                 $controller = new $controllerClass();
 
                 if (!method_exists($controller, $method)) {
-                    throw new \RuntimeException("Method {$method} not found in {$controller}");
+                    throw new \RuntimeException(sprintf(Lang::kit('方法未找到：%s'), $method));
                 }
 
                 return $controller->$method($request);
             } catch (\Throwable $e) {
                 return new \WP_Error(
-                    'rest_api_error',
+                    404,
                     $e->getMessage(),
                     ['status' => 404]
                 );

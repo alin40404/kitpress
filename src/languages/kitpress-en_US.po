@@ -136,3 +136,9 @@ msgstr "Version Check Failed"
 
 msgid "错误"
 msgstr "Error"
+
+msgid "端点回调函数是必需的"
+msgstr "Endpoint callback is required"
+
+msgid "无效的回调函数格式，请使用 \"Controller@method\""
+msgstr "Invalid callback format. Use \"Controller@method\""

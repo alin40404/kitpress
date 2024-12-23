@@ -134,3 +134,9 @@ msgstr "版本检查失败"
 msgid "错误"
 msgstr "错误"
 
+msgid "端点回调函数是必需的"
+msgstr "端点回调函数是必需的"
+
+msgid "无效的回调函数格式，请使用 \"Controller@method\""
+msgstr "无效的回调函数格式，请使用 \"Controller@method\""
+
