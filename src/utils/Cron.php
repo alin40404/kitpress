@@ -67,7 +67,7 @@ class Cron {
 
         foreach ($tasks as $taskKey => $task) {
             // 未开启 session
-            if ($taskKey === 'session_cleanup' && Config::get('app.session.enabled') == false ) {
+            if ($taskKey === 'session_cleanup' && Config::get('app.session.enabled',false) == false ) {
                 continue;
             }
             if (!self::validateTask($task)) {

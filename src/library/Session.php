@@ -2,6 +2,7 @@
 namespace kitpress\library;
 
 use kitpress\core\abstracts\Singleton;
+use kitpress\core\Installer;
 use kitpress\models\SessionModel;
 
 if (!defined('ABSPATH')) {
@@ -128,7 +129,12 @@ class Session extends Singleton {
      * 保存会话数据（优化版）
      */
     public static function saveSession() {
+        if( Config::get('app.session.enabled', false) ) return;
+
         $instance = self::getInstance();
+
+        $instance->model->ensureTableExists();
+
         foreach ($instance->data as $key => $value) {
             $instance->model->saveSessionData(
                 $instance->session_id,

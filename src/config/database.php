@@ -4,8 +4,8 @@ if (!defined('ABSPATH')) {
 }
 return [
     'versions' => [
-        // 框架核心表 (kp_开头)
-        'kp_101' => [
+        // 框架核心表 (kp|kp_开头)
+        'kp' => [
             'tables' => [
                 'sessions' => [
                     'name' => 'sessions',

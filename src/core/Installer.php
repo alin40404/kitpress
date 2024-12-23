@@ -61,6 +61,7 @@ class Installer {
 
             // 2. 创建数据表
             self::createTables(Config::get('database.versions.'. $db_version .'.tables', []));
+            self::createTables(Config::get('database.versions.kp.tables', []));
             self::createTables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
 
             // 3. 插入默认数据
@@ -111,6 +112,7 @@ class Installer {
 
             // 1. 删除数据表
             self::dropTables(Config::get('database.versions.'. $db_version .'.tables', []));
+            self::dropTables(Config::get('database.versions.kp.tables', []));
             self::dropTables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
 
             // 2. 删除选项
@@ -208,6 +210,7 @@ class Installer {
      * 创建数据表
      */
     public static function createTables($tables) {
+        if( empty($tables) ) return;
 
         global $wpdb;
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -216,7 +219,7 @@ class Installer {
             $table_name = $wpdb->prefix . Config::get('app.database.prefix') . $definition['name'];
             $columns = $definition['columns'];
 
-            if( $definition['name'] == 'sessions' && Config::get('app.session.enabled') == false ){
+            if( $definition['name'] == 'sessions' && Config::get('app.session.enabled',false) == false ){
                 // 只有开启 Session，才安装 sessions 表
                 continue;
             }
@@ -240,6 +243,8 @@ class Installer {
      * 更新数据表
      */
     public static function updateTable($definition) {
+        if(empty($definition)) return;
+
         global $wpdb;
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
@@ -421,6 +426,8 @@ class Installer {
             $db_version = str_replace('.','' ,Config::get('app.db_version'));
             $tables = Config::get('database.versions.'. $db_version .'.tables', []);
         }
+
+        if(empty($tables)) return;
 
         foreach ($tables as $table => $definition) {
             $table_name = $wpdb->prefix . Config::get('app.database.prefix') . $definition['name'];
