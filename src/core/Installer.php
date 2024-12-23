@@ -57,23 +57,23 @@ class Installer {
             $kp_version = str_replace('.','' ,KITPRESS_VERSION);
 
             // 1. 检查系统要求
-            self::check_requirements();
+            self::checkRequirements();
 
             // 2. 创建数据表
-            self::create_tables(Config::get('database.versions.'. $db_version .'.tables', []));
-            self::create_tables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
+            self::createTables(Config::get('database.versions.'. $db_version .'.tables', []));
+            self::createTables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
 
             // 3. 插入默认数据
-            self::insert_default_data(Config::get('database.versions.'. $db_version .'.default_data', []));
+            self::insertDefaultData(Config::get('database.versions.'. $db_version .'.default_data', []));
 
             // 4. 创建默认选项
-            self::create_options();
+            self::createOptions();
 
             // 5. 创建必要的目录
-            self::create_directories();
+            self::createDirectories();
 
             // 6. 设置角色权限
-            self::setup_roles();
+            self::setupRoles();
 
             // 7. 更新数据库版本号
             update_option(
@@ -110,17 +110,17 @@ class Installer {
             $kp_version = str_replace('.','' ,KITPRESS_VERSION);
 
             // 1. 删除数据表
-            self::drop_tables(Config::get('database.versions.'. $db_version .'.tables', []));
-            self::drop_tables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
+            self::dropTables(Config::get('database.versions.'. $db_version .'.tables', []));
+            self::dropTables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
 
             // 2. 删除选项
-            self::delete_options();
+            self::deleteOptions();
 
             // 3. 删除上传的文件
-            self::delete_uploaded_files();
+            self::deleteUploadedFiles();
 
             // 4. 删除用户权限
-            self::remove_capabilities();
+            self::removeCapabilities();
 
             // 5. 清理缓存
             wp_cache_flush();
@@ -137,7 +137,7 @@ class Installer {
     /**
      * 检查系统要求
      */
-    public static function check_requirements() {
+    public static function checkRequirements() {
         // PHP 版本检查
         if (version_compare(PHP_VERSION, '7.4', '<')) {
             throw new \Exception(Lang::kit('需要 PHP 7.4 或更高版本'));
@@ -160,7 +160,7 @@ class Installer {
     /**
      * 检查并执行数据库更新
      */
-    public static function check_version() {
+    public static function checkVersion() {
         self::loadConfig();
 
         $current_version = Config::get('app.db_version');
@@ -187,13 +187,13 @@ class Installer {
                 // 更新数据表
                 if (!empty($schema['tables'])) {
                     foreach ($schema['tables'] as $definition) {
-                        self::update_table($definition);
+                        self::updateTable($definition);
                     }
                 }
 
                 // 插入新版本的默认数据
                 if (!empty($schema['default_data'])) {
-                    self::insert_default_data($schema['default_data']);
+                    self::insertDefaultData($schema['default_data']);
                 }
             }
         }
@@ -207,7 +207,7 @@ class Installer {
     /**
      * 创建数据表
      */
-    public static function create_tables($tables) {
+    public static function createTables($tables) {
 
         global $wpdb;
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
@@ -239,7 +239,7 @@ class Installer {
     /**
      * 更新数据表
      */
-    public static function update_table($definition) {
+    public static function updateTable($definition) {
         global $wpdb;
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
@@ -266,7 +266,7 @@ class Installer {
         }
     }
 
-    private static function getFullTableName($table_name)
+    private static function getFullTableName($table_name): string
     {
         global $wpdb;
         return  $wpdb->prefix . Config::get('app.database.prefix') . $table_name;
@@ -277,7 +277,8 @@ class Installer {
      * @param string $table_name 完整的表名
      * @return bool
      */
-    public static function table_exists($table_name,$is_full = false) {
+    public static function tableExists($table_name,$is_full = false): bool
+    {
         global $wpdb;
 
         if($is_full == false) $table_name = self::getFullTableName($table_name);
@@ -293,7 +294,7 @@ class Installer {
     /**
      * 插入默认数据
      */
-    private static function insert_default_data($default_data) {
+    private static function insertDefaultData($default_data) {
         global $wpdb;
 
         foreach ($default_data as $table => $records) {
@@ -307,7 +308,7 @@ class Installer {
                     $wpdb->insert(
                         $table_name,
                         $record,
-                        self::get_column_formats($record)
+                        self::getColumnFormats($record)
                     );
 
                     if ($wpdb->last_error) {
@@ -322,7 +323,7 @@ class Installer {
      * 创建默认选项
      * @throws \Exception 如果选项创建失败
      */
-    private static function create_options() {
+    private static function createOptions() {
         try {
             // 获取所有默认配置
             $features = Config::get('app.features');
@@ -356,7 +357,7 @@ class Installer {
     /**
      * 创建必要的目录
      */
-    private static function create_directories() {
+    private static function createDirectories() {
         $upload_dir = wp_upload_dir();
         $plugin_dir = $upload_dir['basedir'] . '/' . Config::get('app.database.prefix');
 
@@ -374,7 +375,7 @@ class Installer {
     /**
      * 设置角色权限
      */
-    private static function setup_roles() {
+    private static function setupRoles() {
         $admin = get_role('administrator');
 
         $roleKey = KITPRESS_NAME;
@@ -395,7 +396,8 @@ class Installer {
     /**
      * 获取列的格式
      */
-    private static function get_column_formats($record) {
+    private static function getColumnFormats($record): array
+    {
         $formats = [];
         foreach ($record as $value) {
             if (is_int($value)) {
@@ -412,7 +414,7 @@ class Installer {
     /**
      * 删除数据表
      */
-    private static function drop_tables($tables = []) {
+    private static function dropTables($tables = []) {
         global $wpdb;
 
         if(empty($tables)){
@@ -430,18 +432,20 @@ class Installer {
     /**
      * 删除选项
      */
-    private static function delete_options() {
-        // 删除版本号
-        delete_option(Config::get('app.options.db_version_key'));
+    private static function deleteOptions() {
 
-        // 删除设置
-        delete_option(Config::get('app.options.settings_key'));
+        // 删除选项
+        $options = Config::get('app.options');
+        if(!isset($options['db_version'])) $options['db_version'] = [];
+        if(!isset($options['uninstall'])) $options['uninstall'] = false;
+        if(!isset($options['meta']))  $options['meta'] = [];
+        if(!isset($options['license'])) $options['license'] = '';
+        if(!isset($options['license'])) $options['settings'] = [];
 
-        // 删除卸载选项
-        delete_option(Config::get('app.options.uninstall_key'));
-
-        // 删除激活时间
-        delete_option(Config::get('app.options.activated_time_key'));
+        foreach ($options as $key => $default_value) {
+            $key = Helper::optionKey($key);
+            \delete_option($key);
+        }
 
         // 删除所有以插件前缀开头的选项
         global $wpdb;
@@ -457,12 +461,12 @@ class Installer {
     /**
      * 删除上传的文件
      */
-    private static function delete_uploaded_files() {
+    private static function deleteUploadedFiles() {
         $upload_dir = wp_upload_dir();
         $plugin_dir = $upload_dir['basedir'] . '/' . Config::get('app.database.prefix');
 
         if (is_dir($plugin_dir)) {
-            self::delete_directory($plugin_dir);
+            self::deleteDirectory($plugin_dir);
         }
     }
 
@@ -472,7 +476,8 @@ class Installer {
      * @param string $dir 要删除的目录路径
      * @return bool 是否成功删除
      */
-    private static function delete_directory($dir) {
+    private static function deleteDirectory(string $dir): bool
+    {
         if (!file_exists($dir)) {
             return true;
         }
@@ -486,7 +491,7 @@ class Installer {
                 continue;
             }
 
-            if (!self::delete_directory($dir . DIRECTORY_SEPARATOR . $item)) {
+            if (!self::deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
                 return false;
             }
         }
@@ -497,7 +502,7 @@ class Installer {
     /**
      * 移除用户权限
      */
-    private static function remove_capabilities() {
+    private static function removeCapabilities() {
         $admin = get_role('administrator');
 
         $capabilities = Config::get('app.capabilities', []);
