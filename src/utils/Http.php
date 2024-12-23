@@ -6,21 +6,24 @@ if (!defined('ABSPATH')) {
 }
 
 class Http {
+
     /**
      * 发送 GET 请求
      * @param string $url 请求地址
      * @param array $params 请求参数
      * @param array $headers 请求头
+     * @param int $timeout 超时，默认30秒
      * @return array|WP_Error 响应结果或错误
      */
-    public static function get($url, $params = [], $headers = []) {
+    public static function get(string $url, array $params = [], array $headers = [],int $timeout = 30)
+    {
         if (!empty($params)) {
             $url = \add_query_arg($params, $url);
         }
 
         return \wp_remote_get($url, [
             'headers' => $headers,
-            'timeout' => 30
+            'timeout' => $timeout
         ]);
     }
 
@@ -29,13 +32,15 @@ class Http {
      * @param string $url 请求地址
      * @param array|string $data 请求数据
      * @param array $headers 请求头
+     * @param int $timeout 超时，默认30秒
      * @return array|WP_Error 响应结果或错误
      */
-    public static function post($url, $data = [], $headers = []) {
+    public static function post(string $url, $data = [], array $headers = [],int $timeout = 30)
+    {
         return \wp_remote_post($url, [
             'headers' => $headers,
             'body' => $data,
-            'timeout' => 30
+            'timeout' => $timeout
         ]);
     }
 
