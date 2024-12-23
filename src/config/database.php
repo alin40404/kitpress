@@ -11,7 +11,7 @@ return [
                     'name' => 'sessions',
                     'columns' => [
                         'session_id' => 'VARCHAR(40) NOT NULL',
-                        'session_key' => 'VARCHAR(255) NOT NULL',
+                        'session_key' => 'VARCHAR(190) NOT NULL',
                         'session_value' => 'LONGTEXT NOT NULL',
                         'session_expiry' => 'BIGINT UNSIGNED NOT NULL',
                         'created_at' => 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',

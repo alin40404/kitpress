@@ -1,2 +1,8 @@
 wp-content/debug.log
 .maintenance
+idea/
+vscode/
+DS_Store
+humbs.db
+.swp
+~

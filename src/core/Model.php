@@ -107,6 +107,59 @@ class Model extends Singleton {
     }
 
     /**
+     * 插入或更新数据
+     * @param array $data 要插入/更新的数据
+     * @param array $update_fields 需要更新的字段
+     * @return bool|int
+     */
+    public function insertOrUpdate(array $data, array $update_fields = []) {
+        global $wpdb;
+
+        if (empty($data)) {
+            return false;
+        }
+        $table = $this->getTable();
+        $fields = array_keys($data);
+        $formats = $this->getFieldFormats($data);
+        $values = array_values($data);
+
+        // 构建 INSERT 部分
+        $sql = "INSERT INTO {$table} (`" . implode('`, `', $fields) . "`) VALUES (";
+        $sql .= implode(', ', $formats) . ")";
+
+        // 构建 UPDATE 部分
+        if (!empty($update_fields)) {
+            $sql .= " ON DUPLICATE KEY UPDATE ";
+            $updates = [];
+            foreach ($update_fields as $field) {
+                $updates[] = "`{$field}` = VALUES(`{$field}`)";
+            }
+            $sql .= implode(', ', $updates);
+        }
+
+        return $wpdb->query($wpdb->prepare($sql, $values));
+    }
+
+    /**
+     * 获取字段格式
+     * @param array $data
+     * @return array
+     */
+    private function getFieldFormats(array $data) {
+        $formats = [];
+        foreach ($data as $value) {
+            if (is_int($value)) {
+                $formats[] = '%d';
+            } elseif (is_float($value)) {
+                $formats[] = '%f';
+            } else {
+                $formats[] = '%s';
+            }
+        }
+        return $formats;
+    }
+
+    /**
      * 插入数据
      * @param array $data 要插入的数据
      * @param array $format 数据格式
@@ -121,6 +174,8 @@ class Model extends Singleton {
 
         return $result !== false ? $this->wpdb->insert_id : false;
     }
+
+
 
     /**
      * 更新数据
@@ -699,5 +754,4 @@ class Model extends Singleton {
 
         return $this->wpdb->get_results($sql);
     }
-
 }
