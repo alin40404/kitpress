@@ -5,6 +5,9 @@ use kitpress\core\abstracts\Singleton;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Lang;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 class Backend extends Singleton {
     private $routes = [];

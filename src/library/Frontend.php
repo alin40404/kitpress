@@ -5,6 +5,10 @@ use kitpress\core\abstracts\Singleton;
 use kitpress\utils\Lang;
 use kitpress\utils\Log;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 class Frontend extends Singleton {
     private $routes = [];
     private $namespace;
