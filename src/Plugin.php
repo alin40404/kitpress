@@ -68,10 +68,12 @@ class Plugin extends Singleton {
      * @return void
      */
     public function init() {
+        // 初始化前台路由
         Frontend::getInstance()->init();
+        // 初始化接口路由
         RestApi::getInstance()->init();
 
-        // 在 init 注册时，注册后台路由
+        // 注册后台路由
         Backend::getInstance() -> registerRoutes();
 
 	    // 初始化所有可初始化类
