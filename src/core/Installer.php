@@ -216,6 +216,11 @@ class Installer {
             $table_name = $wpdb->prefix . Config::get('app.database.prefix') . $definition['name'];
             $columns = $definition['columns'];
 
+            if( $definition['name'] == 'sessions' && Config::get('app.session.enabled') == false ){
+                // 只有开启 Session，才安装 sessions 表
+                continue;
+            }
+
             $sql = "CREATE TABLE IF NOT EXISTS {$table_name} (";
             foreach ($columns as $column => $spec) {
                 $sql .= "\n{$column} {$spec},";
