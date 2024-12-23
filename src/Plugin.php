@@ -6,6 +6,7 @@ use kitpress\core\abstracts\Singleton;
 use kitpress\library\Backend;
 use kitpress\library\Frontend;
 use kitpress\library\Config;
+use kitpress\library\RestApi;
 use kitpress\utils\Cron;
 use kitpress\utils\Lang;
 
@@ -68,6 +69,7 @@ class Plugin extends Singleton {
      */
     public function init() {
         Frontend::getInstance()->init();
+        RestApi::getInstance()->init();
 
         // 在 init 注册时，注册后台路由
         Backend::getInstance() -> registerRoutes();

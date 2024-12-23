@@ -36,8 +36,11 @@ class RestApi extends Singleton {
      * 初始化 REST API：设置命名空间并注册路由
      */
     public function init() {
-        $this->initNamespace();
-        $this->registerRoutes();
+        // 添加 REST API 初始化钩子
+        \add_action('rest_api_init',function(){
+            $this->initNamespace();
+            $this->registerRoutes();
+        });
     }
 
     /**
@@ -54,7 +57,7 @@ class RestApi extends Singleton {
      * 注册所有路由
      * 遍历路由配置并注册到 WordPress REST API
      */
-    public function registerRoutes() {
+    private function registerRoutes() {
         if(empty($this->routes)) return;
 
         foreach ($this->routes as $version => $endpoints) {
