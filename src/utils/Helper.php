@@ -40,19 +40,17 @@ class Helper{
     protected static function getPluginRootPath()
     {
         // 插件根目录
-        $plugin_dir = Kitpress::getRootPath();
-        if( empty($plugin_dir) ) ErrorHandler::die(Lang::kit('插件根目录不正确'));
-        return $plugin_dir;
+        return Kitpress::getRootPath();
     }
 
     /**
      * 获取插件key，把插件文件夹名称作为插件的key
      * @return string
      */
-    public static function key() {
-        $plugin_dir = self::getPluginRootPath();
+    public static function key(): string
+    {
         // 插件文件名
-        return basename($plugin_dir);
+        return basename(self::getPluginRootPath());
     }
 
     /**
@@ -60,7 +58,8 @@ class Helper{
      * @return string
      * @throws \Exception
      */
-    public static function getMainPluginFile() {
+    public static function getMainPluginFile(): string
+    {
 
         $plugin_dir = self::getPluginRootPath();
 

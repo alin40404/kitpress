@@ -1,7 +1,7 @@
 <?php
 namespace kitpress\core;
 use kitpress\core\abstracts\Singleton;
-use kitpress\library\Config;
+use kitpress\core\Facades\Config;
 use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {

@@ -1,6 +1,6 @@
 <?php
 namespace kitpress\core;
-use kitpress\library\Config;
+use kitpress\core\Facades\Config;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Helper;
@@ -13,10 +13,10 @@ if (!defined('ABSPATH')) {
 
 class Installer {
 
-    public static function getPluginsName(){
+    public static function getPluginsName(): string
+    {
        return Helper::getMainPluginFile();
     }
-
 
     /**
      * 加载配置文件
@@ -125,7 +125,7 @@ class Installer {
             self::removeCapabilities();
 
             // 5. 清理缓存
-            wp_cache_flush();
+            \wp_cache_flush();
 
             // 计划任务
             Cron::deactivate();

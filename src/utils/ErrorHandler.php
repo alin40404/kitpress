@@ -158,7 +158,7 @@ class ErrorHandler {
      * @param bool $showBackLink 是否显示返回链接(可选)
      */
     public static function die($message, $title = '错误', $status = 403, $showBackLink = true) {
-        wp_die(
+        \wp_die(
             $message,
             $title,
             array(

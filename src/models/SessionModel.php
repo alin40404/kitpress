@@ -3,7 +3,7 @@ namespace kitpress\models;
 
 use kitpress\core\Installer;
 use kitpress\core\Model;
-use kitpress\library\Config;
+use kitpress\core\Facades\Config;
 
 if (!defined('ABSPATH')) {
     exit;
