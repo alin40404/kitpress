@@ -1,5 +1,5 @@
 <?php
-namespace kitpress\core;
+namespace kitpress\library;
 use kitpress\core\abstracts\Singleton;
 use kitpress\core\Facades\Config;
 use kitpress\utils\Log;

@@ -2,7 +2,7 @@
 namespace kitpress\models;
 
 use kitpress\core\Installer;
-use kitpress\core\Model;
+use kitpress\library\Model;
 use kitpress\core\Facades\Config;
 
 if (!defined('ABSPATH')) {

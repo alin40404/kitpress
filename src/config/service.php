@@ -24,5 +24,12 @@ return [
         'singleton' => true,
         'priority' => 2,
         'dependencies' => ['config']
-    ]
+    ],
+    // 添加 DB 服务
+    'db' => [
+        'class' => \kitpress\library\Model::class,
+        'singleton' => true,
+        'priority' => 2, // 设置较高优先级，因为其他服务可能依赖它
+        'dependencies' => ['config']
+    ],
 ];
