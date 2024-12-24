@@ -18,7 +18,13 @@ if (!defined('ABSPATH')) {
  * 插件唯一入口类，在所有插件加载完成后执行
  */
 class Plugin extends Singleton {
-	private static $container = [];
+    /**
+     * 插件根目录
+     * @var null
+     */
+    private $rootPath = null;
+    private $container = [];
+    private $instances = [];
 
     protected function __construct() {
         parent::__construct();
@@ -26,22 +32,23 @@ class Plugin extends Singleton {
         $this->initHooks();
     }
 
-	/**
+
+    /**
 	 * 注册一个可初始化的类
 	 * @param Initializable $instance
 	 */
-	public static function registerInitializable(Initializable $instance) {
+	public function registerInitializable(Initializable $instance) {
 		// 检查实例是否已经注册
-		if (!in_array($instance, self::$container, true)) {
-			self::$container[] = $instance;
+		if (!in_array($instance, $this->container, true)) {
+			$this->container[] = $instance;
 		}
 	}
 
 	/**
 	 * 初始化所有注册的类
 	 */
-	private static function initializeAll() {
-		foreach (self::$container as $initializable) {
+	private function initializeAll() {
+		foreach ($this->container as $initializable) {
 			$initializable->init();
 		}
 	}
@@ -52,6 +59,10 @@ class Plugin extends Singleton {
         $this->loadLanguage();
     }
 
+    /**
+     * 初始化钩子
+     * @return void
+     */
     private function initHooks() {
         // 同级别注册钩子
         add_action('init', array($this, 'init'));

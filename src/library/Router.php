@@ -18,8 +18,8 @@ class Router extends Singleton {
      * 加载路由配置（静态代理方法）
      * @param string|array $names 路由文件名
      */
-    public static function load($names) {
-        static::getInstance()->loadResource($names, 'routes');
+    public function load($names) {
+        $this->loadResource($names, 'routes');
     }
 
     /**
@@ -28,9 +28,9 @@ class Router extends Singleton {
      * @param mixed $default 默认值
      * @return mixed
      */
-    public static function get($key = null, $default = null) {
-        return static::getInstance()->getValue(
-            static::getInstance()->items,
+    public function get($key = null, $default = null) {
+        return $this->getValue(
+            $this->items,
             $key,
             $default
         );
@@ -41,9 +41,9 @@ class Router extends Singleton {
      * @param string $key 路由键名
      * @param mixed $value 路由配置
      */
-    public static function set($key, $value) {
-        static::getInstance()->setValue(
-            static::getInstance()->items,
+    public function set($key, $value) {
+        $this->setValue(
+            $this->items,
             $key,
             $value
         );
@@ -55,9 +55,9 @@ class Router extends Singleton {
      * @param string $key 路由键名
      * @return bool
      */
-    public static function has($key) {
-        return static::getInstance()->getValue(
-                static::getInstance()->items,
+    public function has($key) {
+        return $this->getValue(
+                $this->items,
                 $key
             ) !== null;
     }
@@ -65,9 +65,9 @@ class Router extends Singleton {
     /**
      * 重置路由（静态代理方法）
      */
-    public static function reset() {
-        static::getInstance()->items = [];
-        static::getInstance()->loaded = [];
+    public function reset() {
+        $this->items = [];
+        $this->loaded = [];
     }
 
 }

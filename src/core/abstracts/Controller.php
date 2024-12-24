@@ -5,6 +5,10 @@ use kitpress\core\Model;
 use kitpress\core\traits\ViewTrait;
 use kitpress\utils\Lang;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 abstract class Controller {
     use ViewTrait;
 

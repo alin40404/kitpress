@@ -19,8 +19,8 @@ class Config extends Singleton {
      * 加载配置文件（静态代理方法）
      * @param string|array $names 配置文件名
      */
-    public static function load($names) {
-        static::getInstance()->loadResource($names, 'config');
+    public function load($names) {
+        $this->loadResource($names, 'config');
     }
 
     /**
@@ -29,9 +29,9 @@ class Config extends Singleton {
      * @param mixed $default 默认值
      * @return mixed
      */
-    public static function get($key = null, $default = null) {
-        return static::getInstance()->getValue(
-            static::getInstance()->items,
+    public function get($key = null, $default = null) {
+        return $this->getValue(
+            $this->items,
             $key,
             $default
         );
@@ -42,9 +42,9 @@ class Config extends Singleton {
      * @param string $key 配置键名
      * @param mixed $value 配置值
      */
-    public static function set($key, $value) {
-        static::getInstance()->setValue(
-            static::getInstance()->items,
+    public function set($key, $value) {
+        $this->setValue(
+            $this->items,
             $key,
             $value
         );
@@ -55,9 +55,9 @@ class Config extends Singleton {
      * @param string $key 配置键名
      * @return bool
      */
-    public static function has($key) {
-        return static::getInstance()->getValue(
-                static::getInstance()->items,
+    public function has($key) {
+        return $this->getValue(
+                $this->items,
                 $key
             ) !== null;
     }
@@ -65,8 +65,8 @@ class Config extends Singleton {
     /**
      * 重置配置（静态代理方法）
      */
-    public static function reset() {
-        static::getInstance()->items = [];
-        static::getInstance()->loaded = [];
+    public function reset() {
+        $this->items = [];
+        $this->loaded = [];
     }
 } 

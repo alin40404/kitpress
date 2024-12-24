@@ -1,6 +1,7 @@
 <?php
 namespace kitpress\core\traits;
 
+use kitpress\core\exceptions\NotFoundException;
 use kitpress\Kitpress;
 
 if (!defined('ABSPATH')) {
@@ -69,11 +70,19 @@ trait ConfigTrait {
                 continue;
             }
 
+            if (!file_exists($this->customPath . $name . '.php')) {
+                throw new NotFoundException("{$module} file", $name);
+            }
+
             // 加载默认配置
             $default = $this->loadFile($this->defaultPath . $name . '.php');
 
             // 加载自定义配置
             $custom = $this->loadFile($this->customPath . $name . '.php');
+
+            if (!is_array($custom)) {
+                throw new \RuntimeException("{$module} file must return array: {$name}");
+            }
 
             // 合并配置
             $this->items[$name] = $this->merge((array)$default, (array)$custom);
