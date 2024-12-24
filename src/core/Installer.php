@@ -228,7 +228,14 @@ class Installer {
             foreach ($columns as $column => $spec) {
                 $sql .= "\n{$column} {$spec},";
             }
-            $sql = rtrim($sql, ',') . "\n) {$wpdb->get_charset_collate()};";
+            $sql = rtrim($sql, ',') . "\n) {$wpdb->get_charset_collate()}";
+
+            // 如果定义中存在表注释,则添加 COMMENT 子句
+            if (isset($definition['comment']) && !empty($definition['comment'])) {
+                $sql .= " COMMENT='" . esc_sql($definition['comment']) . "'";
+            }
+
+            $sql .= ";";
 
             dbDelta($sql);
 

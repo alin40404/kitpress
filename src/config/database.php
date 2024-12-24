@@ -9,6 +9,7 @@ return [
             'tables' => [
                 'sessions' => [
                     'name' => 'sessions',
+                    'comment' => '会话管理',
                     'columns' => [
                         'session_id' => 'VARCHAR(40) NOT NULL',
                         'session_key' => 'VARCHAR(190) NOT NULL',
