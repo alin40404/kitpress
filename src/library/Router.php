@@ -1,7 +1,7 @@
 <?php
 namespace kitpress\library;
 
-use kitpress\core\abstracts\Singleton;
+
 use kitpress\core\traits\ConfigTrait;
 
 if (!defined('ABSPATH')) {
@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 /**
  * 路由管理类
  */
-class Router extends Singleton {
+class Router {
     use ConfigTrait ;
 
     /**

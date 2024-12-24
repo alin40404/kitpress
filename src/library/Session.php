@@ -1,7 +1,6 @@
 <?php
 namespace kitpress\library;
 
-use kitpress\core\abstracts\Singleton;
 use kitpress\models\SessionModel;
 
 if (!defined('ABSPATH')) {
@@ -12,7 +11,7 @@ if (!defined('ABSPATH')) {
  * 会话管理类
  * 支持数据库存储和缓存存储
  */
-class Session extends Singleton {
+class Session {
     const DAY_IN_SECONDS = 86400;    // 1天
     const HOUR_IN_SECONDS = 3600;    // 1小时
     const MINUTE_IN_SECONDS = 60;    // 1分钟
@@ -47,12 +46,11 @@ class Session extends Singleton {
      */
     private $cookie_expires;
 
-    protected function __construct() {
-        parent::__construct();
-        
+    public function __construct() {
+
         $this->cookie = Config::get('app.session.cookie', 'kp_session');
         $this->cookie_expires = Config::get('app.session.expires', 48 * self::HOUR_IN_SECONDS);
-        $this->cache = Cache::getInstance();
+        $this->cache = new Cache();
         $this->model = new SessionModel();
 
         $this->init();

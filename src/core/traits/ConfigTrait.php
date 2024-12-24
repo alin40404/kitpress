@@ -43,6 +43,12 @@ trait ConfigTrait {
     private $rootPath = null;
 
     /**
+     * 受保护的配置文件（不允许外部修改）
+     * @var array
+     */
+    protected $protectedFiles = ['service'];
+
+    /**
      * 初始化配置路径
      * @param string $module 模块名称
      */
@@ -61,7 +67,7 @@ trait ConfigTrait {
      * @param string|array $names 配置文件名
      * @param string $module 模块名称
      */
-    protected function loadResource($names, $module) {
+    protected function loadResource($names, string $module) {
         // 初始化路径
         $this->init($module);
 
@@ -70,18 +76,23 @@ trait ConfigTrait {
                 continue;
             }
 
-            if (!file_exists($this->customPath . $name . '.php')) {
-                throw new NotFoundException("{$module} file", $name);
-            }
-
             // 加载默认配置
             $default = $this->loadFile($this->defaultPath . $name . '.php');
 
-            // 加载自定义配置
-            $custom = $this->loadFile($this->customPath . $name . '.php');
+            // 检查是否是受保护的配置文件
+            if(!in_array($name, $this->protectedFiles, true)){
 
-            if (!is_array($custom)) {
-                throw new \RuntimeException("{$module} file must return array: {$name}");
+                // 路由配置文件 按需加载，严格检查文件是否存在
+                if ($module == 'routes' && !file_exists($this->customPath . $name . '.php')) {
+                    throw new NotFoundException("{$module} file", $name);
+                }
+
+                // 加载自定义配置
+                $custom = $this->loadFile($this->customPath . $name . '.php');
+
+                if (!is_array($custom)) {
+                    throw new \RuntimeException("{$module} file must return array: {$name}");
+                }
             }
 
             // 合并配置

@@ -29,6 +29,58 @@ class Container extends Singleton implements ContainerInterface {
      * @param array $config 配置参数
      */
     public function bind(string $id, $concrete, array $config = []) {
+        $this->validateBinding($id, $concrete);  // 添加验证
+        $this->registerBinding($id, $concrete, $config);
+    }
+
+    /**
+     * 受保护的辅助方法
+     * @param string $id
+     * @param $concrete
+     * @return void
+     */
+    protected function validateBinding(string $id, $concrete) {
+        if (empty($id)) {
+            throw new InvalidArgumentException('Service ID cannot be empty');
+        }
+
+        if (!is_string($concrete) && !($concrete instanceof Closure)) {
+            throw new InvalidArgumentException(
+                'Service concrete must be string or Closure'
+            );
+        }
+    }
+
+    /**
+     * 注册服务绑定到容器
+     *
+     * @param string $id 服务标识符
+     * @param string|Closure $concrete 具体的服务实现（类名或闭包）
+     * @param array $config 服务配置参数
+     *      - singleton: bool 是否为单例
+     *      - priority: int 优先级（默认10）
+     *      - dependencies: array 依赖服务列表
+     *
+     * @throws InvalidArgumentException 当配置参数无效时
+     *
+     * @example
+     * // 注册普通类
+     * $this->registerBinding('cache', Cache::class, [
+     *     'singleton' => true,
+     *     'priority' => 5
+     * ]);
+     *
+     * // 注册带依赖的服务
+     * $this->registerBinding('userService', UserService::class, [
+     *     'dependencies' => ['db', 'cache']
+     * ]);
+     *
+     * // 注册闭包
+     * $this->registerBinding('logger', function($container) {
+     *     return new Logger($container->resolve('config'));
+     * });
+     */
+    protected function registerBinding(string $id, $concrete, array $config) {
         $this->bindings[$id] = [
             'concrete' => $concrete,
             'singleton' => $config['singleton'] ?? false,
@@ -37,6 +89,8 @@ class Container extends Singleton implements ContainerInterface {
         ];
 
         $this->dependencies[$id] = $config['dependencies'] ?? [];
+
+        $this->triggerHook('service.registered', $id);
     }
 
     /**
@@ -111,4 +165,51 @@ class Container extends Singleton implements ContainerInterface {
             }
         }
     }
+
+    /**
+     * 按优先级获取已注册的服务
+     * @return array
+     */
+    public function getOrderedBindings(): array
+    {
+        $bindings = $this->bindings;
+
+        // 使用 uasort 保持键值对关系
+        uasort($bindings, function($a, $b) {
+            return $a['priority'] <=> $b['priority'];
+        });
+
+        return $bindings;
+    }
+
+    /**
+     * 初始化所有服务
+     * 按优先级顺序初始化
+     */
+    public function initializeServices() {
+        foreach ($this->getOrderedBindings() as $id => $binding) {
+            if ($binding['singleton'] && !isset($this->instances[$id])) {
+                $this->resolve($id);
+            }
+        }
+    }
+
+    /**
+     * 获取所有已注册的服务
+     * @return array
+     */
+    public function getBindings(): array
+    {
+        return $this->bindings;
+    }
+
+    /**
+     * 获取所有已实例化的服务
+     * @return array
+     */
+    public function getInstances(): array
+    {
+        return $this->instances;
+    }
+
 }

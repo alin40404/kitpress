@@ -1,8 +1,6 @@
 <?php
 namespace kitpress\library;
 
-use kitpress\core\abstracts\Singleton;
-
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -11,14 +9,13 @@ if (!defined('ABSPATH')) {
  * 缓存管理类
  * 基于 WordPress Transients API,自动支持 Object Cache(Redis/Memcached)
  */
-class Cache extends Singleton {
+class Cache {
     /**
      * 缓存前缀
      */
     private $prefix;
 
-    protected function __construct() {
-        parent::__construct();
+    public function __construct() {
         $this->prefix = 'kp_' . Config::get('app.database.prefix', '');
     }
 

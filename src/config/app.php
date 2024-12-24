@@ -41,4 +41,7 @@ return [
 	'init' => [
 	],
 
+    'providers' => [
+        // \kitpress\providers\ConfigProvider::class
+    ],
 ];

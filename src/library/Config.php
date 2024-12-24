@@ -1,7 +1,6 @@
 <?php
 namespace kitpress\library;
 
-use kitpress\core\abstracts\Singleton;
 use kitpress\core\traits\ConfigTrait;
 
 if (!defined('ABSPATH')) {
@@ -11,9 +10,8 @@ if (!defined('ABSPATH')) {
 /**
  * 配置管理类
  */
-class Config extends Singleton {
+class Config {
     use ConfigTrait ;
-
 
     /**
      * 加载配置文件（静态代理方法）
