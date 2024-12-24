@@ -60,7 +60,7 @@ trait ConfigTrait {
      * @param string|array $names 配置文件名
      * @param string $module 模块名称
      */
-    protected function load($names, $module) {
+    protected function loadResource($names, $module) {
         // 初始化路径
         $this->init($module);
 

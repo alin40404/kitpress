@@ -12,9 +12,7 @@ if (!defined('ABSPATH')) {
  * 路由管理类
  */
 class Router extends Singleton {
-    use ConfigTrait {
-        load as protected loadResource;
-    }
+    use ConfigTrait ;
 
     /**
      * 加载路由配置（静态代理方法）

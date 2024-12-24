@@ -4,20 +4,19 @@ if (!defined('ABSPATH')) {
 }
 
 //return [
-//    'main' => [
-//        'page_title' => '插件名称',
-//        'menu_title' => '插件名称',
-//        'capability' => 'manage_options',
-//        'menu_slug' => 'your-plugin',
-//        'icon' => 'dashicons-admin-generic',
-//        'position' => 30
+//    [
+//        'page_title' => '调查问卷管理',     // 页面标题
+//        'menu_title' => '调查问卷管理',     // 菜单标题
+//        'capability' => 'manage_options',  // 权限
+//        'menu_slug' => 'nine-box-survey',  // 菜单slug
+//        'icon' => 'dashicons-clipboard',   // 图标
+//        'position' => 30,                  // 位置
 //    ],
-//    'submenu' => [
-//        [
-//            'page_title' => '列表',
-//            'menu_title' => '列表',
-//            'capability' => 'manage_options',
-//            'menu_slug' => 'your-plugin-list'
-//        ]
-//    ]
+//    [
+//        'parent_slug' => 'nine-box-survey',
+//        'page_title' => '过敏原管理',
+//        'menu_title' => '过敏原管理',
+//        'capability' => 'manage_options',
+//        'menu_slug' => 'nine-box-allergies'
+//    ],
 //];

@@ -12,9 +12,8 @@ if (!defined('ABSPATH')) {
  * 配置管理类
  */
 class Config extends Singleton {
-    use ConfigTrait {
-        load as protected loadResource;
-    }
+    use ConfigTrait ;
+
 
     /**
      * 加载配置文件（静态代理方法）
