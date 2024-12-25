@@ -1,7 +1,7 @@
 <?php
 namespace kitpress\core\abstracts;
 
-use kitpress\core\Model;
+use kitpress\library\Model;
 use kitpress\core\traits\ViewTrait;
 use kitpress\utils\Lang;
 
