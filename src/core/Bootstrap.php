@@ -33,6 +33,26 @@ class Bootstrap {
     private static array $initializables = [];
 
     /**
+     * 插件命名空间
+     */
+    private static string $namespace = '';
+
+    /**
+     * 插件版本
+     */
+    private static string $version = '';
+
+    /**
+     * 设置插件信息
+     * @param string $namespace 插件命名空间
+     * @param string $version 插件版本
+     */
+    public static function setPluginInfo(string $namespace, string $version): void {
+        self::$namespace = $namespace;
+        self::$version = $version;
+    }
+
+    /**
      * 框架引导启动
      * 初始化基础设施（工具类、配置等）
      * @return bool
@@ -42,6 +62,10 @@ class Bootstrap {
     {
         if (self::$initialized) {
             return self::$initialized;
+        }
+
+        if (empty(self::$namespace)) {
+            throw new BootstrapException('Plugin namespace must be set before initialization');
         }
 
         try {
@@ -61,7 +85,7 @@ class Bootstrap {
             self::loadLanguage();
 
             // 开启调试模式，打印框架运行轨迹
-            Log::debug('Kitpress 正在初始化...');
+            Log::debug('Kitpress 正在初始化... [Namespace: ' . self::$namespace . ', Version: ' . self::$version . ']');
             Log::debug('插件根目录：' . Kitpress::getRootPath());
             Log::debug('初始化基础容器');
             Log::debug('加载核心配置文件');
@@ -92,7 +116,8 @@ class Bootstrap {
      */
     private static function initializeBaseContainer(): void
     {
-        $container = Container::getInstance();
+        // 使用框架的命名空间和版本初始化容器
+        $container = Container::getInstance(self::$namespace, self::$version);
         Facade::setContainer($container);
     }
 
@@ -129,7 +154,7 @@ class Bootstrap {
      * 初始化容器
      */
     private static function initializeContainer() {
-        $container = Container::getInstance();
+        $container = Container::getInstance(self::$namespace, self::$version);
 
         // 1. 首先注册服务提供者（最高优先级）
         $providers = self::registerProviders($container);
@@ -152,17 +177,17 @@ class Bootstrap {
      * 注册核心服务
      */
     private static function registerCoreServices(Container $container) {
-        // $container = Container::getInstance();
-
+        // 注册配置服务
         $container->singleton('config', function() {
             return self::$config;
         }, [
-            'priority' => 1  // 最高优先级，
+            'priority' => 1
         ]);
 
         // 从配置文件加载服务定义
         $services = self::$config->get('service', []);
         foreach ($services as $name => $definition) {
+            // 服务ID会自动添加命名空间前缀
             $container->singleton($name, function() use ($definition) {
                 $class = $definition['class'];
                 return new $class();
@@ -234,9 +259,9 @@ class Bootstrap {
         if ($initClasses) {
             foreach ($initClasses as $className) {
                 if (class_exists($className) && is_subclass_of($className, Initializable::class)) {
-                    // 注册为服务，使用较低优先级
+                    // 服务ID会自动添加命名空间前缀
                     $container->singleton($className, $className, [
-                        'priority' => 20, // 低于核心服务的优先级
+                        'priority' => 20,
                         'boot' => function($instance) {
                             self::registerInitializable($instance);
                         }

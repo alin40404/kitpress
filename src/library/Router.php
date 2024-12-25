@@ -36,7 +36,7 @@ class Router {
      */
     public function get($key = null, $default = null) {
         return $this->getValue(
-            $this->items[$this->pluginId],
+            $this->items,
             $key,
             $default
         );
@@ -49,7 +49,7 @@ class Router {
      */
     public function set($key, $value) {
         $this->setValue(
-            $this->items[$this->pluginId],
+            $this->items,
             $key,
             $value
         );
@@ -63,7 +63,7 @@ class Router {
      */
     public function has($key) {
         return $this->getValue(
-                $this->items[$this->pluginId],
+                $this->items,
                 $key
             ) !== null;
     }
@@ -72,8 +72,8 @@ class Router {
      * 重置路由（静态代理方法）
      */
     public function reset() {
-        $this->items[$this->pluginId] = [];
-        $this->loaded[$this->pluginId] = [];
+        $this->items = [];
+        $this->loaded = [];
     }
 
 }

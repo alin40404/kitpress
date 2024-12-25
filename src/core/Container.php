@@ -16,11 +16,44 @@ if (!defined('ABSPATH')) {
  */
 class Container extends Singleton implements ContainerInterface {
 
-    private $bindings = [];      // 注册的服务
-    private $instances = [];     // 已实例化的服务
-    private $dependencies = [];  // 依赖关系
-    private $hooks = [];         // 生命周期钩子
+    private array $bindings = [];      // 注册的服务
+    private static array $containers = [];  // 存储容器实例
+    private array $dependencies = [];  // 依赖关系
+    private array $hooks = [];         // 生命周期钩子
+    private string $namespace = '';      // 添加命名空间标识
+    private string $version = '';        // 添加版本标识
+    private array $serviceInstances = [];  // 服务实例缓存
 
+    /**
+     * 初始化容器
+     * @param string $namespace 插件命名空间
+     * @param string $version 框架版本
+     */
+    protected function __construct(string $namespace = '', string $version = '1.0.0') {
+        $this->namespace = $namespace;
+        $this->version = $version;
+        parent::__construct();
+    }
+
+    /**
+     * 获取容器实例，增加命名空间支持
+     * @param string $namespace 插件命名空间
+     * @param string $version 框架版本
+     */
+    public static function getInstance(string $namespace = '', string $version = '1.0.0'): self {
+        $key = $namespace ?: 'default';
+        if (!isset(static::$containers[$key])) {
+            static::$containers[$key] = new static($namespace, $version);
+        }
+        return static::$containers[$key];
+    }
+
+    /**
+     * 生成带命名空间的服务ID
+     */
+    protected function getNamespacedId(string $id): string {
+        return $this->namespace ? "{$this->namespace}.{$id}" : $id;
+    }
 
     /**
      * 注册服务
@@ -85,10 +118,16 @@ class Container extends Singleton implements ContainerInterface {
             'concrete' => $concrete,
             'singleton' => $config['singleton'] ?? false,
             'priority' => $config['priority'] ?? 10,
-            'dependencies' => $config['dependencies'] ?? []
+            'dependencies' => array_map(
+                [$this, 'getNamespacedId'],
+                $config['dependencies'] ?? []
+            )
         ];
 
-        $this->dependencies[$id] = $config['dependencies'] ?? [];
+        $this->dependencies[$id] = array_map(
+            [$this, 'getNamespacedId'],
+            $config['dependencies'] ?? []
+        );
 
         $this->triggerHook('service.registered', $id);
     }
@@ -97,40 +136,39 @@ class Container extends Singleton implements ContainerInterface {
      * 注册单例服务
      */
     public function singleton(string $id, $concrete, array $config = []) {
+        $namespacedId = $this->getNamespacedId($id);
         $config['singleton'] = true;
-        $this->bind($id, $concrete, $config);
+        $this->bind($namespacedId, $concrete, $config);
     }
 
     /**
      * 解析服务
      */
     public function resolve(string $id) {
-        // 如果是单例且已实例化，直接返回实例
-        if (isset($this->instances[$id])) {
-            return $this->instances[$id];
+        $namespacedId = $this->getNamespacedId($id);
+
+        if (isset($this->serviceInstances[$namespacedId])) {
+            return $this->serviceInstances[$namespacedId];
         }
 
-        if (!isset($this->bindings[$id])) {
-            throw new InvalidArgumentException("服务未找到: $id");
+        if (!isset($this->bindings[$namespacedId])) {
+            throw new InvalidArgumentException("Service not found: $namespacedId");
         }
 
-        $binding = $this->bindings[$id];
+        $binding = $this->bindings[$namespacedId];
         $concrete = $binding['concrete'];
 
-        // 解析依赖
         $dependencies = array_map(
             [$this, 'resolve'],
-            $this->dependencies[$id]
+            $this->dependencies[$namespacedId]
         );
 
-        // 创建实例
         $instance = $concrete instanceof Closure
             ? $concrete($this, ...$dependencies)
             : new $concrete(...$dependencies);
 
-        // 如果是单例，保存实例
         if ($binding['singleton']) {
-            $this->instances[$id] = $instance;
+            $this->serviceInstances[$namespacedId] = $instance;
         }
 
         return $instance;
@@ -140,15 +178,17 @@ class Container extends Singleton implements ContainerInterface {
      * 添加生命周期钩子
      */
     public function addHook(string $event, callable $callback) {
-        $this->hooks[$event][] = $callback;
+        $namespacedEvent = $this->getNamespacedId($event);
+        $this->hooks[$namespacedEvent][] = $callback;
     }
 
     /**
      * 触发钩子
      */
     public function triggerHook(string $event, $data = null) {
-        if (isset($this->hooks[$event])) {
-            foreach ($this->hooks[$event] as $callback) {
+        $namespacedEvent = $this->getNamespacedId($event);
+        if (isset($this->hooks[$namespacedEvent])) {
+            foreach ($this->hooks[$namespacedEvent] as $callback) {
                 $callback($data);
             }
         }
@@ -170,15 +210,11 @@ class Container extends Singleton implements ContainerInterface {
      * 按优先级获取已注册的服务
      * @return array
      */
-    public function getOrderedBindings(): array
-    {
-        $bindings = $this->bindings;
-
-        // 使用 uasort 保持键值对关系
+    public function getOrderedBindings(): array {
+        $bindings = $this->getNamespacedBindings();
         uasort($bindings, function($a, $b) {
             return $a['priority'] <=> $b['priority'];
         });
-
         return $bindings;
     }
 
@@ -188,28 +224,70 @@ class Container extends Singleton implements ContainerInterface {
      */
     public function initializeServices() {
         foreach ($this->getOrderedBindings() as $id => $binding) {
-            if ($binding['singleton'] && !isset($this->instances[$id])) {
+            if ($binding['singleton'] && !isset($this->serviceInstances[$id])) {
                 $this->resolve($id);
             }
         }
     }
 
+
     /**
      * 获取所有已注册的服务
      * @return array
      */
-    public function getBindings(): array
-    {
-        return $this->bindings;
+    public function getBindings(): array {
+        return $this->getNamespacedBindings();
     }
 
     /**
      * 获取所有已实例化的服务
      * @return array
      */
-    public function getInstances(): array
-    {
-        return $this->instances;
+    public function getInstances(): array {
+        if (empty($this->namespace)) {
+            return $this->serviceInstances;
+        }
+
+        return array_filter(
+            $this->serviceInstances,
+            function($key) {
+                return strpos($key, $this->namespace . '.') === 0;
+            },
+            ARRAY_FILTER_USE_KEY
+        );
     }
 
+    /**
+     * 获取当前命名空间下的所有绑定
+     * @return array
+     */
+    protected function getNamespacedBindings(): array {
+        if (empty($this->namespace)) {
+            return $this->bindings;
+        }
+
+        return array_filter(
+            $this->bindings,
+            function($key) {
+                return strpos($key, $this->namespace . '.') === 0;
+            },
+            ARRAY_FILTER_USE_KEY
+        );
+    }
+
+    /**
+     * 获取当前容器的命名空间
+     * @return string
+     */
+    public function getNamespace(): string {
+        return $this->namespace;
+    }
+
+    /**
+     * 获取当前容器的版本
+     * @return string
+     */
+    public function getVersion(): string {
+        return $this->version;
+    }
 }

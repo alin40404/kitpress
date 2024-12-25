@@ -29,7 +29,7 @@ class Config {
      */
     public function get($key = null, $default = null) {
         return $this->getValue(
-            $this->items[$this->pluginId],
+            $this->items,
             $key,
             $default
         );
@@ -42,7 +42,7 @@ class Config {
      */
     public function set($key, $value) {
         $this->setValue(
-            $this->items[$this->pluginId],
+            $this->items,
             $key,
             $value
         );
@@ -55,7 +55,7 @@ class Config {
      */
     public function has($key) {
         return $this->getValue(
-                $this->items[$this->pluginId],
+                $this->items,
                 $key
             ) !== null;
     }
@@ -64,7 +64,7 @@ class Config {
      * 重置配置（静态代理方法）
      */
     public function reset() {
-        $this->items[$this->pluginId] = [];
-        $this->loaded[$this->pluginId] = [];
+        $this->items = [];
+        $this->loaded = [];
     }
 } 
