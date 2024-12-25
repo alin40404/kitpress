@@ -124,7 +124,7 @@ class Kitpress extends Singleton
     }
 
     public static function activate($rootPath){
-        Installer::activate($rootPath);
+        Installer::getInstance()->register($rootPath);
     }
 
     /**
