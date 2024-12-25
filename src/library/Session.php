@@ -61,6 +61,8 @@ class Session {
      * 初始化会话
      */
     private function init() {
+        if( Config::get('app.session.enabled', false) == false ) return;
+
         // 获取或创建会话ID
         $this->session_id = $this->getCookie();
         if (!$this->session_id) {
