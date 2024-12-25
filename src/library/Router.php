@@ -17,11 +17,14 @@ class Router {
     use ConfigTrait ;
 
     /**
-     * 加载路由配置（静态代理方法）
-     * @param string|array $names 路由文件名
+     * 加载配置文件
+     * @param string|array $names 配置文件名
+     * @param string $namespace 插件命名空间
+     * @return void
      */
-    public function load($names) {
+    public function load($names,string $namespace) {
         try {
+            $this->namespace = $namespace;
             $this->loadResource($names, 'routes');
         } catch (BootstrapException $e) {
             Log::debug($e->getMessage());

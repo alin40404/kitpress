@@ -39,7 +39,7 @@ class Kitpress extends Singleton
      * 插件根目录
      * @var null
      */
-    private $rootPath;
+    private $rootPaths = [];
 
 
     protected function __construct()
@@ -112,20 +112,23 @@ class Kitpress extends Singleton
 
     private static function setRootPath($rootPath)
     {
-
         if (empty($rootPath)) ErrorHandler::die('插件根目录不正确');
         if (!is_dir($rootPath)) ErrorHandler::die('插件根目录不正确');
 
-        self::getInstance()->rootPath = $rootPath;
+        if( isset(self::getInstance()->rootPaths[Helper::key($rootPath)]) ) return;
+
+        self::getInstance()->rootPaths[Helper::key($rootPath)] = $rootPath;
     }
 
-    public static function getRootPath()
+    public static function getRootPath(string $namespace)
     {
-        return self::getInstance()->rootPath;
+        if( !isset(self::getInstance()->rootPaths[$namespace])) throw new \Exception('插件目录不存在');
+        return self::getInstance()->rootPaths[$namespace];
     }
 
     public static function activate($rootPath){
-        Installer::getInstance()->register($rootPath);
+        self::getInstance()->setRootPath($rootPath);
+        // Installer::getInstance()->register();
     }
 
     /**
@@ -150,7 +153,6 @@ class Kitpress extends Singleton
     {
         $instance = self::getInstance();
         try {
-
             $instance->setRootPath($rootPath);
             // 使用 Bootstrap 初始化框架
             Bootstrap::configurePlugin(Helper::key($rootPath),KITPRESS_VERSION);

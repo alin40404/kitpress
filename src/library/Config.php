@@ -11,13 +11,17 @@ if (!defined('ABSPATH')) {
  * 配置管理类
  */
 class Config {
+
     use ConfigTrait ;
 
     /**
-     * 加载配置文件（静态代理方法）
+     * 加载配置文件
      * @param string|array $names 配置文件名
+     * @param string $namespace 插件命名空间
+     * @return void
      */
-    public function load($names) {
+    public function load($names,string $namespace) {
+        $this->namespace = $namespace;
         $this->loadResource($names, 'config');
     }
 

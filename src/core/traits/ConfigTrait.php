@@ -51,11 +51,16 @@ trait ConfigTrait {
     protected $protectedFiles = ['service'];
 
     /**
+     * 插件命名空间
+     */
+    private string $namespace = '';
+
+    /**
      * 初始化配置路径
      * @param string $module 模块名称
      */
     protected function init($module) {
-        $this->rootPath = $this->rootPath ?: Kitpress::getRootPath();
+        $this->rootPath = $this->rootPath ?: Kitpress::getRootPath($this->namespace);
 
         $defaultPath = KITPRESS_PATH . $module;
         $customPath = $this->rootPath . $module;

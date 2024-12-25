@@ -4,6 +4,7 @@ namespace kitpress\core;
 use kitpress\core\abstracts\Facade;
 use kitpress\core\abstracts\Initializable;
 use kitpress\core\exceptions\BootstrapException;
+use kitpress\core\Facades\Plugin;
 use kitpress\core\interfaces\ProviderInterface;
 use kitpress\Kitpress;
 use kitpress\library\Config;
@@ -77,15 +78,19 @@ class Bootstrap {
             //  初始化容器
             self::initializeContainer();
 
+            // 保存插件命名空间，以便在其他地方调用
+            Plugin::setNamespace(self::$namespace);
+
             //  初始化工具类
             self::initializeUtils();
 
             // 加载语言包
             self::loadLanguage();
 
+
             // 开启调试模式，打印框架运行轨迹
             Log::debug('Kitpress 正在初始化 [Namespace: ' . self::$namespace . ', Version: ' . self::$version . ']');
-            Log::debug('插件根目录：' . Kitpress::getRootPath());
+            Log::debug('插件根目录：' . Plugin::getRootPath());
             Log::debug('初始化基础容器');
             Log::debug('加载核心配置文件');
 
@@ -140,11 +145,11 @@ class Bootstrap {
         $config = new Config();
         $config -> load([
             'app',
-            'database',
-            'menu',
+            // 'database',
+            // 'menu',
             'cron',
             'service',
-        ]);
+        ],self::$namespace);
         self::$config = $config;
     }
 

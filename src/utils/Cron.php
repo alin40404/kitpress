@@ -2,6 +2,7 @@
 namespace kitpress\utils;
 
 use kitpress\core\Facades\Config;
+use kitpress\core\Facades\Plugin;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -56,7 +57,7 @@ class Cron {
      * @return string
      */
     private static function generateHookName($taskKey) {
-        return KITPRESS_NAME . '_' . Helper::key() . '_' . $taskKey;
+        return KITPRESS_NAME . '_' . Plugin::key() . '_' . $taskKey;
     }
 
     /**

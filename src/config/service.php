@@ -5,8 +5,21 @@ if (!defined('ABSPATH')) {
 }
 
 return [
+    'plugin' => [
+        'class' => \kitpress\library\Plugin::class,
+        'singleton' => true,
+        'priority' => 2,
+        'dependencies' => ['config']
+    ],
+
     'cache' => [
         'class' => \kitpress\library\Cache::class,
+        'singleton' => true,
+        'priority' => 2,
+        'dependencies' => ['config']
+    ],
+    'session' => [
+        'class' => \kitpress\library\Session::class,
         'singleton' => true,
         'priority' => 2,
         'dependencies' => ['config']
@@ -19,12 +32,6 @@ return [
         'dependencies' => ['config']
     ],
 
-    'session' => [
-        'class' => \kitpress\library\Session::class,
-        'singleton' => true,
-        'priority' => 2,
-        'dependencies' => ['config']
-    ],
     // 添加 DB 服务
     'db' => [
         'class' => \kitpress\library\Model::class,

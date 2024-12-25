@@ -5,6 +5,7 @@ use kitpress\utils\ErrorHandler;
 use kitpress\utils\Lang;
 use kitpress\core\Facades\Config;
 use kitpress\core\Facades\Router;
+use kitpress\core\Facades\Plugin;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -25,8 +26,8 @@ class Backend {
 
     private function loadConfigs() {
         // 加载后台路由和菜单配置
-        Config::load('menu');
-        Router::load('backend');
+        Config::load('menu',Plugin::getNamespace());
+        Router::load('backend',Plugin::getNamespace());
         $this->menus = Config::get('menu');
         $this->routes = Router::get('backend');
     }

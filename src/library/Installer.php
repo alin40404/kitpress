@@ -4,6 +4,7 @@ use kitpress\core\abstracts\Singleton;
 use kitpress\core\Bootstrap;
 use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\Facades\Config;
+use kitpress\core\Facades\Plugin;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Helper;
@@ -16,39 +17,6 @@ if (!defined('ABSPATH')) {
 }
 
 class Installer extends Singleton {
-    /**
-     * 插件根目录映射
-     * @var array
-     */
-    protected $rootPaths = [];  // 新增静态属性存储多个插件路径
-
-
-    public function setRootPath($rootPath){
-
-        $pluginId = Helper::key($rootPath);
-
-        $this->rootPaths[$pluginId] = $rootPath;
-    }
-
-
-    protected function getPluginFile($rootPath): string
-    {
-        $this->setRootPath($rootPath);
-        $pluginId = Helper::key($rootPath);
-
-        if (!isset($this->rootPaths[$pluginId])) {
-            ErrorHandler::die(Lang::kit('未找到插件路径：' . $pluginId));
-        }
-
-        $rootPath = $this->rootPaths[$pluginId];
-        $file_name = $rootPath . basename($rootPath) . '.php';
-
-        // 如果没找到，抛出异常
-        if( !file_exists($file_name) ){
-            ErrorHandler::die(Lang::kit('框架路径错误：无法在 ' . $file_name . ' 目录下找到有效的插件主文件'));
-        }
-        return $file_name;
-    }
 
     /**
      * 加载配置文件
@@ -58,7 +26,7 @@ class Installer extends Singleton {
     {
         try {
 
-            Bootstrap::setPluginInfo(Helper::key($rootPath),KITPRESS_VERSION);
+            Bootstrap::configurePlugin(Helper::key($rootPath),KITPRESS_VERSION);
             Bootstrap::initialize();
 
         } catch (BootstrapException $e) {
@@ -71,16 +39,17 @@ class Installer extends Singleton {
      * @return void
      */
     public function register($rootPath) {
+        self::init($rootPath);
 
         \register_activation_hook(
-            $this->getPluginFile($rootPath) ,
+            Plugin::getRootFile() ,
             function() use ($rootPath) {
                 self::activate($rootPath);
             }
         );
 
         \register_deactivation_hook(
-            $this->getPluginFile($rootPath),
+            Plugin::getRootFile(),
             function() use ($rootPath) {
                 self::deactivate($rootPath);
             }
@@ -92,9 +61,9 @@ class Installer extends Singleton {
      */
     public static function activate($rootPath) {
         try {
-            Log::debug('Installer::activate 执行开始');
-
             self::init($rootPath);
+
+            Log::debug('Installer::activate 执行开始');
 
             $db_version = str_replace('.','' ,Config::get('app.db_version'));
             $kp_version = str_replace('.','' ,KITPRESS_VERSION);
@@ -209,7 +178,7 @@ class Installer extends Singleton {
      * 检查并执行数据库更新
      */
     public static function checkVersion($rootPath) {
-        self::init();
+        self::init($rootPath);
 
         $current_version = Config::get('app.db_version');
         $installed_version = \get_option(Config::get('app.options.db_version_key'));

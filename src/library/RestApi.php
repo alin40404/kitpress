@@ -4,6 +4,7 @@ namespace kitpress\library;
 use kitpress\utils\Lang;
 use kitpress\core\Facades\Config;
 use kitpress\core\Facades\Router;
+use kitpress\core\Facades\Plugin;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -48,7 +49,7 @@ class RestApi {
      * 从路由配置文件中读取 API 路由设置
      */
     private function loadRoutes() {
-        Router::load('api');
+        Router::load('api',Plugin::getNamespace());
         // 加载前台路由配置文件
         $this->routes = Router::get('api');
     }

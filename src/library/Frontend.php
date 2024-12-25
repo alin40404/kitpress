@@ -5,6 +5,7 @@ use kitpress\utils\Lang;
 use kitpress\utils\Log;
 use kitpress\core\Facades\Config;
 use kitpress\core\Facades\Router;
+use kitpress\core\Facades\Plugin;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -24,7 +25,7 @@ class Frontend {
     }
 
     private function loadRoutes() {
-        Router::load('frontend');
+        Router::load('frontend',Plugin::getNamespace());
         // 加载前台路由配置文件
         $this->routes = Router::get('frontend');
     }
