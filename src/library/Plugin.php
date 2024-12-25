@@ -35,7 +35,7 @@ class Plugin {
         return Kitpress::getRootPath($this->namespace);
     }
 
-    protected function getRootFile(): string
+    public function getRootFile(): string
     {
         $rootPath = self::getRootPath();
         $file_name = $rootPath . basename($rootPath) . '.php';
