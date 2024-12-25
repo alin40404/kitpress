@@ -3,6 +3,7 @@ namespace kitpress\core\traits;
 
 use kitpress\core\exceptions\NotFoundException;
 use kitpress\Kitpress;
+use kitpress\utils\Helper;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -43,6 +44,14 @@ trait ConfigTrait {
     private $rootPath = null;
 
     /**
+     * 插件根目录映射
+     * @var array
+     */
+    protected $rootPaths = [];  // 新增静态属性存储多个插件路径
+
+    protected $pluginId = null;
+
+    /**
      * 受保护的配置文件（不允许外部修改）
      * @var array
      */
@@ -55,15 +64,24 @@ trait ConfigTrait {
     protected function init($module) {
         $this->rootPath = $this->rootPath ?: Kitpress::getRootPath();
 
+        $this->pluginId = Helper::key($this->rootPath);
+
         $defaultPath = KITPRESS_PATH . $module;
         $customPath = $this->rootPath . $module;
 
         $this->defaultPath = rtrim($defaultPath, '/') . '/';
         $this->customPath = rtrim($customPath, '/') . '/';
+
+        if(!isset($this->items[$this->pluginId])) $this->items[$this->pluginId] = [];
+        if(!isset($this->loaded[$this->pluginId])) $this->loaded[$this->pluginId] = [];
     }
 
     public function setRootPath(string $rootPath) {
         $this->rootPath = $rootPath;
+        $this->pluginId = Helper::key($this->rootPath);
+
+        if(!isset($this->items[$this->pluginId])) $this->items[$this->pluginId] = [];
+        if(!isset($this->loaded[$this->pluginId])) $this->loaded[$this->pluginId] = [];
     }
 
     /**
@@ -104,8 +122,8 @@ trait ConfigTrait {
                 }
 
                 // 合并配置
-                $this->items[$name] = $this->merge((array)$default, (array)$custom);
-                $this->loaded[$name] = true;
+                $this->items[$this->pluginId][$name] = $this->merge((array)$default, (array)$custom);
+                $this->loaded[$this->pluginId][$name] = true;
             }
         }
     }

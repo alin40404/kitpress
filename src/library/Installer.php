@@ -22,11 +22,6 @@ class Installer extends Singleton {
      */
     protected $rootPaths = [];  // 新增静态属性存储多个插件路径
 
-    /**
-     * 插件根目录
-     * @var null
-     */
-    protected $rootPath;
 
     public function setRootPath($rootPath){
 
@@ -139,7 +134,10 @@ class Installer extends Singleton {
 
             Log::debug('Installer::activate 执行完成');
         } catch (\Exception $e) {
-            \deactivate_plugins(self::getInstance()->rootPath);
+            // 确保在管理后台环境中才调用 deactivate_plugins
+            if (\is_admin()) {
+                \deactivate_plugins(self::getInstance()->getPluginFile($rootPath));
+            }
             ErrorHandler::die(Lang::kit('插件激活失败：') . $e->getMessage());
         }
     }
