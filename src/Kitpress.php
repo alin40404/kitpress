@@ -12,6 +12,7 @@ use kitpress\library\RestApi;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\core\Facades\Session;
+use kitpress\utils\Helper;
 use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {
@@ -152,7 +153,7 @@ class Kitpress extends Singleton
 
             $instance->setRootPath($rootPath);
             // 使用 Bootstrap 初始化框架
-            Bootstrap::setPluginInfo($rootPath,KITPRESS_VERSION);
+            Bootstrap::setPluginInfo(Helper::key($rootPath),KITPRESS_VERSION);
             Bootstrap::initialize();
             // 初始化钩子
             $instance->initHooks();

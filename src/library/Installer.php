@@ -58,7 +58,7 @@ class Installer extends Singleton {
     {
         try {
 
-            Bootstrap::setPluginInfo($rootPath,KITPRESS_VERSION);
+            Bootstrap::setPluginInfo(Helper::key($rootPath),KITPRESS_VERSION);
             Bootstrap::initialize();
 
 //            self::getInstance()->setRootPath($rootPath);
