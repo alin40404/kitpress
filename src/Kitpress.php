@@ -153,7 +153,7 @@ class Kitpress extends Singleton
 
             $instance->setRootPath($rootPath);
             // 使用 Bootstrap 初始化框架
-            Bootstrap::setPluginInfo(Helper::key($rootPath),KITPRESS_VERSION);
+            Bootstrap::configurePlugin(Helper::key($rootPath),KITPRESS_VERSION);
             Bootstrap::initialize();
             // 初始化钩子
             $instance->initHooks();

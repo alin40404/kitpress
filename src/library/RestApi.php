@@ -1,7 +1,6 @@
 <?php
 namespace kitpress\library;
 
-use kitpress\core\abstracts\Singleton;
 use kitpress\utils\Lang;
 use kitpress\core\Facades\Config;
 use kitpress\core\Facades\Router;
@@ -10,7 +9,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class RestApi extends Singleton {
+class RestApi {
     private $routes = [];
     private $namespace;
     private $defaultConfig = [

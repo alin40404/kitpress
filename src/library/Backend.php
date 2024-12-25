@@ -1,7 +1,6 @@
 <?php
 namespace kitpress\library;
 
-use kitpress\core\abstracts\Singleton;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Lang;
 use kitpress\core\Facades\Config;
@@ -11,7 +10,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Backend extends Singleton {
+class Backend {
     private $routes = [];
     private $menus = [];
     private $namespace;

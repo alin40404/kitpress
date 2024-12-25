@@ -42,7 +42,7 @@ class Bootstrap {
      * @param string $namespace 插件命名空间
      * @param string $version 插件版本
      */
-    public static function setPluginInfo(string $namespace, string $version): void {
+    public static function configurePlugin(string $namespace, string $version): void {
         self::$namespace = $namespace;
         self::$version = $version;
     }
@@ -56,7 +56,7 @@ class Bootstrap {
     public static function initialize(): bool
     {
         if (empty(self::$namespace)) {
-            throw new BootstrapException('Plugin namespace must be set before initialization');
+            throw new BootstrapException('插件命名空间必须在初始化之前设置');
         }
 
         try {
@@ -84,7 +84,7 @@ class Bootstrap {
             self::loadLanguage();
 
             // 开启调试模式，打印框架运行轨迹
-            Log::debug('Kitpress 正在初始化... [Namespace: ' . self::$namespace . ', Version: ' . self::$version . ']');
+            Log::debug('Kitpress 正在初始化 [Namespace: ' . self::$namespace . ', Version: ' . self::$version . ']');
             Log::debug('插件根目录：' . Kitpress::getRootPath());
             Log::debug('初始化基础容器');
             Log::debug('加载核心配置文件');
@@ -100,7 +100,7 @@ class Bootstrap {
 
         } catch (\Exception $e) {
             throw new BootstrapException(
-                "Framework initialization failed: " . $e->getMessage(),
+                "Kitpress初始化失败，请检查配置文件: " . $e->getMessage(),
                 $e->getCode(),
                 $e
             );
