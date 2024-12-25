@@ -123,25 +123,12 @@ class Kitpress extends Singleton
         return self::getInstance()->rootPath;
     }
 
-
-    /**
-     * 激活
-     * @return void
-     */
-    public static function activate($rootPath)
-    {
-        Installer::register($rootPath);
-    }
-
     /**
      * 加载插件
      * @return void
      */
     public static function loaded($rootPath)
     {
-        // 激活动作
-        self::activate($rootPath);
-
         \add_action('plugins_loaded', function () use ($rootPath) {
             self::run($rootPath);
         }, 20);
