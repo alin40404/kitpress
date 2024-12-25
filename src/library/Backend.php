@@ -17,23 +17,30 @@ class Backend {
     private $namespace;
 
     public function __construct() {
-        $this->loadConfigs();
     }
 
     public function init() {
+        $this->loadConfigs();
         $this->initNamespace();
     }
 
     private function loadConfigs() {
         // 加载后台路由和菜单配置
-        Config::load('menu',Plugin::getNamespace());
-        Router::load('backend',Plugin::getNamespace());
-        $this->menus = Config::get('menu');
-        $this->routes = Router::get('backend');
+        if(empty( $this->menus)){
+            Config::load('menu',Plugin::getNamespace());
+            $this->menus = Config::get('menu');
+        }
+
+        if(empty( $this->routes)){
+            Router::load('backend',Plugin::getNamespace());
+            $this->routes = Router::get('backend');
+        }
     }
 
     public function registerRoutes() {
         if (is_admin()) {
+            $this->loadConfigs();
+
             // 注册后台路由
             if ($this->routes) {
                 if (isset($this->routes['post']) && !empty($this->routes['post'])) {
@@ -55,10 +62,10 @@ class Backend {
     }
 
     public function registerAdminMenus() {
+        $this->loadConfigs();
 
-        if (empty($this->menus)) {
-            return;
-        }
+        if (empty($this->menus)) return;
+
         foreach ($this->menus as $menu) {
             if (!isset($menu['parent_slug']) || is_null($menu['parent_slug'])) {
                 add_menu_page(
@@ -84,6 +91,8 @@ class Backend {
     }
 
     public function registerAssets($hook) {
+        $this->loadConfigs();
+
         // 获取当前页面的 page 参数
         $page = $_GET['page'] ?? '';
 
@@ -133,6 +142,8 @@ class Backend {
      * @return void
      */
     public function handleMenuCallback() {
+        $this->loadConfigs();
+
         // 控制器
         $page = $_GET['page'] ?? '';
         // 方法
@@ -166,6 +177,8 @@ class Backend {
      */
     public function handleRoute($type, $action) {
         try {
+            $this->loadConfigs();
+
             // 获取对应类型的路由配置
             if (!isset($this->routes[$type][$action])) {
                 throw new \Exception(sprintf(Lang::kit('Route not found: %s'), $action));

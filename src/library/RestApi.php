@@ -29,7 +29,6 @@ class RestApi {
      * 构造函数：初始化并加载路由配置
      */
     public function __construct() {
-        $this->loadRoutes();
     }
 
 
@@ -39,6 +38,7 @@ class RestApi {
     public function init() {
         // 添加 REST API 初始化钩子
         \add_action('rest_api_init',function(){
+            $this->loadRoutes();
             $this->initNamespace();
             $this->registerRoutes();
         });
@@ -49,6 +49,8 @@ class RestApi {
      * 从路由配置文件中读取 API 路由设置
      */
     private function loadRoutes() {
+        if( $this->routes ) return;
+
         Router::load('api',Plugin::getNamespace());
         // 加载前台路由配置文件
         $this->routes = Router::get('api');

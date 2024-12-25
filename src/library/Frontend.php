@@ -16,21 +16,24 @@ class Frontend {
     private $namespace;
 
     public function __construct() {
-        $this->loadRoutes();
+
     }
 
     public function init() {
+        $this->loadRoutes();
         $this->initNamespace();
         $this->registerHooks();
     }
 
     private function loadRoutes() {
+        if( $this->routes ) return;
         Router::load('frontend',Plugin::getNamespace());
         // 加载前台路由配置文件
         $this->routes = Router::get('frontend');
     }
 
     public function registerHooks() {
+        $this->loadRoutes();
         $this->registerShortcodes();
         // 注册 AJAX 处理程序
         $this->registerAjaxHandlers();
@@ -39,6 +42,7 @@ class Frontend {
     }
 
     public function registerShortcodes() {
+        $this->loadRoutes();
         if( isset($this->routes['shortcodes']) && is_array($this->routes['shortcodes']) ) {
             foreach ($this->routes['shortcodes'] as $tag => $handler) {
                 add_shortcode($tag, function($atts) use ($handler) {
@@ -49,7 +53,7 @@ class Frontend {
     }
 
     public function registerAjaxHandlers() {
-
+        $this->loadRoutes();
         if ( isset($this->routes['ajax']) && !empty($this->routes['ajax']) && is_array($this->routes['ajax'])) {
             // 注册需要登录的 AJAX 处理程序
             if ( isset($this->routes['ajax']['private']) && !empty($this->routes['ajax']['private']) && is_array($this->routes['ajax']['private']) ) {
@@ -77,7 +81,7 @@ class Frontend {
     }
 
     public function registerPostHandlers() {
-
+        $this->loadRoutes();
         if ( isset($this->routes['post']) && !empty($this->routes['post']) && is_array($this->routes['post'])) {
             // 注册需要登录的 AJAX 处理程序
             if ( isset($this->routes['post']['private']) && !empty($this->routes['post']['private']) && is_array($this->routes['post']['private']) ) {
@@ -109,7 +113,7 @@ class Frontend {
      * 注册和加载前端资源
      */
     public function registerAssets() {
-
+        $this->loadRoutes();
         if( isset($this->routes['shortcodes']) && is_array($this->routes['shortcodes']) ) {
             foreach ($this->routes['shortcodes'] as $tag => $handler) {
                 try {
