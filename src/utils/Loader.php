@@ -1,5 +1,6 @@
 <?php
 namespace kitpress\utils;
+use kitpress\core\Facades\Plugin;
 use kitpress\Kitpress;
 use kitpress\core\Facades\Config;
 
@@ -68,7 +69,7 @@ class Loader {
         }
 
         // 根据类型确定基础路径
-        $base_path = Kitpress::getRootPath();
+        $base_path = Plugin::getRootPath();
 
         // 组合完整路径
         return $base_path . $directory . $file_name . '.php';

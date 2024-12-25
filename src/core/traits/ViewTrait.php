@@ -1,6 +1,7 @@
 <?php
 namespace kitpress\core\traits;
 
+use kitpress\core\Facades\Plugin;
 use kitpress\Kitpress;
 
 trait ViewTrait {
@@ -59,7 +60,7 @@ trait ViewTrait {
      * @return string
      */
     protected function getViewFile($view) {
-        return Kitpress::getRootPath() . $this->viewPath . '/' . $view . '.php';
+        return Plugin::getRootPath() . $this->viewPath . '/' . $view . '.php';
     }
 
     /**

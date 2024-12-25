@@ -87,6 +87,8 @@ class Bootstrap {
             // 加载语言包
             self::loadLanguage();
 
+            // 从配置中注册初始化类（作为服务注册）
+            self::registerInitializableServices();
 
             // 开启调试模式，打印框架运行轨迹
             Log::debug('Kitpress 正在初始化 [Namespace: ' . self::$namespace . ', Version: ' . self::$version . ']');
@@ -133,7 +135,7 @@ class Bootstrap {
         $text_domain = self::$config->get('app.text_domain');
         $locale = \determine_locale();
 
-        \load_textdomain($text_domain, Kitpress::getRootPath() . 'languages/' . $text_domain . '-' . $locale . '.mo');
+        \load_textdomain($text_domain, Plugin::getRootPath() . 'languages/' . $text_domain . '-' . $locale . '.mo');
         \load_textdomain(KITPRESS_TEXT_DOMAIN, KITPRESS_PATH  . 'languages/' . KITPRESS_TEXT_DOMAIN . '-' . $locale . '.mo');
     }
 
@@ -157,19 +159,16 @@ class Bootstrap {
     private static function initializeContainer() {
         $container = Container::getInstance(self::$namespace, self::$version);
 
-        // 1. 首先注册服务提供者（最高优先级）
+        //  首先注册服务提供者（最高优先级）
         $providers = self::registerProviders($container);
 
-        // 2. 注册核心服务（次高优先级）
+        //  注册核心服务（次高优先级）
         self::registerCoreServices($container);
 
-        // 3. 从配置中注册初始化类（作为服务注册）
-        self::registerInitializableServices($container);
-
-        // 4. 初始化所有服务
+        //  初始化所有服务
         $container->initializeServices();
 
-        // 5. 启动服务提供者
+        //  启动服务提供者
         self::bootProviders($container, $providers);
 
     }
@@ -255,18 +254,12 @@ class Bootstrap {
     /**
      * 将初始化类注册为服务
      */
-    private static function registerInitializableServices(Container $container): void {
+    private static function registerInitializableServices(): void {
         $initClasses = self::$config->get('app.init');
         if ($initClasses) {
             foreach ($initClasses as $className) {
                 if (class_exists($className) && is_subclass_of($className, Initializable::class)) {
-                    // 服务ID会自动添加命名空间前缀
-                    $container->singleton($className, $className, [
-                        'priority' => 20,
-                        'boot' => function($instance) {
-                            self::registerInitializable($instance);
-                        }
-                    ]);
+                    self::registerInitializable(new $className());
                 }
             }
         }

@@ -1,6 +1,7 @@
 <?php
 namespace kitpress\utils;
 
+use kitpress\core\Facades\Plugin;
 use kitpress\Kitpress;
 use kitpress\core\Facades\Config;
 
@@ -423,7 +424,7 @@ class Log
             }
 
             // 构建并标准化路径
-            $plugin_name = sanitize_file_name(basename(Kitpress::getRootPath()));
+            $plugin_name = sanitize_file_name(basename(Plugin::getRootPath()));
             $log_dir = wp_normalize_path(
                 trailingslashit($upload_dir['basedir']) . 'kitpress-logs/' . $plugin_name
             );
