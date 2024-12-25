@@ -87,9 +87,9 @@ trait ConfigTrait {
                 if(!in_array($name, $this->protectedFiles, true)){
 
                     // 路由配置文件 按需加载，严格检查文件是否存在
-                    if ($module == 'routes' && !file_exists($this->customPath . $name . '.php')) {
+                    /*if ($module == 'routes' && !file_exists($this->customPath . $name . '.php')) {
                         throw new NotFoundException("{$module} file", $name);
-                    }
+                    }*/
 
                     // 加载自定义配置
                     $custom = $this->loadFile($this->customPath . $name . '.php');
