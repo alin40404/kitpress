@@ -1,6 +1,7 @@
 <?php
 namespace kitpress\utils;
 
+use kitpress\core\Facades\Plugin;
 use kitpress\Kitpress;
 
 if (!defined('ABSPATH')) {
@@ -48,7 +49,7 @@ class Helper{
     public static function optionKey($key = '')
     {
        if(empty($key)) return '';
-       return KITPRESS_NAME . '_' . self::key() . '_' . $key;
+       return KITPRESS_NAME . '_' . Plugin::key() . '_' . $key;
     }
 
     public static function getOption($key = ''){
