@@ -127,7 +127,7 @@ class Session {
      * 保存会话数据（优化版）
      */
     public function saveSession() {
-        if( Config::get('app.session.enabled', false) ) return;
+        if( Config::get('app.session.enabled', false) == false ) return;
 
         $this->model->ensureTableExists();
 

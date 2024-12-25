@@ -2,7 +2,9 @@
 namespace kitpress\library;
 
 
+use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\traits\ConfigTrait;
+use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -19,7 +21,11 @@ class Router {
      * @param string|array $names 路由文件名
      */
     public function load($names) {
-        $this->loadResource($names, 'routes');
+        try {
+            $this->loadResource($names, 'routes');
+        } catch (BootstrapException $e) {
+            Log::debug($e->getMessage());
+        }
     }
 
     /**

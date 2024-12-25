@@ -71,35 +71,38 @@ trait ConfigTrait {
         // 初始化路径
         $this->init($module);
 
-        foreach ((array)$names as $name) {
-            if (isset($this->loaded[$name])) {
-                continue;
-            }
+        if(!empty($names)){
 
-            // 加载默认配置
-            $default = $this->loadFile($this->defaultPath . $name . '.php');
-
-            $custom = [];
-
-            // 检查是否是受保护的配置文件
-            if(!in_array($name, $this->protectedFiles, true)){
-
-                // 路由配置文件 按需加载，严格检查文件是否存在
-                if ($module == 'routes' && !file_exists($this->customPath . $name . '.php')) {
-                    throw new NotFoundException("{$module} file", $name);
+            foreach ((array)$names as $name) {
+                if (isset($this->loaded[$name])) {
+                    continue;
                 }
 
-                // 加载自定义配置
-                $custom = $this->loadFile($this->customPath . $name . '.php');
+                // 加载默认配置
+                $default = $this->loadFile($this->defaultPath . $name . '.php');
 
-                if (!is_array($custom)) {
-                    throw new \RuntimeException("{$module} file must return array: {$name}");
+                $custom = [];
+
+                // 检查是否是受保护的配置文件
+                if(!in_array($name, $this->protectedFiles, true)){
+
+                    // 路由配置文件 按需加载，严格检查文件是否存在
+                    if ($module == 'routes' && !file_exists($this->customPath . $name . '.php')) {
+                        throw new NotFoundException("{$module} file", $name);
+                    }
+
+                    // 加载自定义配置
+                    $custom = $this->loadFile($this->customPath . $name . '.php');
+
+                    if (!is_array($custom)) {
+                        throw new \RuntimeException("{$module} file must return array: {$name}");
+                    }
                 }
-            }
 
-            // 合并配置
-            $this->items[$name] = $this->merge((array)$default, (array)$custom);
-            $this->loaded[$name] = true;
+                // 合并配置
+                $this->items[$name] = $this->merge((array)$default, (array)$custom);
+                $this->loaded[$name] = true;
+            }
         }
     }
 
