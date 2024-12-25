@@ -47,6 +47,10 @@ class Bootstrap {
         Log::debug('Kitpress 正在初始化...');
 
         try {
+            // 初始化基础容器
+            self::initializeBaseContainer();
+            Log::debug('初始化基础容器');
+
             // 加载配置
             self::loadConfiguration();
             Log::debug('加载核心配置文件');
@@ -72,6 +76,16 @@ class Bootstrap {
             );
         }
         return self::$initialized;
+    }
+
+    /**
+     * 初始化基础容器
+     * 在框架启动最开始时执行，确保 Facade 可用
+     */
+    private static function initializeBaseContainer(): void
+    {
+        $container = Container::getInstance();
+        Facade::setContainer($container);
     }
 
     /**
@@ -108,8 +122,6 @@ class Bootstrap {
      */
     private static function initializeContainer() {
         $container = Container::getInstance();
-        Facade::setContainer($container);
-        Log::debug('初始化容器');
 
         // 1. 首先注册服务提供者（最高优先级）
         $providers = self::registerProviders($container);
