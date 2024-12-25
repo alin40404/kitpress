@@ -53,13 +53,17 @@ trait ConfigTrait {
      * @param string $module 模块名称
      */
     protected function init($module) {
-        $this->rootPath = Kitpress::getRootPath();
+        $this->rootPath = $this->rootPath ?: Kitpress::getRootPath();
 
         $defaultPath = KITPRESS_PATH . $module;
         $customPath = $this->rootPath . $module;
 
         $this->defaultPath = rtrim($defaultPath, '/') . '/';
         $this->customPath = rtrim($customPath, '/') . '/';
+    }
+
+    public function setRootPath(string $rootPath) {
+        $this->rootPath = $rootPath;
     }
 
     /**

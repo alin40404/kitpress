@@ -10,14 +10,12 @@ if (!defined('ABSPATH')) {
 /**
  * Config Facade
  *
- * @method static mixed get(string $key, mixed $default = null)
+ * @method static void load(string|array $names)
+ * @method static mixed get(string|null $key = null, mixed $default = null)
  * @method static void set(string $key, mixed $value)
  * @method static bool has(string $key)
- * @method static array all()
- * @method static void load(string $name)
- * @method static void reload()
- * @method static void clear()
- * @method static array getLoadedFiles()
+ * @method static void reset()
+ * @method static void setRootPath(string $rootPath)
  *
  * @see \kitpress\library\Config
  */

@@ -15,7 +15,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Installer extends Singleton {
+abstract class Installer extends Singleton {
 
     /**
      * 插件根目录
@@ -23,13 +23,13 @@ class Installer extends Singleton {
      */
     protected $rootPath;
 
-    protected function setRootPath($rootPath)
-    {
-        $this->rootPath = $rootPath;
-    }
+    abstract protected function setRootPath();
+
 
     protected function getPluginFile(): string
     {
+        $this->setRootPath();
+
         // 插件文件名
         $file_name = $this->rootPath . basename( $this->rootPath ) . '.php';
 
@@ -47,7 +47,9 @@ class Installer extends Singleton {
     protected static function init()
     {
         try {
-            Bootstrap::initialize();
+            // Bootstrap::initialize();
+            self::getInstance()->setRootPath();
+            Config::setRootPath(self::getInstance()->rootPath);
             Config::load('database');
 
         } catch (BootstrapException $e) {

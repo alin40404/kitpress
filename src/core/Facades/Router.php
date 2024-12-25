@@ -15,6 +15,7 @@ if (!defined('ABSPATH')) {
  * @method static void set(string $key, mixed $value)
  * @method static bool has(string $key)
  * @method static void reset()
+ * @method static void setRootPath(string $rootPath)
  *
  * @see \kitpress\library\Router
  */
