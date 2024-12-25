@@ -18,11 +18,6 @@ if (!defined('ABSPATH')) {
 class Bootstrap {
 
     /**
-     * 标记是否已初始化
-     */
-    private static $initialized = false;
-
-    /**
      * 配置实例
      */
     private static $config;
@@ -60,15 +55,19 @@ class Bootstrap {
      */
     public static function initialize(): bool
     {
-        if (self::$initialized) {
-            return self::$initialized;
-        }
-
         if (empty(self::$namespace)) {
             throw new BootstrapException('Plugin namespace must be set before initialization');
         }
 
         try {
+            // 获取或创建对应命名空间的容器实例
+            $container = Container::getInstance(self::$namespace, self::$version);
+
+            // 检查该容器是否已经初始化
+            if ($container->isInitialized()) {
+                return true;
+            }
+
             // 初始化基础容器
             self::initializeBaseContainer();
 
@@ -99,7 +98,6 @@ class Bootstrap {
             Log::debug('初始化工具类');
             Log::debug('加载语言包');
 
-            self::$initialized = true;
         } catch (\Exception $e) {
             throw new BootstrapException(
                 "Framework initialization failed: " . $e->getMessage(),
@@ -107,7 +105,7 @@ class Bootstrap {
                 $e
             );
         }
-        return self::$initialized;
+        return true;
     }
 
     /**

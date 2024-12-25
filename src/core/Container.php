@@ -25,6 +25,27 @@ class Container extends Singleton implements ContainerInterface {
     private array $serviceInstances = [];  // 服务实例缓存
 
     /**
+     * 容器初始化状态
+     */
+    private bool $initialized = false;
+
+    /**
+     * 检查容器是否已经初始化
+     */
+    public function isInitialized(): bool
+    {
+        return $this->initialized;
+    }
+
+    /**
+     * 标记容器为已初始化状态
+     */
+    public function setInitialized(): void
+    {
+        $this->initialized = true;
+    }
+
+    /**
      * 初始化容器
      * @param string $namespace 插件命名空间
      * @param string $version 框架版本
@@ -51,8 +72,13 @@ class Container extends Singleton implements ContainerInterface {
     /**
      * 生成带命名空间的服务ID
      */
-    protected function getNamespacedId(string $id): string {
-        return $this->namespace ? "{$this->namespace}.{$id}" : $id;
+    protected function getNamespacedId(string $id): string
+    {
+        // 检查ID是否已经包含命名空间前缀
+        if ($this->namespace && strpos($id, $this->namespace . '.') !== 0) {
+            return "{$this->namespace}.{$id}";
+        }
+        return $id;
     }
 
     /**
