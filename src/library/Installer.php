@@ -28,6 +28,7 @@ class Installer extends Singleton {
 
             Bootstrap::configurePlugin(Helper::key($rootPath),KITPRESS_VERSION);
             Bootstrap::initialize();
+            Config::load('database',Helper::key($rootPath));
 
         } catch (BootstrapException $e) {
             ErrorHandler::die($e->getMessage());

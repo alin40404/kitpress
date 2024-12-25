@@ -145,8 +145,6 @@ class Bootstrap {
         $config = new Config();
         $config -> load([
             'app',
-            // 'database',
-            // 'menu',
             'cron',
             'service',
         ],self::$namespace);
