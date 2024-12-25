@@ -43,8 +43,6 @@ class Kitpress extends Singleton
         try {
             // 使用 Bootstrap 初始化框架
             Bootstrap::initialize();
-            // 初始化钩子
-            $this->initHooks();
 
         } catch (BootstrapException $e) {
             ErrorHandler::die($e->getMessage());
@@ -57,6 +55,7 @@ class Kitpress extends Singleton
      */
     public function initHooks()
     {
+        Log::debug('初始化钩子');
         // WordPress 默认优先级是 10
         // 优先级数字越小越早执行，越大越晚执行
         \add_action('init', array($this, 'init'), 10);
@@ -127,6 +126,7 @@ class Kitpress extends Singleton
         if (!is_dir($rootPath)) ErrorHandler::die(Lang::kit('插件根目录不正确'));
 
         self::getInstance()->rootPath = $rootPath;
+        Log::debug('插件根目录：' . self::getInstance()->rootPath);
     }
 
     public static function getRootPath()
@@ -166,8 +166,10 @@ class Kitpress extends Singleton
     public static function run($rootPath)
     {
         $instance = self::getInstance();
-        self::setRootPath($rootPath);
-        self::shutdown();
+        $instance->setRootPath($rootPath);
+        // 初始化钩子
+        $instance->initHooks();
+        $instance->shutdown();
         return $instance;
     }
 
