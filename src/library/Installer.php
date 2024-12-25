@@ -38,7 +38,7 @@ class Installer extends Singleton {
      * 注册插件的激活和停用钩子
      * @return void
      */
-    public function register($rootPath) {
+    public static function register($rootPath) {
         self::init($rootPath);
 
         \register_activation_hook(
