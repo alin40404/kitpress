@@ -18,10 +18,8 @@ class SessionModel extends Model {
     public function ensureTableExists() {
 
         if( Installer::tableExists($this->table_name) == false ) {
-            $kp_version = str_replace('.','' ,KITPRESS_VERSION);
-
             Installer::createTables([
-                $this->table_name => Config::get('database.versions.kp_'. $kp_version .'.tables.sessions', [])
+                $this->table_name => Config::get('database.versions.kp.tables.sessions', [])
             ]);
         }
 
