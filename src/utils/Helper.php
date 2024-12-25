@@ -36,12 +36,13 @@ class Helper{
 
     /**
      * 获取插件key，把插件文件夹名称作为插件的key
+     * @param $rootPath
      * @return string
      */
-    public static function key(): string
+    public static function key($rootPath = null): string
     {
         // 插件文件名
-        return basename(Kitpress::getRootPath());
+        return basename($rootPath ?: Kitpress::getRootPath());
     }
 
     /**

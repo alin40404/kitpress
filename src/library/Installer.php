@@ -15,7 +15,12 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-abstract class Installer extends Singleton {
+class Installer extends Singleton {
+    /**
+     * 插件根目录映射
+     * @var array
+     */
+    protected $rootPaths = [];  // 新增静态属性存储多个插件路径
 
     /**
      * 插件根目录
@@ -23,15 +28,25 @@ abstract class Installer extends Singleton {
      */
     protected $rootPath;
 
-    abstract protected function setRootPath();
+    public function setRootPath($rootPath){
+
+        $pluginId = Helper::key($rootPath);
+
+        $this->rootPaths[$pluginId] = $rootPath;
+    }
 
 
-    protected function getPluginFile(): string
+    protected function getPluginFile($rootPath): string
     {
-        $this->setRootPath();
+        $this->setRootPath($rootPath);
+        $pluginId = Helper::key($rootPath);
 
-        // 插件文件名
-        $file_name = $this->rootPath . basename( $this->rootPath ) . '.php';
+        if (!isset($this->rootPaths[$pluginId])) {
+            ErrorHandler::die(Lang::kit('未找到插件路径：' . $pluginId));
+        }
+
+        $rootPath = $this->rootPaths[$pluginId];
+        $file_name = $rootPath . basename($rootPath) . '.php';
 
         // 如果没找到，抛出异常
         if( !file_exists($file_name) ){
@@ -44,12 +59,12 @@ abstract class Installer extends Singleton {
      * 加载配置文件
      * @return void
      */
-    protected static function init()
+    protected static function init($rootPath)
     {
         try {
-            // Bootstrap::initialize();
-            self::getInstance()->setRootPath();
-            Config::setRootPath(self::getInstance()->rootPath);
+            Bootstrap::initialize();
+            self::getInstance()->setRootPath($rootPath);
+            Config::setRootPath($rootPath);
             Config::load('database');
 
         } catch (BootstrapException $e) {
@@ -61,29 +76,31 @@ abstract class Installer extends Singleton {
      * 注册插件的激活和停用钩子
      * @return void
      */
-    public static function register() {
-
-        $instance = self::getInstance();
+    public function register($rootPath) {
 
         \register_activation_hook(
-            $instance->getPluginFile() ,
-            [self::class, 'activate']
+            $this->getPluginFile($rootPath) ,
+            function() use ($rootPath) {
+                self::activate($rootPath);
+            }
         );
 
         \register_deactivation_hook(
-            $instance->getPluginFile(),
-            [self::class, 'deactivate']
+            $this->getPluginFile($rootPath),
+            function() use ($rootPath) {
+                self::deactivate($rootPath);
+            }
         );
     }
 
     /**
      * 激活插件时执行
      */
-    public static function activate() {
+    public static function activate($rootPath) {
         try {
             Log::debug('Installer::activate 执行开始');
 
-            self::init();
+            self::init($rootPath);
 
             $db_version = str_replace('.','' ,Config::get('app.db_version'));
             $kp_version = str_replace('.','' ,KITPRESS_VERSION);
@@ -130,8 +147,8 @@ abstract class Installer extends Singleton {
     /**
      * 卸载插件
      */
-    public static function deactivate() {
-        self::init();
+    public static function deactivate($rootPath) {
+        self::init($rootPath);
 
         // 检查是否允许删除数据
         if (!get_option(Config::get('app.options.uninstall_key'), Config::get('app.features.delete_data_on_uninstall'))) {
@@ -194,7 +211,7 @@ abstract class Installer extends Singleton {
     /**
      * 检查并执行数据库更新
      */
-    public static function checkVersion() {
+    public static function checkVersion($rootPath) {
         self::init();
 
         $current_version = Config::get('app.db_version');
