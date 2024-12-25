@@ -15,8 +15,7 @@ class Backend {
     private $menus = [];
     private $namespace;
 
-    protected function __construct() {
-        parent::__construct();
+    public function __construct() {
         $this->loadConfigs();
     }
 

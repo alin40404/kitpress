@@ -27,8 +27,7 @@ class RestApi {
     /**
      * 构造函数：初始化并加载路由配置
      */
-    protected function __construct() {
-        parent::__construct();
+    public function __construct() {
         $this->loadRoutes();
     }
 

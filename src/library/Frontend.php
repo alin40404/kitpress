@@ -14,8 +14,7 @@ class Frontend {
     private $routes = [];
     private $namespace;
 
-    protected function __construct() {
-        parent::__construct();
+    public function __construct() {
         $this->loadRoutes();
     }
 
