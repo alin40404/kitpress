@@ -5,10 +5,10 @@ namespace kitpress;
 use kitpress\core\abstracts\Singleton;
 use kitpress\core\Bootstrap;
 use kitpress\core\exceptions\BootstrapException;
+use kitpress\core\Facades\Backend;
+use kitpress\core\Facades\Frontend;
+use kitpress\core\Facades\RestApi;
 use kitpress\library\Installer;
-use kitpress\library\Backend;
-use kitpress\library\Frontend;
-use kitpress\library\RestApi;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\core\Facades\Session;
@@ -70,13 +70,13 @@ class Kitpress extends Singleton
     public function init()
     {
         // 初始化前台路由
-        Frontend::getInstance()->init();
+        Frontend::init();
 
         // 初始化接口路由
-        RestApi::getInstance()->init();
+        RestApi::init();
 
         // 注册后台路由
-        Backend::getInstance()->registerRoutes();
+        Backend::registerRoutes();
 
         // 初始化所有可初始化类
         Bootstrap::initializeAll();
@@ -91,23 +91,23 @@ class Kitpress extends Singleton
      */
     public function adminInit()
     {
-        Backend::getInstance()->init();
+        Backend::init();
     }
 
     public function registerAdminMenus()
     {
         // 注册后台管理菜单
-        Backend::getInstance()->registerAdminMenus();
+        Backend::registerAdminMenus();
     }
 
     public function enqueueScripts()
     {
-        Frontend::getInstance()->registerAssets();
+        Frontend::registerAssets();
     }
 
     public function enqueueAdminScripts($hook)
     {
-        Backend::getInstance()->registerAssets($hook);
+        Backend::registerAssets($hook);
     }
 
     private static function setRootPath($rootPath)
