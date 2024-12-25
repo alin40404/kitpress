@@ -111,7 +111,7 @@ class Container extends Singleton implements ContainerInterface {
         }
 
         if (!isset($this->bindings[$id])) {
-            throw new InvalidArgumentException("Service not found: $id");
+            throw new InvalidArgumentException("服务未找到: $id");
         }
 
         $binding = $this->bindings[$id];

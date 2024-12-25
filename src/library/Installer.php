@@ -21,13 +21,15 @@ class Installer extends Singleton {
      * 插件根目录
      * @var null
      */
-    private $rootPath;
+    protected $rootPath;
 
-    private function getPluginFile($rootPath): string
+    protected function setRootPath($rootPath)
     {
-
         $this->rootPath = $rootPath;
+    }
 
+    protected function getPluginFile(): string
+    {
         // 插件文件名
         $file_name = $this->rootPath . basename( $this->rootPath ) . '.php';
 
@@ -42,12 +44,12 @@ class Installer extends Singleton {
      * 加载配置文件
      * @return void
      */
-    private static function init()
+    protected static function init()
     {
         try {
             Bootstrap::initialize();
+            Config::load('database');
 
-            Log::debug('插件路径：' . self::getInstance()->rootPath);
         } catch (BootstrapException $e) {
             ErrorHandler::die($e->getMessage());
         }
@@ -57,17 +59,17 @@ class Installer extends Singleton {
      * 注册插件的激活和停用钩子
      * @return void
      */
-    public static function register($rootPath) {
+    public static function register() {
 
         $instance = self::getInstance();
 
         \register_activation_hook(
-            $instance->getPluginFile($rootPath) ,
+            $instance->getPluginFile() ,
             [self::class, 'activate']
         );
 
         \register_deactivation_hook(
-            $instance->getPluginFile($rootPath),
+            $instance->getPluginFile(),
             [self::class, 'deactivate']
         );
     }
@@ -118,7 +120,7 @@ class Installer extends Singleton {
 
             Log::debug('Installer::activate 执行完成');
         } catch (\Exception $e) {
-            \deactivate_plugins(self::getPluginsName());
+            \deactivate_plugins(self::getInstance()->rootPath);
             ErrorHandler::die(Lang::kit('插件激活失败：') . $e->getMessage());
         }
     }
