@@ -33,15 +33,6 @@ class Helper{
 
         return $ip ?: ($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
     }
-    /**
-     * 获取插件根目录
-     * @return null
-     */
-    protected static function getPluginRootPath()
-    {
-        // 插件根目录
-        return Kitpress::getRootPath();
-    }
 
     /**
      * 获取插件key，把插件文件夹名称作为插件的key
@@ -50,18 +41,18 @@ class Helper{
     public static function key(): string
     {
         // 插件文件名
-        return basename(self::getPluginRootPath());
+        return basename(Kitpress::getRootPath());
     }
 
     /**
-     * 获取插件主文件路径
+     * 获取插件主文件
      * @return string
      * @throws \Exception
      */
-    public static function getMainPluginFile(): string
+    public static function getPluginFile(): string
     {
 
-        $plugin_dir = self::getPluginRootPath();
+        $plugin_dir = Kitpress::getRootPath();
 
         // 插件文件名
         $plugin_name = self::key();

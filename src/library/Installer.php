@@ -1,5 +1,8 @@
 <?php
-namespace kitpress\core;
+namespace kitpress\library;
+use kitpress\core\abstracts\Singleton;
+use kitpress\core\Bootstrap;
+use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\Facades\Config;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
@@ -7,39 +10,64 @@ use kitpress\utils\Helper;
 use kitpress\utils\Lang;
 use kitpress\utils\Log;
 
+
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Installer {
+class Installer extends Singleton {
 
-    public static function getPluginsName(): string
+    /**
+     * 插件根目录
+     * @var null
+     */
+    private $rootPath;
+
+    private function getPluginFile($rootPath): string
     {
-       return Helper::getMainPluginFile();
+
+        $this->rootPath = $rootPath;
+
+        // 插件文件名
+        $file_name = $this->rootPath . basename( $this->rootPath ) . '.php';
+
+        // 如果没找到，抛出异常
+        if( !file_exists($file_name) ){
+            ErrorHandler::die(Lang::kit('框架路径错误：无法在 ' . $file_name . ' 目录下找到有效的插件主文件'));
+        }
+        return $file_name;
     }
 
     /**
      * 加载配置文件
      * @return void
      */
-    private static function loadConfig()
+    private static function init()
     {
-        Config::load('database');
+        try {
+            Bootstrap::initialize();
+
+            Log::debug('插件路径：' . self::getInstance()->rootPath);
+        } catch (BootstrapException $e) {
+            ErrorHandler::die($e->getMessage());
+        }
     }
 
     /**
      * 注册插件的激活和停用钩子
      * @return void
      */
-    public static function register() {
+    public static function register($rootPath) {
 
-        register_activation_hook(
-            self::getPluginsName() ,
+        $instance = self::getInstance();
+
+        \register_activation_hook(
+            $instance->getPluginFile($rootPath) ,
             [self::class, 'activate']
         );
 
-        register_deactivation_hook(
-            self::getPluginsName(),
+        \register_deactivation_hook(
+            $instance->getPluginFile($rootPath),
             [self::class, 'deactivate']
         );
     }
@@ -51,7 +79,7 @@ class Installer {
         try {
             Log::debug('Installer::activate 执行开始');
 
-            self::loadConfig();
+            self::init();
 
             $db_version = str_replace('.','' ,Config::get('app.db_version'));
             $kp_version = str_replace('.','' ,KITPRESS_VERSION);
@@ -77,20 +105,20 @@ class Installer {
             self::setupRoles();
 
             // 7. 更新数据库版本号
-            update_option(
+            \update_option(
                 Config::get('app.options.db_version_key'),
                 Config::get('app.db_version')
             );
 
             // 8. 记录激活时间
-            update_option(Config::get('app.options.activated_time_key'), time());
+            \update_option(Config::get('app.options.activated_time_key'), time());
 
             // 9. 清理缓存
-            wp_cache_flush();
+            \wp_cache_flush();
 
             Log::debug('Installer::activate 执行完成');
         } catch (\Exception $e) {
-            deactivate_plugins(self::getPluginsName());
+            \deactivate_plugins(self::getPluginsName());
             ErrorHandler::die(Lang::kit('插件激活失败：') . $e->getMessage());
         }
     }
@@ -99,7 +127,7 @@ class Installer {
      * 卸载插件
      */
     public static function deactivate() {
-        self::loadConfig();
+        self::init();
 
         // 检查是否允许删除数据
         if (!get_option(Config::get('app.options.uninstall_key'), Config::get('app.features.delete_data_on_uninstall'))) {
@@ -163,10 +191,10 @@ class Installer {
      * 检查并执行数据库更新
      */
     public static function checkVersion() {
-        self::loadConfig();
+        self::init();
 
         $current_version = Config::get('app.db_version');
-        $installed_version = get_option(Config::get('app.options.db_version_key'));
+        $installed_version = \get_option(Config::get('app.options.db_version_key'));
 
         if (!$installed_version) {
             self::activate();
@@ -200,7 +228,7 @@ class Installer {
             }
         }
 
-        update_option(
+        \update_option(
             Config::get('app.options.db_version_key'),
             Config::get('app.db_version')
         );
@@ -237,7 +265,7 @@ class Installer {
 
             $sql .= ";";
 
-            dbDelta($sql);
+            \dbDelta($sql);
 
             if ($wpdb->last_error) {
                 throw new \Exception("创建表 {$table_name} 失败: " . $wpdb->last_error);
@@ -271,7 +299,7 @@ class Installer {
 
         $sql .= "\n) {$wpdb->get_charset_collate()};";
 
-        dbDelta($sql);
+        \dbDelta($sql);
 
         if ($wpdb->last_error) {
             Log::error("更新表 {$table_name} 失败: " . $wpdb->last_error);
@@ -355,8 +383,8 @@ class Installer {
 
             foreach ($options as $key => $default_value) {
                 $key = Helper::optionKey($key);
-                if (false === get_option($key)) {
-                    add_option($key, $default_value, '', 'no');
+                if (false === \get_option($key)) {
+                    \add_option($key, $default_value, '', 'no');
                 }
             }
 
@@ -370,11 +398,11 @@ class Installer {
      * 创建必要的目录
      */
     private static function createDirectories() {
-        $upload_dir = wp_upload_dir();
+        $upload_dir = \wp_upload_dir();
         $plugin_dir = $upload_dir['basedir'] . '/' . Config::get('app.database.prefix');
 
         if (!file_exists($plugin_dir)) {
-            wp_mkdir_p($plugin_dir);
+            \wp_mkdir_p($plugin_dir);
 
             // 创建 .htaccess 文件保护目录
             $htaccess_file = $plugin_dir . '/.htaccess';
@@ -388,7 +416,7 @@ class Installer {
      * 设置角色权限
      */
     private static function setupRoles() {
-        $admin = get_role('administrator');
+        $admin = \get_role('administrator');
 
         $roleKey = KITPRESS_NAME;
 

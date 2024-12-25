@@ -5,13 +5,12 @@ namespace kitpress;
 use kitpress\core\abstracts\Singleton;
 use kitpress\core\Bootstrap;
 use kitpress\core\exceptions\BootstrapException;
-use kitpress\core\Installer;
+use kitpress\library\Installer;
 use kitpress\library\Backend;
 use kitpress\library\Frontend;
 use kitpress\library\RestApi;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
-use kitpress\utils\Lang;
 use kitpress\core\Facades\Session;
 use kitpress\utils\Log;
 
@@ -35,18 +34,16 @@ define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
  */
 class Kitpress extends Singleton
 {
+    /**
+     * 插件根目录
+     * @var null
+     */
+    private $rootPath;
+
 
     protected function __construct()
     {
         parent::__construct();
-
-        try {
-            // 使用 Bootstrap 初始化框架
-            Bootstrap::initialize();
-
-        } catch (BootstrapException $e) {
-            ErrorHandler::die($e->getMessage());
-        }
     }
 
     /**
@@ -112,21 +109,13 @@ class Kitpress extends Singleton
         Backend::getInstance()->registerAssets($hook);
     }
 
-    /**
-     * 插件根目录
-     * @var null
-     */
-    private $rootPath;
-
-
     private static function setRootPath($rootPath)
     {
 
-        if (empty($rootPath)) ErrorHandler::die(Lang::kit('插件根目录不正确'));
-        if (!is_dir($rootPath)) ErrorHandler::die(Lang::kit('插件根目录不正确'));
+        if (empty($rootPath)) ErrorHandler::die('插件根目录不正确');
+        if (!is_dir($rootPath)) ErrorHandler::die('插件根目录不正确');
 
         self::getInstance()->rootPath = $rootPath;
-        Log::debug('插件根目录：' . self::getInstance()->rootPath);
     }
 
     public static function getRootPath()
@@ -141,35 +130,43 @@ class Kitpress extends Singleton
      */
     public static function activate($rootPath)
     {
-        self::setRootPath($rootPath);
-        Installer::register();
+        Installer::register($rootPath);
     }
 
     /**
-     * 手动执行 plugins_loaded 钩子
+     * 加载插件
      * @return void
      */
     public static function loaded($rootPath)
     {
-        // 激活钩子，必须在 plugins_loaded 钩子之前执行
+        // 激活动作
         self::activate($rootPath);
+
         \add_action('plugins_loaded', function () use ($rootPath) {
             self::run($rootPath);
         }, 20);
     }
 
-
     /**
-     * 直接执行
-     * @return Plugin|mixed
+     * 运行
+     * @param $rootPath 插件根目录
+     * @return Kitpress|mixed
      */
     public static function run($rootPath)
     {
         $instance = self::getInstance();
-        $instance->setRootPath($rootPath);
-        // 初始化钩子
-        $instance->initHooks();
-        $instance->shutdown();
+        try {
+
+            $instance->setRootPath($rootPath);
+            // 使用 Bootstrap 初始化框架
+            Bootstrap::initialize();
+            // 初始化钩子
+            $instance->initHooks();
+            $instance->shutdown();
+
+        } catch (BootstrapException $e) {
+            ErrorHandler::die($e->getMessage());
+        }
         return $instance;
     }
 

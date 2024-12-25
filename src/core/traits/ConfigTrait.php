@@ -79,6 +79,8 @@ trait ConfigTrait {
             // 加载默认配置
             $default = $this->loadFile($this->defaultPath . $name . '.php');
 
+            $custom = [];
+
             // 检查是否是受保护的配置文件
             if(!in_array($name, $this->protectedFiles, true)){
 
@@ -107,7 +109,7 @@ trait ConfigTrait {
      * @return array
      */
     private function loadFile($path) {
-        return file_exists($path) ? require $path : [];
+        return file_exists($path) ? require_once $path : [];
     }
 
     /**
