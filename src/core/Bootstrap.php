@@ -43,16 +43,16 @@ class Bootstrap {
         if (self::$initialized) {
             return self::$initialized;
         }
-        // 开启调试模式，打印框架运行轨迹
-        Log::debug('Kitpress 正在初始化...');
 
         try {
             // 初始化基础容器
             self::initializeBaseContainer();
-            Log::debug('初始化基础容器');
 
             // 加载配置
             self::loadConfiguration();
+            // 开启调试模式，打印框架运行轨迹
+            Log::debug('Kitpress 正在初始化...');
+            Log::debug('初始化基础容器');
             Log::debug('加载核心配置文件');
 
             //  初始化工具类
