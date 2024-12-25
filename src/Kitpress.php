@@ -1,4 +1,5 @@
 <?php
+
 namespace kitpress;
 
 use kitpress\core\abstracts\Singleton;
@@ -21,7 +22,7 @@ if (!defined('ABSPATH')) {
 // 定义框架基础常量
 define('KITPRESS_VERSION', '1.1.0');
 define('KITPRESS_NAME', 'kitpress');
-define('KITPRESS___FILE__', __FILE__ );
+define('KITPRESS___FILE__', __FILE__);
 // 框架根目录
 define('KITPRESS_PATH', \plugin_dir_path(KITPRESS___FILE__));
 // 框架命名空间
@@ -32,9 +33,11 @@ define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
  * 框架唯一入口类，提供外部调用。
  * 执行时刻没有限制
  */
-class Kitpress extends Singleton {
+class Kitpress extends Singleton
+{
 
-    protected function __construct() {
+    protected function __construct()
+    {
         parent::__construct();
 
         try {
@@ -44,7 +47,7 @@ class Kitpress extends Singleton {
             $this->initHooks();
 
         } catch (BootstrapException $e) {
-
+            ErrorHandler::die($e->getMessage());
         }
     }
 
@@ -52,7 +55,8 @@ class Kitpress extends Singleton {
      * 初始化钩子
      * @return void
      */
-    public function initHooks() {
+    public function initHooks()
+    {
         // WordPress 默认优先级是 10
         // 优先级数字越小越早执行，越大越晚执行
         \add_action('init', array($this, 'init'), 10);
@@ -66,7 +70,8 @@ class Kitpress extends Singleton {
      * 前端初始化
      * @return void
      */
-    public function init() {
+    public function init()
+    {
         // 初始化前台路由
         Frontend::getInstance()->init();
 
@@ -74,7 +79,7 @@ class Kitpress extends Singleton {
         RestApi::getInstance()->init();
 
         // 注册后台路由
-        Backend::getInstance() -> registerRoutes();
+        Backend::getInstance()->registerRoutes();
 
         // 初始化所有可初始化类
         Bootstrap::initializeAll();
@@ -87,21 +92,25 @@ class Kitpress extends Singleton {
      * 后台初始化
      * @return void
      */
-    public function adminInit() {
-        Backend::getInstance() -> init();
+    public function adminInit()
+    {
+        Backend::getInstance()->init();
     }
 
-    public function registerAdminMenus() {
+    public function registerAdminMenus()
+    {
         // 注册后台管理菜单
-        Backend::getInstance() -> registerAdminMenus();
+        Backend::getInstance()->registerAdminMenus();
     }
 
-    public function enqueueScripts() {
-        Frontend::getInstance() -> registerAssets();
+    public function enqueueScripts()
+    {
+        Frontend::getInstance()->registerAssets();
     }
 
-    public function enqueueAdminScripts($hook) {
-        Backend::getInstance() -> registerAssets($hook);
+    public function enqueueAdminScripts($hook)
+    {
+        Backend::getInstance()->registerAssets($hook);
     }
 
     /**
@@ -111,16 +120,18 @@ class Kitpress extends Singleton {
     private $rootPath;
 
 
-    private static function setRootPath($rootPath){
+    private static function setRootPath($rootPath)
+    {
 
-        if(empty($rootPath)) ErrorHandler::die(Lang::kit('插件根目录不正确'));
-        if(!is_dir($rootPath)) ErrorHandler::die(Lang::kit('插件根目录不正确'));
+        if (empty($rootPath)) ErrorHandler::die(Lang::kit('插件根目录不正确'));
+        if (!is_dir($rootPath)) ErrorHandler::die(Lang::kit('插件根目录不正确'));
 
         self::getInstance()->rootPath = $rootPath;
     }
 
-    public static function getRootPath(){
-       return self::getInstance()->rootPath;
+    public static function getRootPath()
+    {
+        return self::getInstance()->rootPath;
     }
 
 
@@ -128,7 +139,8 @@ class Kitpress extends Singleton {
      * 激活
      * @return void
      */
-    public static function activate($rootPath){
+    public static function activate($rootPath)
+    {
         self::setRootPath($rootPath);
         Installer::register();
     }
@@ -137,10 +149,11 @@ class Kitpress extends Singleton {
      * 手动执行 plugins_loaded 钩子
      * @return void
      */
-    public static function loaded($rootPath) {
+    public static function loaded($rootPath)
+    {
         // 激活钩子，必须在 plugins_loaded 钩子之前执行
         self::activate($rootPath);
-        \add_action('plugins_loaded', function () use ($rootPath){
+        \add_action('plugins_loaded', function () use ($rootPath) {
             self::run($rootPath);
         }, 20);
     }
@@ -150,7 +163,8 @@ class Kitpress extends Singleton {
      * 直接执行
      * @return Plugin|mixed
      */
-    public static function run($rootPath){
+    public static function run($rootPath)
+    {
         $instance = self::getInstance();
         self::setRootPath($rootPath);
         self::shutdown();

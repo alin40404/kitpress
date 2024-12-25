@@ -43,16 +43,21 @@ class Bootstrap {
         if (self::$initialized) {
             return self::$initialized;
         }
+        // 开启调试模式，打印框架运行轨迹
+        Log::debug('Kitpress 正在初始化...');
 
         try {
             // 加载配置
             self::loadConfiguration();
+            Log::debug('加载核心配置文件');
 
             //  初始化工具类
             self::initializeUtils();
+            Log::debug('初始化工具类');
 
             // 加载语言包
             self::loadLanguage();
+            Log::debug('加载语言包');
 
             //  初始化容器
             self::initializeContainer();
@@ -80,7 +85,6 @@ class Bootstrap {
 
         \load_textdomain($text_domain, Kitpress::getRootPath() . 'languages/' . $text_domain . '-' . $locale . '.mo');
         \load_textdomain(KITPRESS_TEXT_DOMAIN, KITPRESS_PATH  . 'languages/' . KITPRESS_TEXT_DOMAIN . '-' . $locale . '.mo');
-
     }
 
     /**
@@ -105,21 +109,27 @@ class Bootstrap {
     private static function initializeContainer() {
         $container = Container::getInstance();
         Facade::setContainer($container);
+        Log::debug('初始化容器');
 
         // 1. 首先注册服务提供者（最高优先级）
         $providers = self::registerProviders($container);
+        Log::debug('注册服务提供者');
 
         // 2. 注册核心服务（次高优先级）
         self::registerCoreServices($container);
+        Log::debug('注册核心服务');
 
         // 3. 从配置中注册初始化类（作为服务注册）
         self::registerInitializableServices($container);
+        Log::debug('将初始化类注册为服务');
 
         // 4. 初始化所有服务
         $container->initializeServices();
+        Log::debug('初始化所有服务');
 
         // 5. 启动服务提供者
         self::bootProviders($container, $providers);
+        Log::debug('启动服务提供者');
     }
 
     /**
@@ -197,6 +207,7 @@ class Bootstrap {
 
         // 初始化语言工具
         Lang::init();
+
     }
 
     /**
