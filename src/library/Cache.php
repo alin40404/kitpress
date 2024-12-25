@@ -1,6 +1,8 @@
 <?php
 namespace kitpress\library;
 
+use kitpress\core\Facades\Config;
+
 if (!defined('ABSPATH')) {
     exit;
 }

@@ -1,7 +1,7 @@
 <?php
 namespace kitpress\models;
 
-use kitpress\core\Installer;
+use kitpress\library\Installer;
 use kitpress\library\Model;
 use kitpress\core\Facades\Config;
 

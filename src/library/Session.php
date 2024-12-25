@@ -2,6 +2,7 @@
 namespace kitpress\library;
 
 use kitpress\models\SessionModel;
+use kitpress\core\Facades\Config;
 
 if (!defined('ABSPATH')) {
     exit;

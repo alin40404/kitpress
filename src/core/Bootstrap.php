@@ -50,22 +50,30 @@ class Bootstrap {
 
             // 加载配置
             self::loadConfiguration();
-            // 开启调试模式，打印框架运行轨迹
-            Log::debug('Kitpress 正在初始化...');
-            Log::debug('初始化基础容器');
-            Log::debug('加载核心配置文件');
-
-            //  初始化工具类
-            self::initializeUtils();
-            Log::debug('初始化工具类');
-
-            // 加载语言包
-            self::loadLanguage();
-            Log::debug('加载语言包');
 
             //  初始化容器
             self::initializeContainer();
 
+            //  初始化工具类
+            self::initializeUtils();
+
+            // 加载语言包
+            self::loadLanguage();
+
+            // 开启调试模式，打印框架运行轨迹
+            Log::debug('Kitpress 正在初始化...');
+            Log::debug('插件根目录：' . Kitpress::getRootPath());
+            Log::debug('初始化基础容器');
+            Log::debug('加载核心配置文件');
+
+            Log::debug('注册服务提供者');
+            Log::debug('注册核心服务');
+            Log::debug('将初始化类注册为服务');
+            Log::debug('初始化所有服务');
+            Log::debug('启动服务提供者');
+
+            Log::debug('初始化工具类');
+            Log::debug('加载语言包');
 
             self::$initialized = true;
         } catch (\Exception $e) {
@@ -125,23 +133,19 @@ class Bootstrap {
 
         // 1. 首先注册服务提供者（最高优先级）
         $providers = self::registerProviders($container);
-        Log::debug('注册服务提供者');
 
         // 2. 注册核心服务（次高优先级）
         self::registerCoreServices($container);
-        Log::debug('注册核心服务');
 
         // 3. 从配置中注册初始化类（作为服务注册）
         self::registerInitializableServices($container);
-        Log::debug('将初始化类注册为服务');
 
         // 4. 初始化所有服务
         $container->initializeServices();
-        Log::debug('初始化所有服务');
 
         // 5. 启动服务提供者
         self::bootProviders($container, $providers);
-        Log::debug('启动服务提供者');
+
     }
 
     /**

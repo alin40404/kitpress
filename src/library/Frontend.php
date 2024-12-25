@@ -4,6 +4,8 @@ namespace kitpress\library;
 use kitpress\core\abstracts\Singleton;
 use kitpress\utils\Lang;
 use kitpress\utils\Log;
+use kitpress\core\Facades\Config;
+use kitpress\core\Facades\Router;
 
 if (!defined('ABSPATH')) {
     exit;
