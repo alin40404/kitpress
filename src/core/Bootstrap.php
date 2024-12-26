@@ -22,9 +22,8 @@ class Bootstrap extends Singleton {
      */
     private array $initializables = [];
 
-    protected function __construct(Container $container) {
+    protected function __construct() {
         parent::__construct();
-        $this->container = $container;
     }
 
     public static function getInstance(Container $container = null)
