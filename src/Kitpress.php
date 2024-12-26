@@ -2,7 +2,6 @@
 
 namespace kitpress;
 
-use kitpress\core\abstracts\Singleton;
 use kitpress\core\Container;
 use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\Facades\Backend;
@@ -10,7 +9,6 @@ use kitpress\core\Facades\Bootstrap;
 use kitpress\core\Facades\Frontend;
 use kitpress\core\Facades\Log;
 use kitpress\core\Facades\RestApi;
-use kitpress\library\Installer;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\core\Facades\Session;
@@ -34,13 +32,15 @@ define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
  * 框架唯一入口类，提供外部调用。
  * 执行时刻没有限制
  */
-class Kitpress extends Singleton
+class Kitpress
 {
+    private static $instances = [];
+
     /**
      * 插件根目录
      * @var null
      */
-    private array $rootPaths = [];
+    private static array $rootPaths = [];
 
     /**
      * 添加命名空间标识
@@ -63,8 +63,7 @@ class Kitpress extends Singleton
      * 构造函数
      * @param string $rootPath 插件根目录路径
      */
-    protected function __construct(string $rootPath = '') {
-        parent::__construct();
+    protected function __construct(string $rootPath) {
         $this->setRootPath($rootPath);
 
         // 初始化容器
@@ -80,7 +79,6 @@ class Kitpress extends Singleton
         \kitpress\core\Bootstrap::getInstance($container)->start();
     }
 
-
     /**
      * 创建或获取实例并初始化根路径
      * @param string $rootPath 插件根目录路径
@@ -90,10 +88,10 @@ class Kitpress extends Singleton
     {
 
         $class = static::class;
-        if (!isset(parent::$instances[$class])) {
-            parent::$instances[$class] = new static($rootPath);
+        if (!isset(static::$instances[$class])) {
+            static::$instances[$class] = new static($rootPath);
         }
-        return parent::$instances[$class];
+        return static::$instances[$class];
     }
 
     /**
@@ -166,15 +164,15 @@ class Kitpress extends Singleton
 
         self::$namespace = Helper::key($rootPath);
 
-        if( isset( $this->rootPaths[self::$namespace]) ) return;
+        if( isset( self::$rootPaths[self::$namespace]) ) return;
 
-        $this->rootPaths[self::$namespace] = $rootPath;
+        self::$rootPaths[self::$namespace] = $rootPath;
     }
 
     public static function getRootPath(string $namespace)
     {
-        if( !isset(self::getInstance()->rootPaths[$namespace])) throw new \Exception('插件目录不存在');
-        return self::getInstance()->rootPaths[$namespace];
+        if( !isset(self::$rootPaths[$namespace])) throw new \Exception('插件目录不存在');
+        return self::$rootPaths[$namespace];
     }
 
     public function activate(){
@@ -228,6 +226,19 @@ class Kitpress extends Singleton
             $container = new Container(self::$namespace,KITPRESS_VERSION);
         }
         return $container;
+    }
+
+    // 防止克隆
+    private function __clone() {}
+
+    // 防止反序列化
+    private function __wakeup() {
+        throw new \Exception('无法反序列化单例对象');
+    }
+
+    // 防止通过 serialize() 序列化
+    private function __sleep() {
+        throw new \Exception('无法序列化单例对象');
     }
 }
 

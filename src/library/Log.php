@@ -132,7 +132,7 @@ class Log
     protected function log($level, $message, array $context = [])
     {
         // 只在调试模式下记录 DEBUG 级别的日志
-        if ($level === self::DEBUG && !Config::get('app.features.debug_mode')) {
+        if ($level === self::DEBUG && !$this->config->get('app.features.debug_mode')) {
             return;
         }
 

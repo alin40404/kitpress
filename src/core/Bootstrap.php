@@ -196,9 +196,19 @@ class Bootstrap extends Singleton {
         foreach ($services as $name => $definition) {
             // 检查服务是否已经注册
             if (!$container->has($name)) {
-                $container->singleton($name, function() use ($definition) {
+                $container->singleton($name, function($container) use ($definition) {
                     $class = $definition['class'];
-                    return new $class();
+
+                    // 获取构造函数的依赖
+                    $dependencies = [];
+                    if (!empty($definition['dependencies'])) {
+                        foreach ($definition['dependencies'] as $dep) {
+                            $dependencies[] = $container->get($dep);
+                        }
+                    }
+
+                    // 使用依赖创建实例
+                    return new $class(...$dependencies);
                 }, [
                     'priority' => $definition['priority'] ?? 10,
                     'dependencies' => $definition['dependencies'] ?? []
