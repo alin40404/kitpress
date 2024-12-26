@@ -1,9 +1,5 @@
 <?php
-namespace kitpress\utils;
-
-use kitpress\core\Facades\Plugin;
-use kitpress\Kitpress;
-use kitpress\core\Facades\Config;
+namespace kitpress\library;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -24,18 +20,26 @@ class Log
     /**
      * @var string 当前请求的ID
      */
-    private static $requestId = null;
+    private $requestId = null;
+    private $config = null;
+    private $plugin = null;
+
+    public function __construct(Config $config, Plugin $plugin)
+    {
+        $this->config = $config;
+        $this->plugin = $plugin;
+    }
 
     /**
      * 获取当前请求的ID
      * @return string
      */
-    protected static function getRequestId()
+    protected function getRequestId()
     {
-        if (self::$requestId === null) {
-            self::$requestId = substr(uniqid(), -6) . mt_rand(100, 999);
+        if ($this->requestId === null) {
+            $this->requestId = substr(uniqid(), -6) . mt_rand(100, 999);
         }
-        return self::$requestId;
+        return $this->requestId;
     }
 
     /**
@@ -43,9 +47,9 @@ class Log
      * @param string $message 日志消息
      * @param array $context 上下文数据
      */
-    public static function debug($message, array $context = [])
+    public function debug($message, array $context = [])
     {
-        self::log(self::DEBUG, $message, $context);
+        $this->log(self::DEBUG, $message, $context);
     }
 
     /**
@@ -53,9 +57,9 @@ class Log
      * @param string $message 日志消息
      * @param array $context 上下文数据
      */
-    public static function info($message, array $context = [])
+    public function info($message, array $context = [])
     {
-        self::log(self::INFO, $message, $context);
+        $this->log(self::INFO, $message, $context);
     }
 
     /**
@@ -63,9 +67,9 @@ class Log
      * @param string $message 日志消息
      * @param array $context 上下文数据
      */
-    public static function notice($message, array $context = [])
+    public function notice($message, array $context = [])
     {
-        self::log(self::NOTICE, $message, $context);
+        $this->log(self::NOTICE, $message, $context);
     }
 
     /**
@@ -73,9 +77,9 @@ class Log
      * @param string $message 日志消息
      * @param array $context 上下文数据
      */
-    public static function warning($message, array $context = [])
+    public function warning($message, array $context = [])
     {
-        self::log(self::WARNING, $message, $context);
+        $this->log(self::WARNING, $message, $context);
     }
 
     /**
@@ -83,9 +87,9 @@ class Log
      * @param string $message 日志消息
      * @param array $context 上下文数据
      */
-    public static function error($message, array $context = [])
+    public function error($message, array $context = [])
     {
-        self::log(self::ERROR, $message, $context);
+        $this->log(self::ERROR, $message, $context);
     }
 
     /**
@@ -93,9 +97,9 @@ class Log
      * @param string $message 日志消息
      * @param array $context 上下文数据
      */
-    public static function critical($message, array $context = [])
+    public function critical($message, array $context = [])
     {
-        self::log(self::CRITICAL, $message, $context);
+        $this->log(self::CRITICAL, $message, $context);
     }
 
     /**
@@ -103,9 +107,9 @@ class Log
      * @param string $message 日志消息
      * @param array $context 上下文数据
      */
-    public static function alert($message, array $context = [])
+    public function alert($message, array $context = [])
     {
-        self::log(self::ALERT, $message, $context);
+        $this->log(self::ALERT, $message, $context);
     }
 
     /**
@@ -113,9 +117,9 @@ class Log
      * @param string $message 日志消息
      * @param array $context 上下文数据
      */
-    public static function emergency($message, array $context = [])
+    public function emergency($message, array $context = [])
     {
-        self::log(self::EMERGENCY, $message, $context);
+        $this->log(self::EMERGENCY, $message, $context);
     }
 
     /**
@@ -124,7 +128,7 @@ class Log
      * @param mixed $message 日志消息（支持字符串、数组、对象）
      * @param array $context 上下文数据
      */
-    protected static function log($level, $message, array $context = [])
+    protected function log($level, $message, array $context = [])
     {
         // 只在调试模式下记录 DEBUG 级别的日志
         if ($level === self::DEBUG && !Config::get('app.features.debug_mode')) {
@@ -132,22 +136,22 @@ class Log
         }
 
         // 处理消息内容
-        $message = self::formatMessage($message);
+        $message = $this->formatMessage($message);
 
         // 格式化上下文数据
-        $message = self::interpolate($message, $context);
+        $message = $this->interpolate($message, $context);
 
         // 添加时间戳和级别
         $log_entry = sprintf(
             '[%s] [%s] %s: %s',
             date('Y-m-d H:i:s'),
-            self::getRequestInfo(),
+            $this->getRequestInfo(),
             strtoupper($level),
             $message
         );
 
         // 获取日志文件路径
-        $log_file = self::getLogFile($level);
+        $log_file = $this->getLogFile($level);
 
         // 写入日志
         error_log($log_entry . PHP_EOL, 3, $log_file);
@@ -162,10 +166,10 @@ class Log
      * 获取请求的详细信息
      * @return string
      */
-    protected static function getRequestInfo()
+    protected function getRequestInfo()
     {
         $info = [
-            self::getRequestId(),
+            $this->getRequestId(),
             isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : 'CLI'
         ];
 
@@ -188,18 +192,18 @@ class Log
      * @param mixed $message
      * @return string
      */
-    protected static function formatMessage($message)
+    protected function formatMessage($message)
     {
         if (is_string($message)) {
             return $message;
         }
 
         if (is_array($message)) {
-            return self::formatArray($message);
+            return $this->formatArray($message);
         }
 
         if (is_object($message)) {
-            return self::formatObject($message);
+            return $this->formatObject($message);
         }
 
         if (is_bool($message)) {
@@ -220,7 +224,7 @@ class Log
      * @param int $maxDepth 最大深度
      * @return string
      */
-    protected static function formatArray(array $array, $depth = 0, $maxDepth = 3)
+    protected function formatArray(array $array, $depth = 0, $maxDepth = 3)
     {
         if ($depth >= $maxDepth) {
             return '[Array...]';
@@ -229,11 +233,11 @@ class Log
         $output = [];
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                $value = self::formatArray($value, $depth + 1, $maxDepth);
+                $value = $this->formatArray($value, $depth + 1, $maxDepth);
             } elseif (is_object($value)) {
-                $value = self::formatObject($value, $depth + 1, $maxDepth);
+                $value = $this->formatObject($value, $depth + 1, $maxDepth);
             } else {
-                $value = self::formatMessage($value);
+                $value = $this->formatMessage($value);
             }
             $output[] = "$key: $value";
         }
@@ -248,7 +252,7 @@ class Log
      * @param int $maxDepth 最大深度
      * @return string
      */
-    protected static function formatObject($object, $depth = 0, $maxDepth = 3)
+    protected function formatObject($object, $depth = 0, $maxDepth = 3)
     {
         if ($depth >= $maxDepth) {
             return get_class($object) . '{...}';
@@ -277,7 +281,7 @@ class Log
         return sprintf(
             '%s%s',
             $className,
-            self::formatArray($attributes, $depth + 1, $maxDepth)
+            $this->formatArray($attributes, $depth + 1, $maxDepth)
         );
     }
 
@@ -287,7 +291,7 @@ class Log
      * @param array $context 上下文数据
      * @return string
      */
-    protected static function interpolate($message, array $context = [])
+    protected function interpolate($message, array $context = [])
     {
         if (empty($context)) {
             return $message;
@@ -299,7 +303,7 @@ class Log
             // 格式化值
             $formattedVal = (!is_array($val) && (!is_object($val) || method_exists($val, '__toString')))
                 ? (string)$val
-                : self::formatMessage($val);
+                : $this->formatMessage($val);
 
             // 检查是否有对应的占位符
             $placeholder = '{' . $key . '}';
@@ -327,7 +331,7 @@ class Log
      * 在指定目录创建保护文件
      * @param string $dir 目录路径
      */
-    protected static function createProtectionFiles($dir)
+    protected function createProtectionFiles($dir)
     {
         // 只在 kitpress-logs 目录下创建保护文件
         if (strpos($dir, 'kitpress-logs') === false) {
@@ -357,7 +361,7 @@ class Log
      * 递归创建目录并添加保护文件
      * @param string $path 目标路径
      */
-    protected static function createSecureDirectory($path)
+    protected function createSecureDirectory($path)
     {
         // 统一目录分隔符并去除末尾的斜杠
         $path = rtrim(str_replace('\\', '/', $path), '/');
@@ -386,8 +390,8 @@ class Log
             }
 
             // 只在 WordPress 目录范围内创建保护文件
-            if (is_dir($current) && self::isInWordPressPath($current)) {
-                self::createProtectionFiles($current);
+            if (is_dir($current) && $this->isInWordPressPath($current)) {
+                $this->createProtectionFiles($current);
             }
         }
     }
@@ -397,7 +401,7 @@ class Log
      * @param string $path 要检查的路径
      * @return bool
      */
-    protected static function isInWordPressPath($path)
+    protected function isInWordPressPath($path)
     {
         $wp_root = str_replace('\\', '/', ABSPATH);
         $wp_content = str_replace('\\', '/', WP_CONTENT_DIR);
@@ -414,7 +418,7 @@ class Log
      * @return string
      * @throws \Exception
      */
-    public static function getLogDir()
+    public function getLogDir()
     {
         try {
             // 获取上传目录
@@ -424,19 +428,19 @@ class Log
             }
 
             // 构建并标准化路径
-            $plugin_name = sanitize_file_name(basename(Plugin::getRootPath()));
+            $plugin_name = sanitize_file_name(basename($this->plugin->getRootPath()));
             $log_dir = wp_normalize_path(
                 trailingslashit($upload_dir['basedir']) . 'kitpress-logs/' . $plugin_name
             );
 
             // 确保路径在 WordPress 允许的范围内
-            if (!self::isInWordPressPath($log_dir)) {
+            if (!$this->isInWordPressPath($log_dir)) {
                 throw new \Exception('Log directory is outside WordPress directory');
             }
 
             // 确保目录存在并受保护
             if (!is_dir($log_dir)) {
-                self::createSecureDirectory($log_dir);
+                $this->createSecureDirectory($log_dir);
             }
 
             return $log_dir;
@@ -452,11 +456,11 @@ class Log
      * @param string $level 日志级别
      * @return string
      */
-    protected static function getLogFile($level)
+    protected function getLogFile($level)
     {
         try {
             // 获取日志目录
-            $log_dir = self::getLogDir();
+            $log_dir = $this->getLogDir();
 
             // 构建日志文件名
             $filename = sprintf(
@@ -471,7 +475,7 @@ class Log
             // 确保父目录存在
             $parent_dir = dirname($log_file);
             if (!is_dir($parent_dir)) {
-                self::createSecureDirectory($parent_dir);
+                $this->createSecureDirectory($parent_dir);
             }
 
             // 确保文件可写
@@ -481,7 +485,7 @@ class Log
             }
 
             // 最后一次验证路径安全性
-            if (!self::isInWordPressPath($log_file)) {
+            if (!$this->isInWordPressPath($log_file)) {
                 throw new \Exception('Log file path is outside WordPress directory');
             }
 
@@ -498,9 +502,9 @@ class Log
      * 获取指定插件的所有日志文件
      * @return array
      */
-    public static function getLogFiles()
+    public function getLogFiles()
     {
-        $log_dir = self::getLogDir();
+        $log_dir = $this->getLogDir();
         if (!is_dir($log_dir)) {
             return [];
         }
@@ -512,9 +516,9 @@ class Log
      * 清理指定插件的旧日志文件
      * @param int $days 保留天数
      */
-    public static function cleanOldLogs($days = 30)
+    public function cleanOldLogs($days = 30)
     {
-        $files = self::getLogFiles();
+        $files = $this->getLogFiles();
         $now = time();
 
         foreach ($files as $file) {

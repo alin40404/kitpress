@@ -22,7 +22,8 @@ if (!defined('ABSPATH')) {
  * @see \kitpress\library\Cache
  */
 class Cache extends Facade {
-    protected static function getFacadeAccessor() {
+    protected static function getFacadeAccessor(): string
+    {
         return 'cache';
     }
 }

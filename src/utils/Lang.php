@@ -19,7 +19,7 @@ class Lang {
      * @param $domain
      * @return static
      */
-    public static function init($domain = '') {
+    public static function init($domain = null) {
         self::$textDomain = $domain ?: Config::get('app.text_domain');
     }
 

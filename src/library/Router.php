@@ -4,7 +4,6 @@ namespace kitpress\library;
 
 use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\traits\ConfigTrait;
-use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -15,6 +14,12 @@ if (!defined('ABSPATH')) {
  */
 class Router {
     use ConfigTrait ;
+
+    private $log = null;
+
+    public function __construct(Log $log) {
+        $this->log = $log;
+    }
 
     /**
      * 加载配置文件
@@ -27,7 +32,7 @@ class Router {
             $this->namespace = $namespace;
             $this->loadResource($names, 'routes');
         } catch (BootstrapException $e) {
-            Log::debug($e->getMessage());
+            $this->log->debug($e->getMessage());
         }
     }
 

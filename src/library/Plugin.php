@@ -10,10 +10,19 @@ if (!defined('ABSPATH')) {
 }
 
 class Plugin {
+
     /**
      * 插件命名空间
      */
     private string $namespace = '';
+
+    /**
+     * 构造函数
+     * @param string $namespace 插件命名空间
+     */
+    public function __construct(string $namespace) {
+        $this->namespace = $namespace;
+    }
 
     public function setNamespace(string $namespace)
     {
@@ -37,7 +46,7 @@ class Plugin {
 
     public function getRootFile(): string
     {
-        $rootPath = self::getRootPath();
+        $rootPath = $this->getRootPath();
         $file_name = $rootPath . basename($rootPath) . '.php';
 
         // 如果没找到，抛出异常

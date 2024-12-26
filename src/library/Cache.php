@@ -1,8 +1,6 @@
 <?php
 namespace kitpress\library;
 
-use kitpress\core\Facades\Config;
-
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -17,8 +15,8 @@ class Cache {
      */
     private $prefix;
 
-    public function __construct() {
-        $this->prefix = 'kp_' . Config::get('app.database.prefix', '');
+    public function __construct(Config $config) {
+        $this->prefix = 'kp_' . $config->get('app.database.prefix', '');
     }
 
     /**

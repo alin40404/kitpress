@@ -16,7 +16,8 @@ if (!defined('ABSPATH')) {
  * @see \kitpress\library\RestApi 实际的 REST API 功能实现类
  */
 class RestApi extends Facade {
-    protected static function getFacadeAccessor() {
+    protected static function getFacadeAccessor(): string
+    {
         return 'restapi';
     }
 }

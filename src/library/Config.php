@@ -15,13 +15,20 @@ class Config {
     use ConfigTrait ;
 
     /**
+     * 构造函数
+     * @param string $namespace 插件命名空间
+     */
+    public function __construct(Plugin $plugin) {
+        $this->namespace = $plugin->getNamespace();
+    }
+
+    /**
      * 加载配置文件
      * @param string|array $names 配置文件名
      * @param string $namespace 插件命名空间
      * @return void
      */
-    public function load($names,string $namespace) {
-        $this->namespace = $namespace;
+    public function load($names) {
         $this->loadResource($names, 'config');
     }
 

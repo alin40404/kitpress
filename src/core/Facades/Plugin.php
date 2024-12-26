@@ -20,7 +20,8 @@ if (!defined('ABSPATH')) {
 * @see \kitpress\library\Plugin 实际的插件功能实现类
 */
 class Plugin extends Facade {
-    protected static function getFacadeAccessor() {
+    protected static function getFacadeAccessor(): string
+    {
         return 'plugin';
     }
 }

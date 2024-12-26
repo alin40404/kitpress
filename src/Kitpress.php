@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
 }
 
 // 定义框架基础常量
-define('KITPRESS_VERSION', '1.1.0');
+define('KITPRESS_VERSION', '1.0.2');
 define('KITPRESS_NAME', 'kitpress');
 define('KITPRESS___FILE__', __FILE__);
 // 框架根目录

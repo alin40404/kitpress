@@ -20,7 +20,8 @@ if (!defined('ABSPATH')) {
  * @see \kitpress\library\Frontend 实际的前台功能实现类
  */
 class Frontend extends Facade {
-    protected static function getFacadeAccessor() {
+    protected static function getFacadeAccessor(): string
+    {
         return 'frontend';
     }
 }

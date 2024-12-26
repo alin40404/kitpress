@@ -70,10 +70,6 @@ trait ConfigTrait {
 
     }
 
-    public function setRootPath(string $rootPath) {
-        $this->rootPath = $rootPath;
-    }
-
     /**
      * 加载配置文件
      * @param string|array $names 配置文件名

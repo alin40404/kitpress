@@ -20,7 +20,8 @@ if (!defined('ABSPATH')) {
  * @see \kitpress\library\Router
  */
 class Router extends Facade {
-    protected static function getFacadeAccessor() {
+    protected static function getFacadeAccessor(): string
+    {
         return 'router';
     }
 }

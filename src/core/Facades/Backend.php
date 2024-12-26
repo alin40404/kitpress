@@ -21,7 +21,8 @@ if (!defined('ABSPATH')) {
  * @see \kitpress\library\Backend 实际的后台功能实现类
  */
 class Backend extends Facade {
-    protected static function getFacadeAccessor() {
+    protected static function getFacadeAccessor(): string
+    {
         return 'backend';
     }
 }

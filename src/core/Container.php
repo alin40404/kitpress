@@ -3,7 +3,6 @@ namespace kitpress\core;
 
 use InvalidArgumentException;
 use Closure;
-use kitpress\core\abstracts\Singleton;
 use kitpress\core\interfaces\ContainerInterface;
 
 if (!defined('ABSPATH')) {
@@ -14,10 +13,9 @@ if (!defined('ABSPATH')) {
  * 服务容器类
  * 负责管理所有服务的注册和解析
  */
-class Container extends Singleton implements ContainerInterface {
+class Container implements ContainerInterface {
 
     private array $bindings = [];      // 注册的服务
-    private static array $containers = [];  // 存储容器实例
     private array $dependencies = [];  // 依赖关系
     private array $hooks = [];         // 生命周期钩子
     private string $namespace = '';      // 添加命名空间标识
@@ -53,20 +51,6 @@ class Container extends Singleton implements ContainerInterface {
     protected function __construct(string $namespace = '', string $version = '1.0.0') {
         $this->namespace = $namespace;
         $this->version = $version;
-        parent::__construct();
-    }
-
-    /**
-     * 获取容器实例，增加命名空间支持
-     * @param string $namespace 插件命名空间
-     * @param string $version 框架版本
-     */
-    public static function getInstance(string $namespace = '', string $version = '1.0.0'): self {
-        $key = $namespace ?: 'default';
-        if (!isset(static::$containers[$key])) {
-            static::$containers[$key] = new static($namespace, $version);
-        }
-        return static::$containers[$key];
     }
 
     /**
@@ -201,6 +185,40 @@ class Container extends Singleton implements ContainerInterface {
     }
 
     /**
+     * 获取服务实例（resolve的别名方法）
+     * @param string $id 服务标识
+     * @return mixed
+     * @throws InvalidArgumentException
+     */
+    public function get(string $id) {
+        return $this->resolve($id);
+    }
+
+    public function service(string $id)
+    {
+        return $this->resolve($id);
+    }
+
+    /**
+     * 魔术方法：通过属性方式获取服务
+     * @param string $name 服务名称
+     * @return mixed
+     */
+    public function __get(string $name) {
+        return $this->resolve($name);
+    }
+
+    /**
+     * 检查服务是否已注册
+     * @param string $id 服务标识
+     * @return bool
+     */
+    public function has(string $id): bool {
+        $namespacedId = $this->getNamespacedId($id);
+        return isset($this->bindings[$namespacedId]);
+    }
+
+    /**
      * 添加生命周期钩子
      */
     public function addHook(string $event, callable $callback) {
@@ -269,7 +287,7 @@ class Container extends Singleton implements ContainerInterface {
      * 获取所有已实例化的服务
      * @return array
      */
-    public function getInstances(): array {
+    public function getServices(): array {
         if (empty($this->namespace)) {
             return $this->serviceInstances;
         }
