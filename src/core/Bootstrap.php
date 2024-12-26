@@ -29,7 +29,7 @@ class Bootstrap extends Singleton {
     public static function boot(Container $container = null)
     {
         $instance = self::getInstance();
-        if ($container !== null && !isset($instance->container)) {
+        if ($container !== null ) {
             $instance->container = $container;
         }
         return $instance;

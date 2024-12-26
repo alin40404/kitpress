@@ -116,7 +116,7 @@ class Kitpress extends Singleton
         Backend::registerRoutes();
 
         // 初始化所有可初始化类
-        Bootstrap::initializeAll();
+        Bootstrap::boot($this->container)->initializeAll();
 
         // 初始化计划任务
         Cron::init();
