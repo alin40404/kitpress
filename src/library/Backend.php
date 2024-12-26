@@ -3,43 +3,46 @@ namespace kitpress\library;
 
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Lang;
-use kitpress\core\Facades\Config;
-use kitpress\core\Facades\Router;
-use kitpress\core\Facades\Plugin;
+
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
 class Backend {
-    private $routes = [];
-    private $menus = [];
-    private $namespace;
+    private array $routes = [];
+    private array $menus = [];
+    private string $namespace;
 
-    public function __construct() {
+    private ?Config $config = null;
+    private ?Router $router = null;
+
+    public function __construct(Config $config,Router $router) {
+        $this->config = $config;
+        $this->router = $router;
+
+        $this->loadConfigs();
     }
 
     public function init() {
-        $this->loadConfigs();
         $this->initNamespace();
     }
 
     private function loadConfigs() {
         // 加载后台路由和菜单配置
         if(empty( $this->menus)){
-            Config::load('menu',Plugin::getNamespace());
-            $this->menus = Config::get('menu');
+            $this->config->load('menu');
+            $this->menus = $this->config->get('menu');
         }
 
         if(empty( $this->routes)){
-            Router::load('backend',Plugin::getNamespace());
-            $this->routes = Router::get('backend');
+            $this->router->load('backend');
+            $this->routes = $this->router->get('backend');
         }
     }
 
     public function registerRoutes() {
         if (is_admin()) {
-            $this->loadConfigs();
 
             // 注册后台路由
             if ($this->routes) {
@@ -62,7 +65,6 @@ class Backend {
     }
 
     public function registerAdminMenus() {
-        $this->loadConfigs();
 
         if (empty($this->menus)) return;
 
@@ -91,7 +93,6 @@ class Backend {
     }
 
     public function registerAssets($hook) {
-        $this->loadConfigs();
 
         // 获取当前页面的 page 参数
         $page = $_GET['page'] ?? '';
@@ -142,7 +143,6 @@ class Backend {
      * @return void
      */
     public function handleMenuCallback() {
-        $this->loadConfigs();
 
         // 控制器
         $page = $_GET['page'] ?? '';
@@ -177,7 +177,6 @@ class Backend {
      */
     public function handleRoute($type, $action) {
         try {
-            $this->loadConfigs();
 
             // 获取对应类型的路由配置
             if (!isset($this->routes[$type][$action])) {
@@ -328,6 +327,6 @@ class Backend {
     }
 
     protected function initNamespace() {
-        $this->namespace = Config::get('app.namespace') . '\\backend\\controllers\\';
+        $this->namespace = $this->config->get('app.namespace') . '\\backend\\controllers\\';
     }
 }

@@ -2,17 +2,17 @@
 namespace kitpress\library;
 
 use kitpress\utils\Lang;
-use kitpress\core\Facades\Config;
-use kitpress\core\Facades\Router;
-use kitpress\core\Facades\Plugin;
+
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
 class RestApi {
-    private $routes = [];
-    private $namespace;
+    private array $routes = [];
+    private string $namespace;
+    private ?Config $config = null;
+    private ?Router $router = null;
     private $defaultConfig = [
         'methods' => 'POST',
         'permission_callback' => '__return_true',
@@ -28,7 +28,9 @@ class RestApi {
     /**
      * 构造函数：初始化并加载路由配置
      */
-    public function __construct() {
+    public function __construct(Config $config,Router $router) {
+        $this->config = $config;
+        $this->router = $router;
     }
 
 
@@ -51,9 +53,9 @@ class RestApi {
     private function loadRoutes() {
         if( $this->routes ) return;
 
-        Router::load('api',Plugin::getNamespace());
+        $this->router->load('api');
         // 加载前台路由配置文件
-        $this->routes = Router::get('api');
+        $this->routes = $this->router->get('api');
     }
 
     /**
@@ -162,6 +164,6 @@ class RestApi {
     protected function initNamespace()
     {
         // 默认命名空间
-        $this->namespace =  Config::get('app.namespace') . '\\api\\controllers\\';
+        $this->namespace =  $this->config->get('app.namespace') . '\\api\\controllers\\';
     }
 }
