@@ -200,6 +200,41 @@ class Container extends Singleton implements ContainerInterface {
         return $instance;
     }
 
+
+    /**
+     * 获取服务实例（resolve的别名方法）
+     * @param string $id 服务标识
+     * @return mixed
+     * @throws InvalidArgumentException
+     */
+    public function get(string $id) {
+        return $this->resolve($id);
+    }
+
+    public function service(string $id)
+    {
+        return $this->resolve($id);
+    }
+
+    /**
+     * 魔术方法：通过属性方式获取服务
+     * @param string $name 服务名称
+     * @return mixed
+     */
+    public function __get(string $name) {
+        return $this->resolve($name);
+    }
+
+    /**
+     * 检查服务是否已注册
+     * @param string $id 服务标识
+     * @return bool
+     */
+    public function has(string $id): bool {
+        $namespacedId = $this->getNamespacedId($id);
+        return isset($this->bindings[$namespacedId]);
+    }
+
     /**
      * 添加生命周期钩子
      */

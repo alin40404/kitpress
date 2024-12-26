@@ -2,10 +2,11 @@
 
 namespace kitpress;
 
+use kitpress\core\abstracts\Singleton;
+use kitpress\core\Bootstrap;
 use kitpress\core\Container;
 use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\Facades\Backend;
-use kitpress\core\Facades\Bootstrap;
 use kitpress\core\Facades\Frontend;
 use kitpress\core\Facades\Log;
 use kitpress\core\Facades\RestApi;
@@ -32,9 +33,8 @@ define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
  * 框架唯一入口类，提供外部调用。
  * 执行时刻没有限制
  */
-class Kitpress
+class Kitpress extends Singleton
 {
-    private static $instances = [];
 
     /**
      * 插件根目录
@@ -47,11 +47,6 @@ class Kitpress
      * @var string
      */
     private static string $namespace = '';
-    /**
-     * 容器池
-     * @var array
-     */
-    private static array $containers = [];
 
     /**
      * 当前容器
@@ -63,20 +58,8 @@ class Kitpress
      * 构造函数
      * @param string $rootPath 插件根目录路径
      */
-    protected function __construct(string $rootPath) {
-        $this->setRootPath($rootPath);
-
-        // 初始化容器
-        $container = self::$containers[self::$namespace] ?? null;
-        if( is_null($container) ) {
-            $container = new Container(self::$namespace,KITPRESS_VERSION);
-            self::$containers[self::$namespace] = $container;
-        }
-
-        $this->container = $container;
-
-        // 框架引导启动
-        \kitpress\core\Bootstrap::getInstance($container)->start();
+    protected function __construct() {
+        parent::__construct();
     }
 
     /**
@@ -86,12 +69,19 @@ class Kitpress
      */
     public static function boot(string $rootPath): Kitpress
     {
+       self::setRootPath($rootPath);
 
-        $class = static::class;
-        if (!isset(static::$instances[$class])) {
-            static::$instances[$class] = new static($rootPath);
+        $instance = self::getInstance();
+        $instance->container = Container::getInstance(self::$namespace,KITPRESS_VERSION);
+
+        // 框架引导启动
+        try {
+            Bootstrap::boot($instance->container)->start();
+        } catch (BootstrapException $e) {
+            ErrorHandler::die($e->getMessage());
         }
-        return static::$instances[$class];
+
+        return $instance;
     }
 
     /**
@@ -157,7 +147,7 @@ class Kitpress
         Backend::registerAssets($hook);
     }
 
-    public function setRootPath($rootPath)
+    private static function setRootPath($rootPath)
     {
         if (empty($rootPath) || !is_dir($rootPath)) ErrorHandler::die('插件根目录不正确');
 
@@ -206,7 +196,7 @@ class Kitpress
         } catch (BootstrapException $e) {
             ErrorHandler::die($e->getMessage());
         }
-        return $this;
+        return;
     }
 
     public function shutdown()
@@ -220,24 +210,8 @@ class Kitpress
 
     public static function getContainer(): Container
     {
-        $container = self::$containers[self::$namespace] ?? null;
-        if( is_null($container) ) {
-            $container = new Container(self::$namespace,KITPRESS_VERSION);
-        }
-        return $container;
+        return Container::getInstance(self::$namespace,KITPRESS_VERSION);
     }
 
-    // 防止克隆
-    private function __clone() {}
-
-    // 防止反序列化
-    private function __wakeup() {
-        throw new \Exception('无法反序列化单例对象');
-    }
-
-    // 防止通过 serialize() 序列化
-    private function __sleep() {
-        throw new \Exception('无法序列化单例对象');
-    }
 }
 
