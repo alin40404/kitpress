@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * 单例抽象类
  */
 abstract class Singleton {
-    private static $instances = [];
+    protected static $instances = [];
 
     public static function getInstance() {
         // 后期静态绑定

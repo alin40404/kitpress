@@ -48,7 +48,7 @@ class Container implements ContainerInterface {
      * @param string $namespace 插件命名空间
      * @param string $version 框架版本
      */
-    protected function __construct(string $namespace = '', string $version = '1.0.0') {
+    public function __construct(string $namespace = '', string $version = '1.0.0') {
         $this->namespace = $namespace;
         $this->version = $version;
     }

@@ -1,15 +1,13 @@
 <?php
 namespace kitpress\library;
 use kitpress\core\abstracts\Singleton;
-use kitpress\core\Bootstrap;
-use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\Facades\Config;
 use kitpress\core\Facades\Plugin;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Helper;
 use kitpress\utils\Lang;
-use kitpress\utils\Log;
+
 
 
 if (!defined('ABSPATH')) {
@@ -18,22 +16,6 @@ if (!defined('ABSPATH')) {
 
 class Installer extends Singleton {
 
-    /**
-     * 加载配置文件
-     * @return void
-     */
-    protected static function init($rootPath)
-    {
-        try {
-
-            Bootstrap::configurePlugin(Helper::key($rootPath),KITPRESS_VERSION);
-            Bootstrap::initialize();
-            Config::load('database',Helper::key($rootPath));
-
-        } catch (BootstrapException $e) {
-            ErrorHandler::die($e->getMessage());
-        }
-    }
 
     /**
      * 注册插件的激活和停用钩子

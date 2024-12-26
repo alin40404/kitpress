@@ -3,28 +3,37 @@ namespace kitpress\core;
 
 use kitpress\core\abstracts\Facade;
 use kitpress\core\abstracts\Initializable;
+use kitpress\core\abstracts\Singleton;
 use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\Facades\Log;
 use kitpress\core\interfaces\ProviderInterface;
-use kitpress\library\Config;
-use kitpress\library\Plugin;
 use kitpress\utils\Lang;
-use kitpress\utils\Loader;
+
 
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Bootstrap {
-    private Container $container;
+class Bootstrap extends Singleton {
+    private ?Container $container;
     /**
      * 可初始化的实例服务
      */
     private array $initializables = [];
 
     protected function __construct(Container $container) {
+        parent::__construct();
         $this->container = $container;
+    }
+
+    public static function getInstance(Container $container = null)
+    {
+        $instance = parent::getInstance();
+        if ($container !== null && !isset($instance->container)) {
+            $instance->container = $container;
+        }
+        return $instance;
     }
 
     /**
@@ -288,6 +297,11 @@ class Bootstrap {
                 Log::error('Failed to initialize: ' . get_class($initializable) . ' - ' . $e->getMessage());
             }
         }
+    }
+
+    public function getContainer(): Container
+    {
+        return $this->container;
     }
 
 }

@@ -1,6 +1,7 @@
 <?php
 namespace kitpress\core\abstracts;
 
+use kitpress\core\Bootstrap;
 use kitpress\core\Container;
 use RuntimeException;
 
@@ -9,7 +10,6 @@ abstract class Facade {
      * 容器实例
      */
     protected static array $containers = [];
-    protected static ?string $currentNamespace = null;
 
 
     /**
@@ -18,7 +18,6 @@ abstract class Facade {
     public static function setContainer(Container $container, ?string $namespace = null) {
         $namespace = $namespace ?? $container->getNamespace();
         static::$containers[$namespace] = $container;
-        static::$currentNamespace = $namespace;
     }
 
     /**
@@ -30,7 +29,6 @@ abstract class Facade {
         if (!isset(static::$containers[$namespace])) {
             throw new \RuntimeException("Container for namespace '{$namespace}' not found");
         }
-        static::$currentNamespace = $namespace;
     }
 
     /**
@@ -38,15 +36,15 @@ abstract class Facade {
      */
     protected static function getFacadeContainer(): Container
     {
-        if (empty(static::$currentNamespace)) {
-            throw new \RuntimeException('No container namespace is set');
+        // 通过 Bootstrap 获取当前容器
+        $bootstrap = Bootstrap::getInstance();
+        $container = $bootstrap->getContainer();
+
+        if (!$container) {
+            throw new \RuntimeException('No container available in Bootstrap');
         }
 
-        if (!isset(static::$containers[static::$currentNamespace])) {
-            throw new \RuntimeException("Container for namespace '" . static::$currentNamespace . "' not found");
-        }
-
-        return static::$containers[static::$currentNamespace];
+        return $container;
     }
 
 

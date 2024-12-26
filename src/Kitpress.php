@@ -3,17 +3,18 @@
 namespace kitpress;
 
 use kitpress\core\abstracts\Singleton;
-use kitpress\core\Bootstrap;
+use kitpress\core\Container;
 use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\Facades\Backend;
+use kitpress\core\Facades\Bootstrap;
 use kitpress\core\Facades\Frontend;
+use kitpress\core\Facades\Log;
 use kitpress\core\Facades\RestApi;
 use kitpress\library\Installer;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\core\Facades\Session;
 use kitpress\utils\Helper;
-use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -39,19 +40,60 @@ class Kitpress extends Singleton
      * 插件根目录
      * @var null
      */
-    private $rootPaths = [];
+    private array $rootPaths = [];
 
+    /**
+     * 添加命名空间标识
+     * @var string
+     */
+    private string $namespace = '';
+    /**
+     * 容器池
+     * @var array
+     */
+    private static array $containers = [];
 
-    protected function __construct()
-    {
+    /**
+     * 构造函数
+     * @param string $rootPath 插件根目录路径
+     */
+    protected function __construct(string $rootPath = '') {
         parent::__construct();
+        $this->setRootPath($rootPath);
+
+        // 初始化容器
+        $container = self::$containers[$this->namespace] ?? null;
+        if( is_null($container) ) {
+            $container = new Container($this->namespace,KITPRESS_VERSION);
+            self::$containers[$this->namespace] = $container;
+        }
+
+        // 框架引导启动
+        \kitpress\core\Bootstrap::getInstance($container)->start();
+
+    }
+
+
+    /**
+     * 创建或获取实例并初始化根路径
+     * @param string $rootPath 插件根目录路径
+     * @return static
+     */
+    public static function boot(string $rootPath): Kitpress
+    {
+
+        $class = static::class;
+        if (!isset(parent::$instances[$class])) {
+            parent::$instances[$class] = new static($rootPath);
+        }
+        return parent::$instances[$class];
     }
 
     /**
      * 初始化钩子
      * @return void
      */
-    public function initHooks()
+    private function initHooks()
     {
         Log::debug('初始化钩子');
         // WordPress 默认优先级是 10
@@ -110,14 +152,16 @@ class Kitpress extends Singleton
         Backend::registerAssets($hook);
     }
 
-    private static function setRootPath($rootPath)
+    public function setRootPath($rootPath)
     {
         if (empty($rootPath)) ErrorHandler::die('插件根目录不正确');
         if (!is_dir($rootPath)) ErrorHandler::die('插件根目录不正确');
 
-        if( isset(self::getInstance()->rootPaths[Helper::key($rootPath)]) ) return;
+        $this->namespace = Helper::key($rootPath);
 
-        self::getInstance()->rootPaths[Helper::key($rootPath)] = $rootPath;
+        if( isset( $this->rootPaths[$this->namespace]) ) return;
+
+        $this->rootPaths[$this->namespace] = $rootPath;
     }
 
     public static function getRootPath(string $namespace)
@@ -126,21 +170,20 @@ class Kitpress extends Singleton
         return self::getInstance()->rootPaths[$namespace];
     }
 
-    public static function activate($rootPath){
-        self::getInstance()->setRootPath($rootPath);
-         Installer::register($rootPath);
+    public function activate(){
+         // Installer::register();
     }
 
     /**
      * 加载插件
      * @return void
      */
-    public static function loaded($rootPath)
+    public function loaded()
     {
-        self::getInstance()->activate($rootPath);
+        $this->activate();
 
-        \add_action('plugins_loaded', function () use ($rootPath) {
-            self::run($rootPath);
+        \add_action('plugins_loaded', function () {
+            $this->run();
         }, 20);
     }
 
@@ -149,25 +192,20 @@ class Kitpress extends Singleton
      * @param $rootPath 插件根目录
      * @return Kitpress|mixed
      */
-    public static function run($rootPath)
+    public function run()
     {
-        $instance = self::getInstance();
-        try {
-            $instance->setRootPath($rootPath);
-            // 使用 Bootstrap 初始化框架
-            Bootstrap::configurePlugin(Helper::key($rootPath),KITPRESS_VERSION);
-            Bootstrap::initialize();
+        try{
             // 初始化钩子
-            $instance->initHooks();
-            $instance->shutdown();
+            $this->initHooks();
+            $this->shutdown();
 
         } catch (BootstrapException $e) {
             ErrorHandler::die($e->getMessage());
         }
-        return $instance;
+        return $this;
     }
 
-    public static function shutdown()
+    public function shutdown()
     {
         // WordPress 钩子系统
         \add_action('shutdown', function () {
