@@ -54,6 +54,12 @@ class Kitpress extends Singleton
     private static array $containers = [];
 
     /**
+     * 当前容器
+     * @var Container
+     */
+    private Container $container;
+
+    /**
      * 构造函数
      * @param string $rootPath 插件根目录路径
      */
@@ -67,6 +73,8 @@ class Kitpress extends Singleton
             $container = new Container($this->namespace,KITPRESS_VERSION);
             self::$containers[$this->namespace] = $container;
         }
+
+        $this->container = $container;
 
         // 框架引导启动
         \kitpress\core\Bootstrap::getInstance($container)->start();
@@ -171,7 +179,7 @@ class Kitpress extends Singleton
     }
 
     public function activate(){
-         // Installer::register();
+        $this->container->get('installer')->register();
     }
 
     /**
@@ -212,6 +220,11 @@ class Kitpress extends Singleton
             Session::saveSession();
             Log::debug('Kitpress 已执行完毕');
         });
+    }
+
+    public function getContainer(): Container
+    {
+        return $this->container;
     }
 }
 

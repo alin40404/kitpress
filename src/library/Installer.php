@@ -1,40 +1,44 @@
 <?php
 namespace kitpress\library;
-use kitpress\core\abstracts\Singleton;
-use kitpress\core\Facades\Config;
-use kitpress\core\Facades\Plugin;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Helper;
 use kitpress\utils\Lang;
 
 
-
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Installer extends Singleton {
+class Installer {
 
+    private ?Config $config = null;
+    private ?Plugin $plugin = null;
+    private ?Log $log = null;
+
+    public function __construct(Plugin $plugin, Config $config, Log $log) {
+        $this->config = $config;
+        $this->plugin = $plugin;
+        $this->log = $log;
+    }
 
     /**
      * 注册插件的激活和停用钩子
      * @return void
      */
-    public static function register($rootPath) {
-        self::init($rootPath);
+    public function register() {
 
         \register_activation_hook(
-            Plugin::getRootFile() ,
-            function() use ($rootPath) {
-                self::activate($rootPath);
+           $this->plugin->getRootFile() ,
+            function() {
+                $this->activate();
             }
         );
 
         \register_deactivation_hook(
-            Plugin::getRootFile(),
-            function() use ($rootPath) {
-                self::deactivate($rootPath);
+           $this->plugin->getRootFile(),
+            function() {
+                $this->deactivate();
             }
         );
     }
@@ -42,52 +46,51 @@ class Installer extends Singleton {
     /**
      * 激活插件时执行
      */
-    public static function activate($rootPath) {
+    public function activate() {
         try {
-            self::init($rootPath);
 
-            Log::debug('Installer::activate 执行开始');
+            $this->log->debug('Installer::activate 执行开始');
 
-            $db_version = str_replace('.','' ,Config::get('app.db_version'));
+            $db_version = str_replace('.','' ,$this->config->get('app.db_version'));
             $kp_version = str_replace('.','' ,KITPRESS_VERSION);
 
             // 1. 检查系统要求
-            self::checkRequirements();
+            $this->checkRequirements();
 
             // 2. 创建数据表
-            self::createTables(Config::get('database.versions.'. $db_version .'.tables', []));
-            self::createTables(Config::get('database.versions.kp.tables', []));
-            self::createTables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
+            $this->createTables($this->config->get('database.versions.'. $db_version .'.tables', []));
+            $this->createTables($this->config->get('database.versions.kp.tables', []));
+            $this->createTables($this->config->get('database.versions.kp_'. $kp_version .'.tables', []));
 
             // 3. 插入默认数据
-            self::insertDefaultData(Config::get('database.versions.'. $db_version .'.default_data', []));
+            $this->insertDefaultData($this->config->get('database.versions.'. $db_version .'.default_data', []));
 
             // 4. 创建默认选项
-            self::createOptions();
+            $this->createOptions();
 
             // 5. 创建必要的目录
-            self::createDirectories();
+            $this->createDirectories();
 
             // 6. 设置角色权限
-            self::setupRoles();
+            $this->setupRoles();
 
             // 7. 更新数据库版本号
             \update_option(
-                Config::get('app.options.db_version_key'),
-                Config::get('app.db_version')
+                $this->config->get('app.options.db_version_key'),
+                $this->config->get('app.db_version')
             );
 
             // 8. 记录激活时间
-            \update_option(Config::get('app.options.activated_time_key'), time());
+            \update_option($this->config->get('app.options.activated_time_key'), time());
 
             // 9. 清理缓存
             \wp_cache_flush();
 
-            Log::debug('Installer::activate 执行完成');
+            $this->log->debug('Installer::activate 执行完成');
         } catch (\Exception $e) {
             // 确保在管理后台环境中才调用 deactivate_plugins
             if (\is_admin()) {
-                \deactivate_plugins(self::getInstance()->getPluginFile($rootPath));
+                \deactivate_plugins($this->plugin->getRootFile());
             }
             ErrorHandler::die(Lang::kit('插件激活失败：') . $e->getMessage());
         }
@@ -96,31 +99,30 @@ class Installer extends Singleton {
     /**
      * 卸载插件
      */
-    public static function deactivate($rootPath) {
-        self::init($rootPath);
+    public function deactivate() {
 
         // 检查是否允许删除数据
-        if (!get_option(Config::get('app.options.uninstall_key'), Config::get('app.features.delete_data_on_uninstall'))) {
+        if (!get_option($this->config->get('app.options.uninstall_key'), $this->config->get('app.features.delete_data_on_uninstall'))) {
             return;
         }
 
         try {
-            $db_version = str_replace('.','' ,Config::get('app.db_version'));
+            $db_version = str_replace('.','' ,$this->config->get('app.db_version'));
             $kp_version = str_replace('.','' ,KITPRESS_VERSION);
 
             // 1. 删除数据表
-            self::dropTables(Config::get('database.versions.'. $db_version .'.tables', []));
-            self::dropTables(Config::get('database.versions.kp.tables', []));
-            self::dropTables(Config::get('database.versions.kp_'. $kp_version .'.tables', []));
+            $this->dropTables($this->config->get('database.versions.'. $db_version .'.tables', []));
+            $this->dropTables($this->config->get('database.versions.kp.tables', []));
+            $this->dropTables($this->config->get('database.versions.kp_'. $kp_version .'.tables', []));
 
             // 2. 删除选项
-            self::deleteOptions();
+            $this->deleteOptions();
 
             // 3. 删除上传的文件
-            self::deleteUploadedFiles();
+            $this->deleteUploadedFiles();
 
             // 4. 删除用户权限
-            self::removeCapabilities();
+            $this->removeCapabilities();
 
             // 5. 清理缓存
             \wp_cache_flush();
@@ -137,7 +139,7 @@ class Installer extends Singleton {
     /**
      * 检查系统要求
      */
-    public static function checkRequirements() {
+    public function checkRequirements() {
         // PHP 版本检查
         if (version_compare(PHP_VERSION, '7.4', '<')) {
             throw new \Exception(Lang::kit('需要 PHP 7.4 或更高版本'));
@@ -160,64 +162,63 @@ class Installer extends Singleton {
     /**
      * 检查并执行数据库更新
      */
-    public static function checkVersion($rootPath) {
-        self::init($rootPath);
+    public function checkVersion($rootPath) {
 
-        $current_version = Config::get('app.db_version');
-        $installed_version = \get_option(Config::get('app.options.db_version_key'));
+        $current_version = $this->config->get('app.db_version');
+        $installed_version = \get_option($this->config->get('app.options.db_version_key'));
 
         if (!$installed_version) {
-            self::activate();
+            $this->activate();
             return;
         }
 
         if (version_compare($installed_version, $current_version, '<')) {
-            self::upgrade($installed_version);
+            $this->upgrade($installed_version);
         }
     }
 
     /**
      * 执行升级
      */
-    public static function upgrade($from_version) {
-        $versions = Config::get('database.versions', []);
+    public function upgrade($from_version) {
+        $versions = $this->config->get('database.versions', []);
 
         foreach ($versions as $version => $schema) {
             if (version_compare($from_version, $version, '<')) {
                 // 更新数据表
                 if (!empty($schema['tables'])) {
                     foreach ($schema['tables'] as $definition) {
-                        self::updateTable($definition);
+                        $this->updateTable($definition);
                     }
                 }
 
                 // 插入新版本的默认数据
                 if (!empty($schema['default_data'])) {
-                    self::insertDefaultData($schema['default_data']);
+                    $this->insertDefaultData($schema['default_data']);
                 }
             }
         }
 
         \update_option(
-            Config::get('app.options.db_version_key'),
-            Config::get('app.db_version')
+            $this->config->get('app.options.db_version_key'),
+            $this->config->get('app.db_version')
         );
     }
 
     /**
      * 创建数据表
      */
-    public static function createTables($tables) {
+    public function createTables($tables) {
         if( empty($tables) ) return;
 
         global $wpdb;
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        require(ABSPATH . 'wp-admin/includes/upgrade.php');
 
         foreach ($tables as  $definition) {
-            $table_name = $wpdb->prefix . Config::get('app.database.prefix') . $definition['name'];
+            $table_name = $wpdb->prefix . $this->config->get('app.database.prefix') . $definition['name'];
             $columns = $definition['columns'];
 
-            if( $definition['name'] == 'sessions' && Config::get('app.session.enabled',false) == false ){
+            if( $definition['name'] == 'sessions' && $this->config->get('app.session.enabled',false) == false ){
                 // 只有开启 Session，才安装 sessions 表
                 continue;
             }
@@ -247,13 +248,13 @@ class Installer extends Singleton {
     /**
      * 更新数据表
      */
-    public static function updateTable($definition) {
+    public function updateTable($definition) {
         if(empty($definition)) return;
 
         global $wpdb;
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        require(ABSPATH . 'wp-admin/includes/upgrade.php');
 
-        $table_name = $wpdb->prefix . Config::get('app.database.prefix') . $definition['name'];
+        $table_name = $wpdb->prefix . $this->config->get('app.database.prefix') . $definition['name'];
         $columns = $definition['columns'];
 
         $sql = "CREATE TABLE IF NOT EXISTS {$table_name} (";
@@ -272,14 +273,8 @@ class Installer extends Singleton {
         \dbDelta($sql);
 
         if ($wpdb->last_error) {
-            Log::error("更新表 {$table_name} 失败: " . $wpdb->last_error);
+            $this->log->error("更新表 {$table_name} 失败: " . $wpdb->last_error);
         }
-    }
-
-    private static function getFullTableName($table_name): string
-    {
-        global $wpdb;
-        return  $wpdb->prefix . Config::get('app.database.prefix') . $table_name;
     }
 
     /**
@@ -287,11 +282,11 @@ class Installer extends Singleton {
      * @param string $table_name 完整的表名
      * @return bool
      */
-    public static function tableExists($table_name,$is_full = false): bool
+    public function tableExists($table_name,$is_full = false): bool
     {
         global $wpdb;
 
-        if($is_full == false) $table_name = self::getFullTableName($table_name);
+        if($is_full == false) $table_name = $this->getFullTableName($table_name);
 
         $query = $wpdb->prepare(
             "SHOW TABLES LIKE %s",
@@ -300,15 +295,20 @@ class Installer extends Singleton {
         return $wpdb->get_var($query) === $table_name;
     }
 
+    private function getFullTableName($table_name): string
+    {
+        global $wpdb;
+        return  $wpdb->prefix . $this->config->get('app.database.prefix') . $table_name;
+    }
 
     /**
      * 插入默认数据
      */
-    private static function insertDefaultData($default_data) {
+    private function insertDefaultData($default_data) {
         global $wpdb;
 
         foreach ($default_data as $table => $records) {
-            $table_name = $wpdb->prefix . Config::get('app.database.prefix') . $table;
+            $table_name = $wpdb->prefix . $this->config->get('app.database.prefix') . $table;
 
             // 检查表是否为空
             $count = $wpdb->get_var("SELECT COUNT(*) FROM {$table_name}");
@@ -318,11 +318,11 @@ class Installer extends Singleton {
                     $wpdb->insert(
                         $table_name,
                         $record,
-                        self::getColumnFormats($record)
+                        $this->getColumnFormats($record)
                     );
 
                     if ($wpdb->last_error) {
-                        Log::error("插入数据到 {$table_name} 失败: " . $wpdb->last_error);
+                        $this->log->error("插入数据到 {$table_name} 失败: " . $wpdb->last_error);
                     }
                 }
             }
@@ -333,17 +333,17 @@ class Installer extends Singleton {
      * 创建默认选项
      * @throws \Exception 如果选项创建失败
      */
-    private static function createOptions() {
+    private function createOptions() {
         try {
             // 获取所有默认配置
-            $features = Config::get('app.features');
-            $options = Config::get('app.options');
+            $features = $this->config->get('app.features');
+            $options = $this->config->get('app.options');
 
-            if(!isset($options['db_version'])) $options['db_version'] = Config::get('app.db_version');
+            if(!isset($options['db_version'])) $options['db_version'] = $this->config->get('app.db_version');
             if(!isset($options['uninstall'])) $options['uninstall'] = $features['delete_data_on_uninstall'] ?? false;
             if(!isset($options['meta'])){
                 $options['meta'] = [
-                    'version' => Config::get('app.version'),
+                    'version' => $this->config->get('app.version'),
                     'installed_at' => current_time('timestamp'),
                     'last_updated' => current_time('timestamp')
                 ];
@@ -359,7 +359,7 @@ class Installer extends Singleton {
             }
 
         } catch (\Exception $e) {
-            Log::error('创建选项失败: ' . $e->getMessage());
+            $this->log->error('创建选项失败: ' . $e->getMessage());
             throw new \Exception(Lang::kit('创建插件选项失败'));
         }
     }
@@ -367,9 +367,9 @@ class Installer extends Singleton {
     /**
      * 创建必要的目录
      */
-    private static function createDirectories() {
+    private function createDirectories() {
         $upload_dir = \wp_upload_dir();
-        $plugin_dir = $upload_dir['basedir'] . '/' . Config::get('app.database.prefix');
+        $plugin_dir = $upload_dir['basedir'] . '/' . $this->config->get('app.database.prefix');
 
         if (!file_exists($plugin_dir)) {
             \wp_mkdir_p($plugin_dir);
@@ -385,12 +385,12 @@ class Installer extends Singleton {
     /**
      * 设置角色权限
      */
-    private static function setupRoles() {
+    private function setupRoles() {
         $admin = \get_role('administrator');
 
         $roleKey = KITPRESS_NAME;
 
-        $capabilities = Config::get('app.capabilities', [
+        $capabilities = $this->config->get('app.capabilities', [
             'create_' . $roleKey,
             'edit_' . $roleKey,
             'delete_' . $roleKey,
@@ -406,7 +406,7 @@ class Installer extends Singleton {
     /**
      * 获取列的格式
      */
-    private static function getColumnFormats($record): array
+    private function getColumnFormats($record): array
     {
         $formats = [];
         foreach ($record as $value) {
@@ -424,18 +424,18 @@ class Installer extends Singleton {
     /**
      * 删除数据表
      */
-    private static function dropTables($tables = []) {
+    private function dropTables($tables = []) {
         global $wpdb;
 
         if(empty($tables)){
-            $db_version = str_replace('.','' ,Config::get('app.db_version'));
-            $tables = Config::get('database.versions.'. $db_version .'.tables', []);
+            $db_version = str_replace('.','' ,$this->config->get('app.db_version'));
+            $tables = $this->config->get('database.versions.'. $db_version .'.tables', []);
         }
 
         if(empty($tables)) return;
 
         foreach ($tables as $table => $definition) {
-            $table_name = $wpdb->prefix . Config::get('app.database.prefix') . $definition['name'];
+            $table_name = $wpdb->prefix . $this->config->get('app.database.prefix') . $definition['name'];
             $wpdb->query("DROP TABLE IF EXISTS {$table_name}");
         }
     }
@@ -444,10 +444,10 @@ class Installer extends Singleton {
     /**
      * 删除选项
      */
-    private static function deleteOptions() {
+    private function deleteOptions() {
 
         // 删除选项
-        $options = Config::get('app.options');
+        $options = $this->config->get('app.options');
         if(!isset($options['db_version'])) $options['db_version'] = [];
         if(!isset($options['uninstall'])) $options['uninstall'] = false;
         if(!isset($options['meta']))  $options['meta'] = [];
@@ -461,7 +461,7 @@ class Installer extends Singleton {
 
         // 删除所有以插件前缀开头的选项
         global $wpdb;
-        $prefix = Config::get('app.database.prefix');
+        $prefix = $this->config->get('app.database.prefix');
         $wpdb->query(
             $wpdb->prepare(
                 "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s",
@@ -473,12 +473,12 @@ class Installer extends Singleton {
     /**
      * 删除上传的文件
      */
-    private static function deleteUploadedFiles() {
+    private function deleteUploadedFiles() {
         $upload_dir = wp_upload_dir();
-        $plugin_dir = $upload_dir['basedir'] . '/' . Config::get('app.database.prefix');
+        $plugin_dir = $upload_dir['basedir'] . '/' . $this->config->get('app.database.prefix');
 
         if (is_dir($plugin_dir)) {
-            self::deleteDirectory($plugin_dir);
+            $this->deleteDirectory($plugin_dir);
         }
     }
 
@@ -488,7 +488,7 @@ class Installer extends Singleton {
      * @param string $dir 要删除的目录路径
      * @return bool 是否成功删除
      */
-    private static function deleteDirectory(string $dir): bool
+    private function deleteDirectory(string $dir): bool
     {
         if (!file_exists($dir)) {
             return true;
@@ -503,7 +503,7 @@ class Installer extends Singleton {
                 continue;
             }
 
-            if (!self::deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
+            if (!$this->deleteDirectory($dir . DIRECTORY_SEPARATOR . $item)) {
                 return false;
             }
         }
@@ -514,10 +514,10 @@ class Installer extends Singleton {
     /**
      * 移除用户权限
      */
-    private static function removeCapabilities() {
+    private function removeCapabilities() {
         $admin = get_role('administrator');
 
-        $capabilities = Config::get('app.capabilities', []);
+        $capabilities = $this->config->get('app.capabilities', []);
         foreach ($capabilities as $cap) {
             $admin->remove_cap($cap);
         }

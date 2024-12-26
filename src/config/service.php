@@ -60,6 +60,13 @@ return [
         'dependencies' => ['plugin','log']
     ],
 
+    'installer' => [
+        'class' => \kitpress\library\Installer::class,
+        'singleton' => true,
+        'priority' => 15,
+        'dependencies' => ['plugin','config','log']
+    ],
+
     'frontend' => [
         'class' => \kitpress\library\Frontend::class,
         'singleton' => true,
