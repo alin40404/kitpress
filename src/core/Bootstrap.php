@@ -3,36 +3,49 @@ namespace kitpress\core;
 
 use kitpress\core\abstracts\Facade;
 use kitpress\core\abstracts\Initializable;
-use kitpress\core\abstracts\Singleton;
 use kitpress\core\exceptions\BootstrapException;
-use kitpress\core\Facades\Log;
+use kitpress\core\Facades\Plugin;
 use kitpress\core\interfaces\ProviderInterface;
+use kitpress\Kitpress;
+use kitpress\library\Config;
 use kitpress\utils\Lang;
-
-
+use kitpress\utils\Loader;
+use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Bootstrap extends Singleton {
-    private ?Container $container;
+class Bootstrap {
+
     /**
-     * 可初始化的实例服务
+     * 配置实例
      */
-    private array $initializables = [];
+    private static $config;
 
-    protected function __construct() {
-        parent::__construct();
-    }
+    /**
+     * 可初始化的实例容器
+     */
+    private static array $initializables = [];
 
-    public static function getInstance(Container $container = null)
-    {
-        $instance = parent::getInstance();
-        if ($container !== null && !isset($instance->container)) {
-            $instance->container = $container;
-        }
-        return $instance;
+    /**
+     * 插件命名空间
+     */
+    private static string $namespace = '';
+
+    /**
+     * 插件版本
+     */
+    private static string $version = '';
+
+    /**
+     * 设置插件信息
+     * @param string $namespace 插件命名空间
+     * @param string $version 插件版本
+     */
+    public static function configurePlugin(string $namespace, string $version): void {
+        self::$namespace = $namespace;
+        self::$version = $version;
     }
 
     /**
@@ -41,15 +54,15 @@ class Bootstrap extends Singleton {
      * @return bool
      * @throws BootstrapException
      */
-    public function start(): bool
+    public static function initialize(): bool
     {
-        $container = $this->container;
-
-        if (empty( $container->getNamespace() )) {
+        if (empty(self::$namespace)) {
             throw new BootstrapException('插件命名空间必须在初始化之前设置');
         }
 
         try {
+            // 获取或创建对应命名空间的容器实例
+            $container = Container::getInstance(self::$namespace, self::$version);
 
             // 检查该容器是否已经初始化
             if ($container->isInitialized()) {
@@ -57,23 +70,29 @@ class Bootstrap extends Singleton {
             }
 
             // 初始化基础容器
-            $this->initializeBaseContainer();
+            self::initializeBaseContainer();
+
+            // 加载配置
+            self::loadConfiguration();
 
             //  初始化容器
-            $this->initializeContainer();
+            self::initializeContainer();
+
+            // 保存插件命名空间，以便在其他地方调用
+            Plugin::setNamespace(self::$namespace);
 
             //  初始化工具类
-            $this->initializeUtils();
+            self::initializeUtils();
 
             // 加载语言包
-            $this->loadLanguage();
+            self::loadLanguage();
 
             // 从配置中注册初始化类（作为服务注册）
-            $this->registerInitializableServices();
+            self::registerInitializableServices();
 
             // 开启调试模式，打印框架运行轨迹
-            Log::debug('Kitpress 正在初始化 [Namespace: ' . $container->getNamespace() . ', Version: ' . $container->getVersion() . ']');
-            Log::debug('插件根目录：' . $container->plugin->getRootPath());
+            Log::debug('Kitpress 正在初始化 [Namespace: ' . self::$namespace . ', Version: ' . self::$version . ']');
+            Log::debug('插件根目录：' . Plugin::getRootPath());
             Log::debug('初始化基础容器');
             Log::debug('加载核心配置文件');
 
@@ -100,120 +119,82 @@ class Bootstrap extends Singleton {
      * 初始化基础容器
      * 在框架启动最开始时执行，确保 Facade 可用
      */
-    private function initializeBaseContainer(): void
+    private static function initializeBaseContainer(): void
     {
-        // 首先将自身注册到容器中
-        $this->container->singleton('bootstrap', function() {
-            return $this;
-        });
-
         // 使用框架的命名空间和版本初始化容器
-        Facade::setContainer($this->container);
-
-        // 加载配置
-        $this->loadConfiguration();
+        $container = Container::getInstance(self::$namespace, self::$version);
+        Facade::setContainer($container);
     }
 
     /**
      * 加载语言包
      * @return void
      */
-    private function loadLanguage(): void {
-        $config = $this->container->config;
-        $plugin = $this->container->plugin;
-
+    public static function loadLanguage(): void {
         // 在插件初始化时加载文本域，使用绝对路径。相对路径函数 load_plugin_textdomain 始终不生效。
-        $text_domain = $config->get('app.text_domain');
+        $text_domain = self::$config->get('app.text_domain');
         $locale = \determine_locale();
 
-        \load_textdomain($text_domain, $plugin->getRootPath() . 'languages/' . $text_domain . '-' . $locale . '.mo');
+        \load_textdomain($text_domain, Plugin::getRootPath() . 'languages/' . $text_domain . '-' . $locale . '.mo');
         \load_textdomain(KITPRESS_TEXT_DOMAIN, KITPRESS_PATH  . 'languages/' . KITPRESS_TEXT_DOMAIN . '-' . $locale . '.mo');
     }
 
     /**
      * 加载配置文件
      */
-    private function loadConfiguration() {
-        $container = $this->container;
-
-        // 注册 Plugin 服务
-        $container->singleton('plugin', function($container) {
-            return new \kitpress\library\Plugin($container->getNamespace());
-        });
-
-        $container->singleton('config', function($container) {
-            return new \kitpress\library\Config($container->get('plugin'));
-        });
-
-        $container->singleton('log', function($container) {
-            return new \kitpress\library\Log($container->get('plugin'), $container->get('config'));
-        });
-
-        $container->singleton('loader', function($container) {
-            return new \kitpress\library\Loader($container->get('plugin'), $container->get('config'), $container->get('log'));
-        });
-
+    private static function loadConfiguration() {
         // 载入通用配置文件
-        $container->get('config')->load([
+        $config = new Config();
+        $config -> load([
             'app',
             'cron',
             'service',
-        ]);
-
-        $container->get('loader')->register();
+        ],self::$namespace);
+        self::$config = $config;
     }
 
     /**
      * 初始化容器
      */
-    private function initializeContainer() {
+    private static function initializeContainer() {
+        $container = Container::getInstance(self::$namespace, self::$version);
 
         //  首先注册服务提供者（最高优先级）
-        $providers = $this->registerProviders();
+        $providers = self::registerProviders($container);
 
         //  注册核心服务（次高优先级）
-        $this->registerCoreServices();
+        self::registerCoreServices($container);
 
         //  初始化所有服务
-        $this->container->initializeServices();
+        $container->initializeServices();
 
         //  启动服务提供者
-        $this->bootProviders($providers);
+        self::bootProviders($container, $providers);
 
     }
 
     /**
      * 注册核心服务
      */
-    private function registerCoreServices() {
-
-        $container = $this->container;
+    private static function registerCoreServices(Container $container) {
         // 注册配置服务
-        $config = $container->get('config');
+        $container->singleton('config', function() {
+            return self::$config;
+        }, [
+            'priority' => 1
+        ]);
 
         // 从配置文件加载服务定义
-        $services = $config->get('service', []);
+        $services = self::$config->get('service', []);
         foreach ($services as $name => $definition) {
-            // 检查服务是否已经注册
-            if (!$container->has($name)) {
-                $container->singleton($name, function($container) use ($definition) {
-                    $class = $definition['class'];
-
-                    // 获取构造函数的依赖
-                    $dependencies = [];
-                    if (!empty($definition['dependencies'])) {
-                        foreach ($definition['dependencies'] as $dep) {
-                            $dependencies[] = $container->get($dep);
-                        }
-                    }
-
-                    // 使用依赖创建实例
-                    return new $class(...$dependencies);
-                }, [
-                    'priority' => $definition['priority'] ?? 10,
-                    'dependencies' => $definition['dependencies'] ?? []
-                ]);
-            }
+            // 服务ID会自动添加命名空间前缀
+            $container->singleton($name, function() use ($definition) {
+                $class = $definition['class'];
+                return new $class();
+            }, [
+                'priority' => $definition['priority'] ?? 10,
+                'dependencies' => $definition['dependencies'] ?? []
+            ]);
         }
 
     }
@@ -222,14 +203,12 @@ class Bootstrap extends Singleton {
      * 注册服务提供者
      * @return array 返回注册的服务提供者实例数组
      */
-    private function registerProviders(): array
+    private static function registerProviders(Container $container): array
     {
-        $container = $this->container;
-
         $providers = [];
 
         // 获取所有服务提供者
-        $providerClasses = $container->get('config')->get('app.providers', []);
+        $providerClasses = self::$config->get('app.providers', []);
 
         if(!empty($providerClasses)) {
             // 注册每个服务提供者
@@ -249,12 +228,13 @@ class Bootstrap extends Singleton {
 
     /**
      * 启动所有服务提供者
+     * @param Container $container
      * @param array $providers
      */
-    private function bootProviders(array $providers): void {
+    private static function bootProviders(Container $container, array $providers): void {
         if(!empty($providers)) {
             foreach ($providers as $provider) {
-                $provider->boot($this->container);
+                $provider->boot($container);
             }
         }
     }
@@ -262,7 +242,9 @@ class Bootstrap extends Singleton {
     /**
      * 初始化工具类
      */
-    private function initializeUtils() {
+    private static function initializeUtils() {
+        // 注册加载器
+        Loader::register();
 
         // 初始化语言工具
         Lang::init();
@@ -272,14 +254,12 @@ class Bootstrap extends Singleton {
     /**
      * 将初始化类注册为服务
      */
-    private function registerInitializableServices(): void {
-        $container = $this->container;
-
-        $initClasses = $container->config->get('app.init');
+    private static function registerInitializableServices(): void {
+        $initClasses = self::$config->get('app.init');
         if ($initClasses) {
             foreach ($initClasses as $className) {
                 if (class_exists($className) && is_subclass_of($className, Initializable::class)) {
-                    $this->registerInitializable(new $className());
+                    self::registerInitializable(new $className());
                 }
             }
         }
@@ -288,17 +268,17 @@ class Bootstrap extends Singleton {
     /**
      * 注册一个可初始化的实例
      */
-    public function registerInitializable(Initializable $instance): void {
-        if (!in_array($instance, $this->initializables, true)) {
-            $this->initializables[] = $instance;
+    public static function registerInitializable(Initializable $instance): void {
+        if (!in_array($instance, self::$initializables, true)) {
+            self::$initializables[] = $instance;
         }
     }
 
     /**
      * 初始化所有注册的类
      */
-    public function initializeAll(): void {
-        foreach ($this->initializables as $initializable) {
+    public static function initializeAll(): void {
+        foreach (self::$initializables as $initializable) {
             try {
                 $initializable->init();
             } catch (\Exception $e) {
@@ -307,4 +287,11 @@ class Bootstrap extends Singleton {
             }
         }
     }
+
+    /**
+     * 禁止实例化
+     */
+    private function __construct() {}
+    private function __clone() {}
+    private function __wakeup() {}
 }

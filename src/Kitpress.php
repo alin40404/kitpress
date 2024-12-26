@@ -159,8 +159,7 @@ class Kitpress
 
     public function setRootPath($rootPath)
     {
-        if (empty($rootPath)) ErrorHandler::die('插件根目录不正确');
-        if (!is_dir($rootPath)) ErrorHandler::die('插件根目录不正确');
+        if (empty($rootPath) || !is_dir($rootPath)) ErrorHandler::die('插件根目录不正确');
 
         self::$namespace = Helper::key($rootPath);
 
