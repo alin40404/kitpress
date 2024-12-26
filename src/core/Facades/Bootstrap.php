@@ -15,7 +15,6 @@ if (!defined('ABSPATH')) {
  * @method static bool start()
  * @method static void initializeAll()
  * @method static void registerInitializable(\kitpress\core\abstracts\Initializable $instance)
- * @method static Container getContainer()
  *
  */
 class Bootstrap extends Facade

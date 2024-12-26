@@ -46,7 +46,7 @@ class Kitpress extends Singleton
      * 添加命名空间标识
      * @var string
      */
-    private string $namespace = '';
+    private static string $namespace = '';
     /**
      * 容器池
      * @var array
@@ -68,17 +68,16 @@ class Kitpress extends Singleton
         $this->setRootPath($rootPath);
 
         // 初始化容器
-        $container = self::$containers[$this->namespace] ?? null;
+        $container = self::$containers[self::$namespace] ?? null;
         if( is_null($container) ) {
-            $container = new Container($this->namespace,KITPRESS_VERSION);
-            self::$containers[$this->namespace] = $container;
+            $container = new Container(self::$namespace,KITPRESS_VERSION);
+            self::$containers[self::$namespace] = $container;
         }
 
         $this->container = $container;
 
         // 框架引导启动
         \kitpress\core\Bootstrap::getInstance($container)->start();
-
     }
 
 
@@ -165,11 +164,11 @@ class Kitpress extends Singleton
         if (empty($rootPath)) ErrorHandler::die('插件根目录不正确');
         if (!is_dir($rootPath)) ErrorHandler::die('插件根目录不正确');
 
-        $this->namespace = Helper::key($rootPath);
+        self::$namespace = Helper::key($rootPath);
 
-        if( isset( $this->rootPaths[$this->namespace]) ) return;
+        if( isset( $this->rootPaths[self::$namespace]) ) return;
 
-        $this->rootPaths[$this->namespace] = $rootPath;
+        $this->rootPaths[self::$namespace] = $rootPath;
     }
 
     public static function getRootPath(string $namespace)
@@ -222,9 +221,13 @@ class Kitpress extends Singleton
         });
     }
 
-    public function getContainer(): Container
+    public static function getContainer(): Container
     {
-        return $this->container;
+        $container = self::$containers[self::$namespace] ?? null;
+        if( is_null($container) ) {
+            $container = new Container(self::$namespace,KITPRESS_VERSION);
+        }
+        return $container;
     }
 }
 

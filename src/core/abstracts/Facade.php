@@ -3,6 +3,7 @@ namespace kitpress\core\abstracts;
 
 use kitpress\core\Bootstrap;
 use kitpress\core\Container;
+use kitpress\Kitpress;
 use RuntimeException;
 
 abstract class Facade {
@@ -36,9 +37,7 @@ abstract class Facade {
      */
     protected static function getFacadeContainer(): Container
     {
-        // 通过 Bootstrap 获取当前容器
-        $bootstrap = Bootstrap::getInstance();
-        $container = $bootstrap->getContainer();
+        $container = Kitpress::getContainer();
 
         if (!$container) {
             throw new \RuntimeException('No container available in Bootstrap');

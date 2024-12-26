@@ -298,10 +298,4 @@ class Bootstrap extends Singleton {
             }
         }
     }
-
-    public function getContainer(): Container
-    {
-        return $this->container;
-    }
-
 }
