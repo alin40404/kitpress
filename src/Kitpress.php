@@ -6,13 +6,8 @@ use kitpress\core\abstracts\Singleton;
 use kitpress\core\Bootstrap;
 use kitpress\core\Container;
 use kitpress\core\exceptions\BootstrapException;
-use kitpress\core\Facades\Backend;
-use kitpress\core\Facades\Frontend;
-use kitpress\core\Facades\Log;
-use kitpress\core\Facades\RestApi;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
-use kitpress\core\Facades\Session;
 use kitpress\utils\Helper;
 
 if (!defined('ABSPATH')) {
@@ -28,6 +23,9 @@ define('KITPRESS_PATH', \plugin_dir_path(KITPRESS___FILE__));
 // 框架命名空间
 define('KITPRESS_CORE_NAMESPACE', KITPRESS_NAME);
 define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
+
+// 引入助手函数
+require_once KITPRESS_PATH . 'functions/function.php';
 
 /**
  * 框架唯一入口类，提供外部调用。
@@ -62,6 +60,20 @@ class Kitpress extends Singleton
         parent::__construct();
     }
 
+
+    /**
+     * 获取插件实例
+     * @param string $namespace
+     * @return static
+     */
+    public static function getInstance(string $namespace = ''): self
+    {
+        if (!isset(self::$instances[$namespace])) {
+            self::$instances[$namespace] = new self();
+        }
+        return self::$instances[$namespace];
+    }
+
     /**
      * 创建或获取实例并初始化根路径
      * @param string $rootPath 插件根目录路径
@@ -69,14 +81,16 @@ class Kitpress extends Singleton
      */
     public static function boot(string $rootPath): Kitpress
     {
-       self::setRootPath($rootPath);
+        self::setRootPath($rootPath);
 
-        $instance = self::getInstance();
+        $instance = self::getInstance(self::$namespace);
         $instance->container = Container::getInstance(self::$namespace,KITPRESS_VERSION);
 
         // 框架引导启动
         try {
             Bootstrap::boot($instance->container)->start();
+            // error_log('命名空间： ' . $instance->container->getNamespace());
+            // error_log('注册了服务：' . json_encode($instance->container->getServices()));
         } catch (BootstrapException $e) {
             ErrorHandler::die($e->getMessage());
         }
@@ -90,7 +104,8 @@ class Kitpress extends Singleton
      */
     private function initHooks()
     {
-        Log::debug('初始化钩子');
+        // $this->container->get('log')->error('容器服务：' . json_encode($this->container->getServices()));
+        // $this->container->get('log')->error('初始化钩子' . $this->container->getNamespace());
         // WordPress 默认优先级是 10
         // 优先级数字越小越早执行，越大越晚执行
         \add_action('init', array($this, 'init'), 10);
@@ -107,13 +122,13 @@ class Kitpress extends Singleton
     public function init()
     {
         // 初始化前台路由
-        Frontend::init();
+        $this->container->get('frontend')->init();
 
         // 初始化接口路由
-        RestApi::init();
+        $this->container->get('restapi')->init();
 
         // 注册后台路由
-        Backend::registerRoutes();
+        $this->container->get('backend')->registerRoutes();
 
         // 初始化所有可初始化类
         Bootstrap::boot($this->container)->initializeAll();
@@ -128,23 +143,23 @@ class Kitpress extends Singleton
      */
     public function adminInit()
     {
-        Backend::init();
+        $this->container->get('backend')->init();
     }
 
     public function registerAdminMenus()
     {
         // 注册后台管理菜单
-        Backend::registerAdminMenus();
+        $this->container->get('backend')->registerAdminMenus();
     }
 
     public function enqueueScripts()
     {
-        Frontend::registerAssets();
+        $this->container->get('frontend')->registerAssets();
     }
 
     public function enqueueAdminScripts($hook)
     {
-        Backend::registerAssets($hook);
+        $this->container->get('backend')->registerAssets($hook);
     }
 
     private static function setRootPath($rootPath)
@@ -203,14 +218,20 @@ class Kitpress extends Singleton
     {
         // WordPress 钩子系统
         \add_action('shutdown', function () {
-            Session::saveSession();
-            Log::debug('Kitpress 已执行完毕');
+            $this->container->get('session')->saveSession();
+            $this->container->get('log')->debug('Kitpress 已执行完毕');
         });
+    }
+
+    public static function getNamespace(): string
+    {
+        return self::$namespace;
     }
 
     public static function getContainer(): Container
     {
-        return Container::getInstance(self::$namespace,KITPRESS_VERSION);
+//		error_log('命名空间：'. self::$namespace);
+        return self::getInstance(self::$namespace)->container;
     }
 
 }
