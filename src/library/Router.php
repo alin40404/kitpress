@@ -17,8 +17,9 @@ class Router {
 
     private $log = null;
 
-    public function __construct(Log $log) {
+    public function __construct(Plugin $plugin,Log $log) {
         $this->log = $log;
+        $this->namespace = $plugin->getNamespace();
     }
 
     /**
@@ -27,9 +28,8 @@ class Router {
      * @param string $namespace 插件命名空间
      * @return void
      */
-    public function load($names,string $namespace) {
+    public function load($names) {
         try {
-            $this->namespace = $namespace;
             $this->loadResource($names, 'routes');
         } catch (BootstrapException $e) {
             $this->log->debug($e->getMessage());

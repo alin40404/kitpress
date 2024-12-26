@@ -47,11 +47,11 @@ class Session {
      */
     private $cookie_expires;
 
-    public function __construct() {
+    public function __construct(Cache $cache) {
 
         $this->cookie = Config::get('app.session.cookie', 'kp_session');
         $this->cookie_expires = Config::get('app.session.expires', 48 * self::HOUR_IN_SECONDS);
-        $this->cache = new Cache();
+        $this->cache = $cache;
         $this->model = new SessionModel();
 
         $this->init();

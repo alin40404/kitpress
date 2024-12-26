@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 /**
  * Config Facade
  *
- * @method static void load(string|array $names, string $namespace)
+ * @method static void load(string|array $names)
  * @method static mixed get(string|null $key = null, mixed $default = null)
  * @method static void set(string $key, mixed $value)
  * @method static bool has(string $key)

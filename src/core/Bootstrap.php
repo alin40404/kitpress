@@ -130,20 +130,29 @@ class Bootstrap {
 
         // 注册 Plugin 服务
         $container->singleton('plugin', function($container) {
-            return new Plugin($container->getNamespace());
+            return new \kitpress\library\Plugin($container->getNamespace());
         });
 
         $container->singleton('config', function($container) {
-            return new Config($container->get('plugin'));
+            return new \kitpress\library\Config($container->get('plugin'));
+        });
+
+        $container->singleton('log', function($container) {
+            return new \kitpress\library\Log($container->get('plugin'), $container->get('config'));
+        });
+
+        $container->singleton('loader', function($container) {
+            return new \kitpress\library\Loader($container->get('plugin'), $container->get('config'), $container->get('log'));
         });
 
         // 载入通用配置文件
-        $container->get('config') -> load([
+        $container->get('config')->load([
             'app',
             'cron',
             'service',
         ]);
 
+        $container->get('loader')->register();
     }
 
     /**
@@ -236,8 +245,6 @@ class Bootstrap {
      * 初始化工具类
      */
     private function initializeUtils() {
-        // 注册加载器
-        Loader::register();
 
         // 初始化语言工具
         Lang::init();

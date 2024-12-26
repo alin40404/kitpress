@@ -35,6 +35,8 @@ class Model extends Singleton {
 
         // 设置表名
         $this->setTableName();
+        
+        parent::__construct();
     }
 
     public function getWpdb()

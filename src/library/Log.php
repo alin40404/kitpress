@@ -21,10 +21,11 @@ class Log
      * @var string 当前请求的ID
      */
     private $requestId = null;
-    private $config = null;
-    private $plugin = null;
 
-    public function __construct(Config $config, Plugin $plugin)
+    public $config = null;
+    public $plugin = null;
+
+    public function __construct(Plugin $plugin, Config $config)
     {
         $this->config = $config;
         $this->plugin = $plugin;

@@ -2,10 +2,7 @@
 namespace kitpress\library;
 
 use kitpress\utils\Lang;
-use kitpress\utils\Log;
-use kitpress\core\Facades\Config;
-use kitpress\core\Facades\Router;
-use kitpress\core\Facades\Plugin;
+
 
 if (!defined('ABSPATH')) {
     exit;
@@ -15,25 +12,30 @@ class Frontend {
     private $routes = [];
     private $namespace;
 
-    public function __construct() {
+    private ?Config $config = null;
+    private ?Log $log = null;
+    private ?Router $router = null;
 
+    public function __construct(Config $config,Log $log,Router $router) {
+        $this->config = $config;
+        $this->log = $log;
+        $this->router = $router;
+        $this->loadRoutes();
     }
 
     public function init() {
-        $this->loadRoutes();
         $this->initNamespace();
         $this->registerHooks();
     }
 
     private function loadRoutes() {
         if( $this->routes ) return;
-        Router::load('frontend',Plugin::getNamespace());
+        $this->router->load('frontend');
         // 加载前台路由配置文件
-        $this->routes = Router::get('frontend');
+        $this->routes = $this->router->get('frontend');
     }
 
     public function registerHooks() {
-        $this->loadRoutes();
         $this->registerShortcodes();
         // 注册 AJAX 处理程序
         $this->registerAjaxHandlers();
@@ -42,10 +44,9 @@ class Frontend {
     }
 
     public function registerShortcodes() {
-        $this->loadRoutes();
         if( isset($this->routes['shortcodes']) && is_array($this->routes['shortcodes']) ) {
             foreach ($this->routes['shortcodes'] as $tag => $handler) {
-                add_shortcode($tag, function($atts) use ($handler) {
+                \add_shortcode($tag, function($atts) use ($handler) {
                     return $this->handleShortcode($handler, $atts);
                 });
             }
@@ -53,12 +54,12 @@ class Frontend {
     }
 
     public function registerAjaxHandlers() {
-        $this->loadRoutes();
+
         if ( isset($this->routes['ajax']) && !empty($this->routes['ajax']) && is_array($this->routes['ajax'])) {
             // 注册需要登录的 AJAX 处理程序
             if ( isset($this->routes['ajax']['private']) && !empty($this->routes['ajax']['private']) && is_array($this->routes['ajax']['private']) ) {
                 foreach ($this->routes['ajax']['private'] as $action => $handler) {
-                    add_action('wp_ajax_' . $action, function() use ($handler) {
+                    \add_action('wp_ajax_' . $action, function() use ($handler) {
                         $this->handleAjaxRequest($handler);
                     });
                 }
@@ -72,7 +73,7 @@ class Frontend {
                         $this->handleAjaxRequest($handler);
                     });
                     // 未登录用户可访问
-                    add_action('wp_ajax_nopriv_' . $action, function() use ($handler) {
+                    \add_action('wp_ajax_nopriv_' . $action, function() use ($handler) {
                         $this->handleAjaxRequest($handler);
                     });
                 }
@@ -81,7 +82,7 @@ class Frontend {
     }
 
     public function registerPostHandlers() {
-        $this->loadRoutes();
+
         if ( isset($this->routes['post']) && !empty($this->routes['post']) && is_array($this->routes['post'])) {
             // 注册需要登录的 AJAX 处理程序
             if ( isset($this->routes['post']['private']) && !empty($this->routes['post']['private']) && is_array($this->routes['post']['private']) ) {
@@ -113,7 +114,7 @@ class Frontend {
      * 注册和加载前端资源
      */
     public function registerAssets() {
-        $this->loadRoutes();
+
         if( isset($this->routes['shortcodes']) && is_array($this->routes['shortcodes']) ) {
             foreach ($this->routes['shortcodes'] as $tag => $handler) {
                 try {
@@ -134,7 +135,7 @@ class Frontend {
                 } catch (\Exception $e) {
                     // 在开发环境显示错误
                     if (defined('WP_DEBUG') && WP_DEBUG) {
-                        Log::error($e->getMessage());
+                        $this->log->error($e->getMessage());
                     }
                 }
             }
@@ -258,6 +259,6 @@ class Frontend {
     protected function initNamespace()
     {
         // 默认命名空间
-        $this->namespace =  Config::get('app.namespace') . '\\frontend\\controllers\\';
+        $this->namespace =  $this->config->get('app.namespace') . '\\frontend\\controllers\\';
     }
 }
