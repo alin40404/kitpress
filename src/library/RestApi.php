@@ -198,17 +198,14 @@ class RestApi {
                     throw new \RuntimeException(sprintf(Lang::kit('方法未找到：%s'), $method));
                 }
 
-                $controller->$method($request);
+               return $controller->$method($request);
 
             } catch (\Throwable $e) {
-                // 发生异常时返回错误响应
-                \wp_send_json([
-                    'code' => 500,
-                    'message' => $e->getMessage(),
-                    'data' => [
-                        'wp_code' => 'rest_api_error'
-                    ]
-                ], 500);
+                return $this->translateRestErrors(new \WP_Error(
+                    500,
+                    $e->getMessage(),
+                    ['wp_code' => 'rest_api_error']
+                ));
             }
         };
     }
