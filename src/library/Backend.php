@@ -14,7 +14,16 @@ if (!defined('ABSPATH')) {
 class Backend {
     private array $routes = [];
     private array $menus = [];
+    /**
+     * 命名空间
+     * @var string
+     */
     private string $namespace;
+    /**
+     * 命名空间路径
+     * @var string
+     */
+    private string $namespacePath;
 
     private ?Plugin $plugin = null;
     private ?Config $config = null;
@@ -121,7 +130,7 @@ class Backend {
                 list($controller, $method) = $this->parseHandler($handler);
 
                 // 构建完整的控制器类名
-                $controllerClass = $this->namespace . $controller;
+                $controllerClass = $this->namespacePath . $controller;
 
                 // 检查控制器类是否存在
                 if (!class_exists($controllerClass)) {
@@ -190,7 +199,7 @@ class Backend {
 
             $handler = $this->routes[$type][$action];
             list($controller, $method) = $this->parseHandler($handler);
-            $controllerClass = $this->namespace . $controller;
+            $controllerClass = $this->namespacePath . $controller;
 
             if (!class_exists($controllerClass)) {
                 throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controllerClass));
@@ -222,7 +231,7 @@ class Backend {
     private function handleRequest($handler,$action = '') {
         try {
             list($controller, $method) = $this->parseHandler($handler);
-            $controllerClass = $this->namespace . $controller;
+            $controllerClass = $this->namespacePath . $controller;
 
             if (!class_exists($controllerClass)) {
                 throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controllerClass ));
@@ -339,6 +348,7 @@ class Backend {
     }
 
     protected function initNamespace() {
-        $this->namespace = $this->config->get('app.namespace') . '\\backend\\controllers\\';
+        // $this->namespace =  $this->plugin->getNamespace();
+        $this->namespacePath = $this->config->get('app.namespace') . '\\backend\\controllers\\';
     }
 }

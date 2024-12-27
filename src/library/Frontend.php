@@ -11,7 +11,16 @@ if (!defined('ABSPATH')) {
 
 class Frontend {
     private $routes = [];
-    private $namespace;
+    /**
+     * 命名空间
+     * @var string
+     */
+    private string $namespace;
+    /**
+     * 命名空间路径
+     * @var string
+     */
+    private string $namespacePath;
 
     private ?Plugin $plugin = null;
     private ?Config $config = null;
@@ -122,7 +131,7 @@ class Frontend {
             foreach ($this->routes['shortcodes'] as $tag => $handler) {
                 try {
                     list($controller, $method) = $this->parseHandler($handler);
-                    $controllerClass = $this->namespace . $controller;
+                    $controllerClass = $this->namespacePath . $controller;
 
                     if (!class_exists($controllerClass)) {
                         throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controller));
@@ -157,7 +166,7 @@ class Frontend {
     private function handleShortcode($handler, $atts = [], $content = null) {
         try {
             list($controller, $method) = $this->parseHandler($handler);
-            $controllerClass = $this->namespace . $controller;
+            $controllerClass = $this->namespacePath . $controller;
 
             if (!class_exists($controllerClass)) {
                 throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controller));
@@ -189,7 +198,7 @@ class Frontend {
     private function handleAjaxRequest($handler) {
         try {
             list($controller, $method) = $this->parseHandler($handler);
-            $controllerClass = $this->namespace . $controller;
+            $controllerClass = $this->namespacePath . $controller;
 
             if (!class_exists($controllerClass)) {
                 throw new \Exception(sprintf(Lang::kit('控制器未找到： %s'), $controller));
@@ -264,7 +273,7 @@ class Frontend {
 
     protected function initNamespace()
     {
-        // 默认命名空间
-        $this->namespace =  $this->config->get('app.namespace') . '\\frontend\\controllers\\';
+        // $this->namespace =  $this->plugin->getNamespace();
+        $this->namespacePath =  $this->config->get('app.namespace') . '\\frontend\\controllers\\';
     }
 }

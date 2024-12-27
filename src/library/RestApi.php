@@ -11,7 +11,16 @@ if (!defined('ABSPATH')) {
 
 class RestApi {
     private array $routes = [];
+    /**
+     * 命名空间
+     * @var string
+     */
     private string $namespace;
+    /**
+     * 命名空间路径
+     * @var string
+     */
+    private string $namespacePath;
     private ?Plugin $plugin = null;
     private ?Config $config = null;
     private ?Router $router = null;
@@ -176,7 +185,7 @@ class RestApi {
         return function($request) use ($action) {
             try {
                 [$controller, $method] = explode('@', $action);
-                $controllerClass = $this->namespace . $controller;
+                $controllerClass = $this->namespacePath . $controller;
 
                 if (!class_exists($controllerClass)) {
                     throw new \RuntimeException(sprintf(Lang::kit('控制器未找到： %s'), $controllerClass));
@@ -267,7 +276,7 @@ class RestApi {
      */
     protected function initNamespace()
     {
-        // 默认命名空间
         $this->namespace =  $this->plugin->getNamespace();
+        $this->namespacePath = $this->config->get('app.namespace') . '\\api\\controllers\\';
     }
 }
