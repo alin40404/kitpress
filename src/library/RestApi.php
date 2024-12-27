@@ -86,21 +86,13 @@ class RestApi {
 
     /**
      * 验证API版本格式
-     * 遵循 WordPress REST API 命名空间规范：
-     * - 必须以 '/' 开头
-     * - 只能包含小写字母、数字和连字符(-)
-     * - 版本号通常采用 'v1', 'v2' 等格式
-     *
-     * @param string $version API版本
+     * @param string $version API版本（例如：v1, v2）
      * @throws InvalidArgumentException 当版本格式无效时抛出异常
      */
     private function validateVersion(string $version): void {
-        // 移除开头的斜杠（如果有）
-        $version = ltrim($version, '/');
-
-        if (!preg_match('/^[a-z0-9-]+\/v[0-9]+$/', $version)) {
+        if (!preg_match('/^v[0-9]+$/', $version)) {
             throw new \InvalidArgumentException(
-                Lang::kit('无效的API版本格式。版本应该类似于: "my-plugin/v1"')
+                Lang::kit('无效的API版本格式。版本应该类似于: "v1"')
             );
         }
     }
