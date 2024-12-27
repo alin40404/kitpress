@@ -57,7 +57,7 @@ return [
         'class' => \kitpress\library\Session::class,
         'singleton' => true,
         'priority' => 12,
-        'dependencies' => ['cache']
+        'dependencies' => ['config','log','cache']
     ],
 
     'router' => [

@@ -2,7 +2,6 @@
 namespace kitpress\library;
 
 use kitpress\models\SessionModel;
-use kitpress\core\Facades\Config;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -32,6 +31,8 @@ class Session {
      */
     private $data = [];
 
+    private Config $config;
+    private Log $log;
     /**
      * 缓存实例
      */
@@ -47,12 +48,15 @@ class Session {
      */
     private $cookie_expires;
 
-    public function __construct(Cache $cache) {
-
-        $this->cookie = Config::get('app.session.cookie', 'kp_session');
-        $this->cookie_expires = Config::get('app.session.expires', 48 * self::HOUR_IN_SECONDS);
+    public function __construct(Config $config, Log $log,Cache $cache) {
+        $this->config = $config;
+        $this->log = $log;
         $this->cache = $cache;
-        $this->model = new SessionModel();
+
+        $this->cookie = $this->config->get('app.session.cookie', 'kp_session');
+        $this->cookie_expires = $this->config->get('app.session.expires', 48 * self::HOUR_IN_SECONDS);
+
+        $this->model = new SessionModel($config,$log);
 
         $this->init();
     }
@@ -61,7 +65,7 @@ class Session {
      * 初始化会话
      */
     private function init() {
-        if( Config::get('app.session.enabled', false) == false ) return;
+        if( $this->config->get('app.session.enabled', false) == false ) return;
 
         // 获取或创建会话ID
         $this->session_id = $this->getCookie();
@@ -129,7 +133,7 @@ class Session {
      * 保存会话数据（优化版）
      */
     public function saveSession() {
-        if( Config::get('app.session.enabled', false) == false ) return;
+        if( $this->config->get('app.session.enabled', false) == false ) return;
 
         $this->model->ensureTableExists();
 
