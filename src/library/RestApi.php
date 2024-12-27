@@ -79,7 +79,7 @@ class RestApi {
                 // 确保endpoint以/开头和结尾
                 $endpoint = '/' . trim($endpoint, '/') . '/';
 
-                \register_rest_route($version, $endpoint, $routeConfig);
+                \register_rest_route($fullNamespace, $endpoint, $routeConfig);
             }
         }
     }
