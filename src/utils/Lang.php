@@ -1,13 +1,16 @@
 <?php
 namespace kitpress\utils;
 
-use kitpress\core\Facades\Config;
+use kitpress\core\abstracts\Singleton;
+use function kitpress\functions\kp;
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Lang {
+class Lang extends Singleton{
+    private static ?array $config = null;
+
     /**
      * 存储当前文本域
      * @var string
@@ -17,10 +20,22 @@ class Lang {
     /**
      * 初始化文本域
      * @param $domain
-     * @return static
+     * @return Lang|void
      */
-    public static function init($domain = null) {
-        self::$textDomain = $domain ?: Config::get('app.text_domain');
+    public static function init(string $namespace) {
+        if( !isset(self::$config[$namespace]) ) {
+            self::$config[$namespace] = kp($namespace)->get('config');
+        }
+        self::switch($namespace);
+    }
+
+    public static function switch(string $namespace)
+    {
+        self::$textDomain = self::$config[$namespace]->get('app.text_domain');
+        return self::getInstance();
+    }
+    public static function setTextDomain(string $textDomain) {
+        self::$textDomain = $textDomain;
     }
 
     /**

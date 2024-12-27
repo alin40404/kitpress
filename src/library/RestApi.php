@@ -169,15 +169,76 @@ class RestApi {
                     throw new \RuntimeException(sprintf(Lang::kit('方法未找到：%s'), $method));
                 }
 
-                return $controller->$method($request);
+                $response = $controller->$method($request);
+                // 检查响应是否为错误
+                if (\is_wp_error($response)) {
+                    return $this->translateRestErrors($response);
+                }
+
+                return $response;
             } catch (\Throwable $e) {
-                return new \WP_Error(
-                    404,
+                return $this->translateRestErrors(new \WP_Error(
+                    500,
                     $e->getMessage(),
-                    ['status' => 404]
-                );
+                    ['wp_code' => 'rest_api_error']
+                ));
             }
         };
+    }
+
+    /**
+     * 翻译 REST API 错误信息
+     * @param WP_Error $error 错误对象
+     * @return WP_Error 处理后的错误对象
+     */
+    private function translateRestErrors(\WP_Error $response): \WP_Error {
+        $error_data = $response->get_error_data();
+        $code = $error_data['status'] ?? 400;
+        $message = $response->get_error_message();
+
+        // 获取原始请求对象
+        $request = $error_data['request'] ?? null;
+
+        // 获取语言参数
+        $lang = null;
+        if ($request instanceof \WP_REST_Request) {
+            // 从请求参数中获取语言设置
+            $lang = $request->get_param('lang');
+        }
+
+        // 如果指定了语言，临时切换
+        if ($lang) {
+            $current_locale = \get_locale();
+            \switch_to_locale($lang);
+        }
+
+        // 如果是验证错误，可能包含多个错误信息
+        if ($code === 400 && is_array($message)) {
+            $messages = [];
+            foreach ($message as $key => $msg) {
+                if (is_array($msg)) {
+                    $messages[$key] = reset($msg);
+                } else {
+                    $messages[$key] = $msg;
+                }
+            }
+            $message = implode('; ', $messages);
+        }
+
+        // 如果之前切换了语言，恢复原来的语言设置
+        if ($lang) {
+            \switch_to_locale($current_locale);
+        }
+
+        // 返回标准化的错误响应
+        return new \WP_Error(
+            $code,
+            $message,
+            [
+                'lang' => $lang ?? \get_locale(),
+                'wp_code' => $response->get_error_code()
+            ]
+        );
     }
 
     /**

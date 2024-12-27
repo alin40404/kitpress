@@ -265,7 +265,7 @@ class Bootstrap extends Singleton {
     private function initializeUtils() {
 
         // 初始化语言工具
-        Lang::init();
+        Lang::init($this->container->getNamespace());
 
     }
 
