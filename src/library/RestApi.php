@@ -24,7 +24,7 @@ class RestApi {
     private ?Plugin $plugin = null;
     private ?Config $config = null;
     private ?Router $router = null;
-    private $defaultConfig = [
+    private array $defaultConfig = [
         'methods' => 'POST',
         'permission_callback' => '__return_true',
         'show_in_index' => true,

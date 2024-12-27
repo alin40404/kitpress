@@ -1,4 +1,5 @@
 <?php
+
 namespace kitpress\utils;
 
 use kitpress\core\abstracts\Singleton;
@@ -8,7 +9,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-class Lang extends Singleton{
+class Lang extends Singleton
+{
     private static ?array $config = null;
 
     /**
@@ -22,19 +24,22 @@ class Lang extends Singleton{
      * @param $domain
      * @return Lang|void
      */
-    public static function init(string $namespace) {
-        if( !isset(self::$config[$namespace]) ) {
+    public static function init(string $namespace): self
+    {
+        if (!isset(self::$config[$namespace])) {
             self::$config[$namespace] = kp($namespace)->get('config');
         }
         self::switch($namespace);
     }
 
-    public static function switch(string $namespace)
+    public static function switch(string $namespace): self
     {
         self::$textDomain = self::$config[$namespace]->get('app.text_domain');
         return self::getInstance();
     }
-    public static function setTextDomain(string $textDomain) {
+
+    public static function setTextDomain(string $textDomain)
+    {
         self::$textDomain = $textDomain;
     }
 
@@ -43,7 +48,8 @@ class Lang extends Singleton{
      * @param string $text 需要翻译的文本
      * @return string
      */
-    public static function __($text) {
+    public static function __($text)
+    {
         return \__($text, self::$textDomain);
     }
 
@@ -52,15 +58,17 @@ class Lang extends Singleton{
      * @param string $text 需要翻译的文本
      * @return string
      */
-    public static function kit($text) {
-        return \__($text,KITPRESS_TEXT_DOMAIN);
+    public static function kit($text)
+    {
+        return \__($text, KITPRESS_TEXT_DOMAIN);
     }
 
     /**
      * 翻译文本并输出
      * @param string $text 需要翻译的文本
      */
-    public static function _e($text) {
+    public static function _e($text)
+    {
         \_e($text, self::$textDomain);
     }
 
@@ -71,7 +79,8 @@ class Lang extends Singleton{
      * @param int $number 数量
      * @return string
      */
-    public static function _n($single, $plural, $number) {
+    public static function _n($single, $plural, $number)
+    {
         return \_n($single, $plural, $number, self::$textDomain);
     }
 
@@ -79,7 +88,8 @@ class Lang extends Singleton{
      * 获取当前文本域
      * @return string
      */
-    public static function getDomain() {
+    public static function getDomain()
+    {
         return self::$textDomain;
     }
 }
