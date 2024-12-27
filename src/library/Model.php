@@ -1,14 +1,11 @@
 <?php
 namespace kitpress\library;
-use kitpress\core\abstracts\Singleton;
-use kitpress\core\Facades\Config;
-use kitpress\utils\Log;
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
-class Model extends Singleton {
+class Model {
     protected $wpdb;
     protected $table;
     protected $prefix;
@@ -26,17 +23,22 @@ class Model extends Singleton {
     protected $debug = false;
     protected $lastSql = '';
 
+    private Config $config;
+    private Log $log;
 
-    public function __construct() {
+    public function __construct(Config $config, Log $log) {
+        $this->config = $config;
+        $this->log = $log;
+
         global $wpdb;
         $this->wpdb = $wpdb;
         $this->prefix = $wpdb->prefix;
-        $this->plugin_prefix = Config::get('app.database.prefix');
+        $this->plugin_prefix = $this->config->get('app.database.prefix');
 
         // 设置表名
         $this->setTableName();
-        
-        parent::__construct();
+
+
     }
 
     public function getWpdb()
@@ -535,7 +537,7 @@ class Model extends Singleton {
     }
 
     /**
-     * 执行查询并返回结��
+     * 执行查询并返回
      * @return array
      */
     public function get() {
@@ -543,7 +545,7 @@ class Model extends Singleton {
 
         // 如果开启了调试模式
         if ($this->debug) {
-            Log::error("Executing SQL: " . $sql);
+            $this->log->error("Executing SQL: " . $sql);
             if (is_admin()) {
                 echo "<pre>Executing SQL: " . esc_html($sql) . "</pre>";
             }
@@ -721,7 +723,7 @@ class Model extends Singleton {
         $sql = $this->buildSql();
 
         // 输出 SQL 到错误日志
-        Log::error("Debug SQL: " . $sql);
+        $this->log->error("Debug SQL: " . $sql);
 
         // 如果在管理后台，直接输出SQL
         if (is_admin()) {
@@ -751,7 +753,7 @@ class Model extends Singleton {
         $this->lastSql = $sql;
 
         if ($this->debug) {
-            Log::error("SQL: " . $sql);
+            $this->log->error("SQL: " . $sql);
         }
 
         return $this->wpdb->get_results($sql);

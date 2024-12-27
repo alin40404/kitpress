@@ -3,6 +3,8 @@ namespace kitpress\library;
 
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Lang;
+use function kitpress\functions\kitpress;
+use function kitpress\functions\kp;
 
 
 if (!defined('ABSPATH')) {
@@ -14,10 +16,12 @@ class Backend {
     private array $menus = [];
     private string $namespace;
 
+    private ?Plugin $plugin = null;
     private ?Config $config = null;
     private ?Router $router = null;
 
-    public function __construct(Config $config,Router $router) {
+    public function __construct(Plugin $plugin,Config $config,Router $router) {
+        $this->plugin = $plugin;
         $this->config = $config;
         $this->router = $router;
 
@@ -126,6 +130,7 @@ class Backend {
 
                 // 实例化控制器
                 $instance = new $controllerClass();
+                $instance->setContainer(kp($this->plugin->getNamespace()));
 
                 // 如果控制器有 enqueueAssets 方法，则调用它，并传入 $hook 参数
                 if (method_exists($instance, 'enqueueAssets')) {
@@ -192,6 +197,8 @@ class Backend {
             }
 
             $instance = new $controllerClass();
+            $instance->setContainer(kp($this->plugin->getNamespace()));
+
             if (!method_exists($instance, $method)) {
                 throw new \Exception(sprintf(Lang::kit('方法未找到：%s'), $method));
             }
@@ -232,7 +239,8 @@ class Backend {
                     $camelMethod = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $underscoreMethod))));
                     
                     $instance = new $controllerClass();
-                    
+                    $instance->setContainer(kp($this->plugin->getNamespace()));
+
                     // 优先检查下划线风格
                     if (method_exists($instance, $underscoreMethod)) {
                         $method = $underscoreMethod;
@@ -252,6 +260,8 @@ class Backend {
                 } else {
                     // 如果动作名称中没有横杠，直接使用转换后的方法名
                     $instance = new $controllerClass();
+                    $instance->setContainer(kp($this->plugin->getNamespace()));
+
                     if (method_exists($instance, $underscoreMethod)) {
                         $method = $underscoreMethod;
                     } else {
@@ -263,6 +273,8 @@ class Backend {
                 }
             } else {
                 $instance = new $controllerClass();
+                $instance->setContainer(kp($this->plugin->getNamespace()));
+
                 if (!method_exists($instance, $method)) {
                     throw new \Exception(sprintf(Lang::kit('方法未找到：%s'), $method));
                 }

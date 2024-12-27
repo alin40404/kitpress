@@ -2,6 +2,7 @@
 namespace kitpress\library;
 
 use kitpress\utils\Lang;
+use function kitpress\functions\kp;
 
 
 if (!defined('ABSPATH')) {
@@ -12,11 +13,13 @@ class Frontend {
     private $routes = [];
     private $namespace;
 
+    private ?Plugin $plugin = null;
     private ?Config $config = null;
     private ?Log $log = null;
     private ?Router $router = null;
 
-    public function __construct(Config $config,Log $log,Router $router) {
+    public function __construct(Plugin $plugin,Config $config,Log $log,Router $router) {
+        $this->plugin = $plugin;
         $this->config = $config;
         $this->log = $log;
         $this->router = $router;
@@ -126,6 +129,7 @@ class Frontend {
                     }
 
                     $instance = new $controllerClass();
+                    $instance->setContainer(kp($this->plugin->getNamespace()));
 
                     // 检查并调用 enqueueAssets 方法
                     if (method_exists($instance, 'enqueueAssets')) {
@@ -160,6 +164,7 @@ class Frontend {
             }
 
             $instance = new $controllerClass();
+            $instance->setContainer(kp($this->plugin->getNamespace()));
 
             if (!method_exists($instance, $method)) {
                 throw new \Exception(sprintf(Lang::kit('方法未找到：%s'), $method));
@@ -191,6 +196,7 @@ class Frontend {
             }
 
             $instance = new $controllerClass();
+            $instance->setContainer(kp($this->plugin->getNamespace()));
 
             if (!method_exists($instance, $method)) {
                 throw new \Exception(sprintf(Lang::kit('方法未找到：%s'), $method));

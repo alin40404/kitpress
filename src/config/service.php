@@ -38,12 +38,19 @@ return [
         'dependencies' => ['config']
     ],
 
+    'model' => [
+        'class' => \kitpress\library\Model::class,
+        'singleton' => true,
+        'priority' => 10,
+        'dependencies' => ['config','log']
+    ],
+
     // 添加 DB 服务
     'db' => [
         'class' => \kitpress\library\Model::class,
         'singleton' => true,
         'priority' => 10, // 设置较高优先级，因为其他服务可能依赖它
-        'dependencies' => []
+        'dependencies' => ['config','log']
     ],
 
     'session' => [
@@ -71,18 +78,18 @@ return [
         'class' => \kitpress\library\Frontend::class,
         'singleton' => true,
         'priority' => 20,
-        'dependencies' => ['config','log','router']
+        'dependencies' => ['plugin','config','log','router']
     ],
     'backend' => [
         'class' => \kitpress\library\Backend::class,
         'singleton' => true,
         'priority' => 20,
-        'dependencies' => ['config','router']
+        'dependencies' => ['plugin','config','router']
     ],
     'restapi' => [
         'class' => \kitpress\library\RestApi::class,
         'singleton' => true,
         'priority' => 20,
-        'dependencies' => ['config','router']
+        'dependencies' => ['plugin','config','router']
     ],
 ];

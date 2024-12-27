@@ -1,6 +1,7 @@
 <?php
 namespace kitpress\core\abstracts;
 
+use kitpress\core\Container;
 use kitpress\library\Model;
 use kitpress\core\traits\ViewTrait;
 use kitpress\utils\Lang;
@@ -15,9 +16,21 @@ abstract class Controller {
     protected $model = null;
 
     /**
+     * 当前容器
+     * @var Container
+     */
+    protected Container $container;
+
+    /**
      * 构造函数
      */
     public function __construct() {
+        // $this->init();
+    }
+
+    public function setContainer(Container $container)
+    {
+        $this->container = $container;
         $this->init();
     }
 
@@ -26,7 +39,8 @@ abstract class Controller {
      * @return void
      */
     protected function init() {
-        $this->model = Model::getInstance();
+        $this->plugin = $this->container->get('plugin');
+        $this->model = $this->container->get('model');
     }
 
     /**

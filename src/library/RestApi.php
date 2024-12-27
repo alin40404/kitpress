@@ -2,6 +2,7 @@
 namespace kitpress\library;
 
 use kitpress\utils\Lang;
+use function kitpress\functions\kp;
 
 
 if (!defined('ABSPATH')) {
@@ -11,6 +12,7 @@ if (!defined('ABSPATH')) {
 class RestApi {
     private array $routes = [];
     private string $namespace;
+    private ?Plugin $plugin = null;
     private ?Config $config = null;
     private ?Router $router = null;
     private $defaultConfig = [
@@ -28,7 +30,8 @@ class RestApi {
     /**
      * 构造函数：初始化并加载路由配置
      */
-    public function __construct(Config $config,Router $router) {
+    public function __construct(Plugin $plugin,Config $config,Router $router) {
+        $this->plugin = $plugin;
         $this->config = $config;
         $this->router = $router;
     }
@@ -141,6 +144,7 @@ class RestApi {
                 }
 
                 $controller = new $controllerClass();
+                $controller->setContainer(kp($this->plugin->getNamespace()));
 
                 if (!method_exists($controller, $method)) {
                     throw new \RuntimeException(sprintf(Lang::kit('方法未找到：%s'), $method));

@@ -1,8 +1,7 @@
 <?php
 namespace kitpress\core\traits;
 
-use kitpress\core\Facades\Plugin;
-use kitpress\Kitpress;
+use kitpress\library\Plugin;
 use function kitpress\functions\kp_plugin;
 
 trait ViewTrait {
@@ -14,6 +13,8 @@ trait ViewTrait {
 
     /** @var array<string, mixed> 视图数据数组 */
     protected array $viewData = [];
+
+    protected ?Plugin $plugin = null;
 
     /**
      * 渲染视图
@@ -43,7 +44,7 @@ trait ViewTrait {
         $viewFile = $this->getViewFile($view);
 
         if (!file_exists($viewFile)) {
-            wp_die("View file not found: {$view}");
+            \wp_die("View file not found: {$view}");
         }
 
         if ($return) {
@@ -61,7 +62,7 @@ trait ViewTrait {
      * @return string
      */
     protected function getViewFile($view) {
-        return kp_plugin()->getRootPath() . $this->viewPath . '/' . $view . '.php';
+        return kp_plugin($this->plugin->getNamespace())->getRootPath() . $this->viewPath . '/' . $view . '.php';
     }
 
     /**
