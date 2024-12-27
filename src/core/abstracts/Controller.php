@@ -78,7 +78,7 @@ abstract class Controller {
         if (is_array($data)) {
             return array_map([$this, 'sanitize'], $data);
         }
-        return sanitize_text_field($data);
+        return \sanitize_text_field($data);
     }
 
     /**
@@ -135,12 +135,14 @@ abstract class Controller {
      * @param bool $success
      * @param string $message
      */
-    protected function json($data = null, $code = 1, $message = '') {
-        wp_send_json([
+    protected function json($data = null, $code = 1, string $message = ''): bool
+    {
+        \wp_send_json([
             'code' => $code,
             'message' => $message,
             'data' => $data
         ]);
+        return true;
     }
 
     /**
@@ -148,8 +150,9 @@ abstract class Controller {
      * @param mixed $data
      * @param string $message
      */
-    protected function success($data = null, $message = '') {
-        $this->json($data, 1, $message);
+    protected function success($data = null, string $message = ''): bool
+    {
+        return $this->json($data, 1, $message);
     }
 
     /**
@@ -157,8 +160,9 @@ abstract class Controller {
      * @param string $message
      * @param mixed $data
      */
-    protected function error($message = '', $data = null) {
-        $this->json($data, 0, $message);
+    protected function error($message = '', $data = null): bool
+    {
+        return $this->json($data, 0, $message);
     }
 
     /**
@@ -166,7 +170,7 @@ abstract class Controller {
      * @return \WP_User|null
      */
     protected function getCurrentUser() {
-        return wp_get_current_user();
+        return \wp_get_current_user();
     }
 
     /**
@@ -174,7 +178,7 @@ abstract class Controller {
      * @return bool
      */
     protected function isUserLoggedIn() {
-        return is_user_logged_in();
+        return \is_user_logged_in();
     }
 
     /**
@@ -182,8 +186,8 @@ abstract class Controller {
      * @param string $capability
      * @return bool
      */
-    protected function checkCapability($capability) {
-        return current_user_can($capability);
+    protected function checkCapability(string $capability) {
+        return \current_user_can($capability);
     }
 
     /**
@@ -192,7 +196,7 @@ abstract class Controller {
      * @param int $status
      */
     protected function redirect($url, $status = 302) {
-        wp_redirect($url, $status);
+        \wp_redirect($url, $status);
         exit;
     }
 
@@ -209,7 +213,7 @@ abstract class Controller {
      * @return bool
      */
     protected function isAjax() {
-        return wp_doing_ajax();
+        return \wp_doing_ajax();
     }
 
     /**
