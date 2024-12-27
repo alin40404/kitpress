@@ -11,7 +11,7 @@ abstract class FrontendController extends Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->init();  // 添加这一行
+        // $this->init();  // 添加这一行
     }
 
     /**
