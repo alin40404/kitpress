@@ -24,9 +24,6 @@ define('KITPRESS_PATH', \plugin_dir_path(KITPRESS___FILE__));
 define('KITPRESS_CORE_NAMESPACE', KITPRESS_NAME);
 define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
 
-// 引入助手函数
-require_once KITPRESS_PATH . 'functions/function.php';
-
 /**
  * 框架唯一入口类，提供外部调用。
  * 执行时刻没有限制
@@ -82,6 +79,7 @@ class Kitpress extends Singleton
     public static function boot(string $rootPath): Kitpress
     {
         self::setRootPath($rootPath);
+        self::includes($rootPath);
 
         $instance = self::getInstance(self::$namespace);
         $instance->container = Container::getInstance(self::$namespace,KITPRESS_VERSION);
@@ -160,6 +158,27 @@ class Kitpress extends Singleton
     public function enqueueAdminScripts($hook)
     {
         $this->container->get('backend')->registerAssets($hook);
+    }
+
+    private static function includes(string $rootPath){
+        $files = [
+            'function',
+        ];
+
+        // 移除末尾的斜杠
+        $rootPath = rtrim($rootPath, '/\\');
+
+        // 引入助手函数
+        foreach ($files as $file) {
+
+            if(file_exists($rootPath . DIRECTORY_SEPARATOR . 'functions' . DIRECTORY_SEPARATOR . $file . '.php')){
+                require_once $rootPath . DIRECTORY_SEPARATOR . 'functions' . DIRECTORY_SEPARATOR . $file . '.php';
+            }
+
+            if(file_exists(KITPRESS_PATH . 'functions' . DIRECTORY_SEPARATOR . $file . '.php')){
+                require_once KITPRESS_PATH . 'functions' . DIRECTORY_SEPARATOR . $file . '.php';
+            }
+        }
     }
 
     private static function setRootPath($rootPath)

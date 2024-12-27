@@ -9,8 +9,6 @@ use kitpress\core\Facades\Log;
 use kitpress\core\interfaces\ProviderInterface;
 use kitpress\utils\Lang;
 
-
-
 if (!defined('ABSPATH')) {
     exit;
 }
