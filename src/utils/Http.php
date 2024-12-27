@@ -75,12 +75,12 @@ class Http {
      * @param array|WP_Error $response 响应结果
      * @return bool
      */
-    public static function isSuccess($response) {
+    public static function isSuccess($response): bool
+    {
         if (\is_wp_error($response)) {
             return false;
         }
-        $code = self::getCode($response);
-        return $code >= 200 && $code < 300;
+        return true;
     }
 
     /**
