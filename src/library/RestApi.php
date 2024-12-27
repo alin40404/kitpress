@@ -41,6 +41,12 @@ class RestApi {
      * 初始化 REST API：设置命名空间并注册路由
      */
     public function init() {
+        // 添加多个错误处理过滤器
+        \add_filter('rest_pre_dispatch', [$this, 'handlePreDispatch'], 10, 3);
+        \add_filter('rest_request_before_callbacks', [$this, 'handlePreDispatch'], 10, 3);
+        \add_filter('rest_request_after_callbacks', [$this, 'handlePreDispatch'], 10, 3);
+        \add_filter('rest_post_dispatch', [$this, 'handlePreDispatch'], 10, 3);
+
         // 添加 REST API 初始化钩子
         \add_action('rest_api_init',function(){
             $this->loadRoutes();
@@ -132,6 +138,20 @@ class RestApi {
                 'permission_callback' => ''
             ])
         );
+    }
+
+    /**
+     * 将错误处理逻辑移到单独的方法
+     * @param $response
+     * @param $server
+     * @param $request
+     * @return WP_Error|mixed|\WP_Error
+     */
+    public function handlePreDispatch($response, $server, $request) {
+        if ($response !== null && \is_wp_error($response)) {
+            return $this->translateRestErrors($response);
+        }
+        return $response;
     }
 
     /**
