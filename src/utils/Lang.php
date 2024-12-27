@@ -29,7 +29,7 @@ class Lang extends Singleton
         if (!isset(self::$config[$namespace])) {
             self::$config[$namespace] = kp($namespace)->get('config');
         }
-        self::switch($namespace);
+        return self::switch($namespace);
     }
 
     public static function switch(string $namespace): self
