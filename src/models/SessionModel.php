@@ -2,6 +2,7 @@
 namespace kitpress\models;
 
 use kitpress\library\Installer;
+use kitpress\library\Log;
 use kitpress\library\Model;
 use kitpress\core\Facades\Config;
 
@@ -12,14 +13,15 @@ if (!defined('ABSPATH')) {
 class SessionModel extends Model {
     protected $table_name = 'sessions';
 
+
     /**
      * 检查并创建会话表
      */
     public function ensureTableExists() {
 
-        if( Installer::tableExists($this->table_name) == false ) {
+        if( $this->tableExists($this->table_name) == false ) {
             Installer::createTables([
-                $this->table_name => Config::get('database.versions.kp.tables.sessions', [])
+                $this->table_name => $this->config->get('database.versions.kp.tables.sessions', [])
             ]);
         }
 

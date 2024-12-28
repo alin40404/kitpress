@@ -48,15 +48,15 @@ class Session {
      */
     private $cookie_expires;
 
-    public function __construct(Config $config, Log $log,Cache $cache) {
-        $this->config = $config;
+    public function __construct(Log $log,Cache $cache) {
+        $this->config = $log->config;
         $this->log = $log;
         $this->cache = $cache;
 
         $this->cookie = $this->config->get('app.session.cookie', 'kp_session');
         $this->cookie_expires = $this->config->get('app.session.expires', 48 * self::HOUR_IN_SECONDS);
 
-        $this->model = new SessionModel($config,$log);
+        $this->model = new SessionModel($log);
 
         $this->init();
     }

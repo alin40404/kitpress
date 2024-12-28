@@ -43,6 +43,7 @@ class Kitpress extends Singleton
      */
     private static string $namespace = '';
 
+
     /**
      * 当前容器
      * @var Container
@@ -60,15 +61,14 @@ class Kitpress extends Singleton
 
     /**
      * 获取插件实例
-     * @param string $namespace
      * @return static
      */
-    public static function getInstance(string $namespace = ''): self
+    public static function getInstance(): self
     {
-        if (!isset(self::$instances[$namespace])) {
-            self::$instances[$namespace] = new self();
+        if(empty(self::$namespace)){
+            throw new \RuntimeException('Kitpress框架初始化失败，请检查插件路径是否设置正确');
         }
-        return self::$instances[$namespace];
+        return parent::getInstance();
     }
 
     /**
@@ -81,7 +81,7 @@ class Kitpress extends Singleton
         self::setRootPath($rootPath);
         self::includes($rootPath);
 
-        $instance = self::getInstance(self::$namespace);
+        $instance = self::getInstance();
         $instance->container = Container::getInstance(self::$namespace,KITPRESS_VERSION);
 
         // 框架引导启动
@@ -238,7 +238,7 @@ class Kitpress extends Singleton
         // WordPress 钩子系统
         \add_action('shutdown', function () {
             $this->container->get('session')->saveSession();
-            $this->container->get('log')->debug('Kitpress 已执行完毕');
+            $this->container->get('log')->debug('Kitpress已执行完毕');
         });
     }
 
@@ -249,8 +249,32 @@ class Kitpress extends Singleton
 
     public static function getContainer(): Container
     {
-//		error_log('命名空间：'. self::$namespace);
-        return self::getInstance(self::$namespace)->container;
+        return self::getInstance()->container;
+    }
+
+    public static function setContainer(): void
+    {
+        $instance = self::getInstance();
+        $instance->container = Container::getInstance(self::$namespace,KITPRESS_VERSION);
+        return;
+    }
+
+    /**
+     * 切换当前使用的容器命名空间
+     * @param string $namespace
+     */
+    public static function useNamespace(string $namespace): void
+    {
+
+        try {
+            // 检查容器是否已经设置
+            Container::checkContainer($namespace);
+            self::$namespace = $namespace;
+            self::setContainer();
+        }catch (\RuntimeException $e){
+            ErrorHandler::die($e->getMessage());
+        }
+
     }
 
 }

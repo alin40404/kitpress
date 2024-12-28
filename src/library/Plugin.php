@@ -23,12 +23,6 @@ class Plugin {
     public function __construct(string $namespace) {
         $this->namespace = $namespace;
     }
-
-    public function setNamespace(string $namespace)
-    {
-        $this->namespace = $namespace;
-    }
-
     public function getNamespace(): string
     {
         return $this->namespace;

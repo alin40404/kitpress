@@ -70,6 +70,21 @@ class Container extends Singleton implements ContainerInterface {
     }
 
     /**
+     * 检查容器是否已设置
+     * @return bool
+     * @throws RuntimeException
+     */
+    public static function checkContainer(string $namespace): bool
+    {
+        if (!isset(static::$containers[$namespace])) {
+            throw new \RuntimeException("Container for namespace '{$namespace}' not found");
+        }
+        return true;
+    }
+
+
+
+    /**
      * 生成带命名空间的服务ID
      */
     protected function getNamespacedId(string $id): string
@@ -304,7 +319,7 @@ class Container extends Singleton implements ContainerInterface {
      * 获取所有已实例化的服务
      * @return array
      */
-    public function getInstances(): array {
+    public function getServices(): array {
         if (empty($this->namespace)) {
             return $this->serviceInstances;
         }

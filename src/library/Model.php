@@ -9,9 +9,9 @@ class Model {
     protected $wpdb;
     protected $table;
     protected $prefix;
-    protected $plugin_prefix;
-    protected $table_name;
-    protected $original_table;
+    protected $pluginPrefix;
+    protected $tableName;
+    protected $originalTable;
     protected $select = '*';
     protected $joins = [];
     protected $orderBy;
@@ -23,22 +23,20 @@ class Model {
     protected $debug = false;
     protected $lastSql = '';
 
-    private Config $config;
-    private Log $log;
+    protected Config $config;
+    protected Log $log;
 
-    public function __construct(Config $config, Log $log) {
-        $this->config = $config;
+    public function __construct(Log $log) {
+        $this->config = $log->config;
         $this->log = $log;
 
         global $wpdb;
         $this->wpdb = $wpdb;
         $this->prefix = $wpdb->prefix;
-        $this->plugin_prefix = $this->config->get('app.database.prefix');
+        $this->pluginPrefix = $this->config->get('app.database.prefix');
 
         // 设置表名
         $this->setTableName();
-
-
     }
 
     public function getWpdb()
@@ -56,8 +54,8 @@ class Model {
         }
 
         // 如果显式指定了表名（不包含前缀），则使用指定的表名
-        if (!empty($this->table_name)) {
-            $this->table = $this->prefix . $this->plugin_prefix . $this->table_name;
+        if (!empty($this->tableName)) {
+            $this->table = $this->prefix . $this->pluginPrefix . $this->tableName;
             return;
         }
 
@@ -69,7 +67,7 @@ class Model {
         // 将驼峰命名转换为下划线命名
         $tableName = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $className));
         
-        $this->table = $this->prefix . $this->plugin_prefix . $tableName;
+        $this->table = $this->prefix . $this->pluginPrefix . $tableName;
     }
 
     public function getTable() {
@@ -77,9 +75,9 @@ class Model {
     }
 
     public function getTableName() {
-        // 如果显式设置了 table_name，直接返回
-        if (!empty($this->table_name)) {
-            return $this->table_name;
+        // 如果显式设置了 tableName，直接返回
+        if (!empty($this->tableName)) {
+            return $this->tableName;
         }
 
         // 如果设置了完整表名，移除两个前缀
@@ -90,8 +88,8 @@ class Model {
                 $table = substr($table, strlen($this->prefix));
             }
             // 移除插件前缀
-            if (strpos($table, $this->plugin_prefix) === 0) {
-                $table = substr($table, strlen($this->plugin_prefix));
+            if (strpos($table, $this->pluginPrefix) === 0) {
+                $table = substr($table, strlen($this->pluginPrefix));
             }
             return $table;
         }
@@ -301,7 +299,7 @@ class Model {
     public function join($table, $condition, $type = 'INNER', $isFullName = false) {
         // 如果不是完整表名，且不是 WordPress 核心表，则添加插件前缀
         if (!$isFullName && !strpos($table, $this->prefix)) {
-            $table = $this->prefix . $this->plugin_prefix . $table;
+            $table = $this->prefix . $this->pluginPrefix . $table;
         }
 
         $this->joins[] = strtoupper($type) . " JOIN {$table} ON {$condition}";
@@ -496,26 +494,49 @@ class Model {
      * @param bool $isFullName 是否是完整表名（true则不添加前缀）
      * @return $this
      */
-    public static function table($tableName, $isFullName = false) {
-        $instance = self::getInstance();
+    public function table($tableName, $isFullName = false) {
 
         // 保存原始表名，以便后续可能需要恢复
-        if (!isset($instance->original_table)) {
-            $instance->original_table = $instance->table;
+        if (!isset($this->originalTable)) {
+            $this->originalTable = $this->table;
         }
 
         // 根据 isFullName 参数决定是否添加前缀
         if ($isFullName) {
-            $instance->table = $tableName;
+            $this->table = $tableName;
         } else {
-            $instance->table = $instance->prefix . $instance->plugin_prefix . $tableName;
+            $this->table = $this->getFullTableName($tableName);
         }
 
         // 重置where条件
-        $instance->where = null;
-        $instance->values = [];
+        $this->where = null;
+        $this->values = [];
 
-        return $instance;
+        return $this;
+    }
+
+    public function getFullTableName($tableName): string
+    {
+        return  $this->prefix . $this->pluginPrefix . $tableName;
+    }
+
+    /**
+     * 检查表是否存在
+     * @param string $tableName 完整的表名
+     * @param bool $isFull 是否是完整表名
+     * @return bool
+     */
+    public function tableExists($tableName,$isFull = false): bool
+    {
+        global $wpdb;
+
+        if($isFull == false) $tableName = $this->getFullTableName($tableName);
+
+        $query = $wpdb->prepare(
+            "SHOW TABLES LIKE %s",
+            $wpdb->esc_like($tableName)
+        );
+        return $wpdb->get_var($query) === $tableName;
     }
 
     /**
@@ -523,8 +544,8 @@ class Model {
      * @return $this
      */
     public function resetTable() {
-        if (isset($this->original_table)) {
-            $this->table = $this->original_table;
+        if (isset($this->originalTable)) {
+            $this->table = $this->originalTable;
         }
         return $this;
     }

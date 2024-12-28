@@ -23,6 +23,8 @@ class RestApi {
     private string $namespacePath;
     private ?Plugin $plugin = null;
     private ?Config $config = null;
+
+    private ?Log $log = null;
     private ?Router $router = null;
     private array $defaultConfig = [
         'methods' => 'POST',
@@ -39,9 +41,11 @@ class RestApi {
     /**
      * 构造函数：初始化并加载路由配置
      */
-    public function __construct(Plugin $plugin,Config $config,Router $router) {
-        $this->plugin = $plugin;
-        $this->config = $config;
+    public function __construct(Log $log,Router $router) {
+        $this->plugin = $log->plugin;
+        $this->config = $log->config;
+        $this->log = $log;
+
         $this->router = $router;
     }
 

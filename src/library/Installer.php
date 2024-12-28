@@ -1,5 +1,6 @@
 <?php
 namespace kitpress\library;
+use kitpress\Kitpress;
 use kitpress\utils\Cron;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Helper;
@@ -16,9 +17,9 @@ class Installer {
     private ?Plugin $plugin = null;
     private ?Log $log = null;
 
-    public function __construct(Plugin $plugin, Config $config, Log $log) {
-        $this->config = $config;
-        $this->plugin = $plugin;
+    public function __construct(Log $log) {
+        $this->plugin = $log->plugin;
+        $this->config = $log->config;
         $this->log = $log;
     }
 
@@ -127,6 +128,8 @@ class Installer {
             // 5. 清理缓存
             \wp_cache_flush();
 
+            // 切换容器，保证执行在同一个容器
+            Kitpress::useNamespace($this->log->plugin->getNamespace());
             // 计划任务
             Cron::deactivate();
 

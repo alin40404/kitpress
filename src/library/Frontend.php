@@ -27,9 +27,9 @@ class Frontend {
     private ?Log $log = null;
     private ?Router $router = null;
 
-    public function __construct(Plugin $plugin,Config $config,Log $log,Router $router) {
-        $this->plugin = $plugin;
-        $this->config = $config;
+    public function __construct(Log $log,Router $router) {
+        $this->plugin = $log->plugin;
+        $this->config = $log->config;
         $this->log = $log;
         $this->router = $router;
         $this->loadRoutes();

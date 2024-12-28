@@ -21,7 +21,6 @@ class Log
      * @var string 当前请求的ID
      */
     private $requestId = null;
-
     public $config = null;
     public $plugin = null;
 

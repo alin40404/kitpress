@@ -105,9 +105,6 @@ class Bootstrap extends Singleton {
             return $this;
         });
 
-        // 使用框架的命名空间和版本初始化容器
-        Facade::setContainer($this->container);
-
         // 加载配置
         $this->loadConfiguration();
     }
@@ -148,7 +145,7 @@ class Bootstrap extends Singleton {
         });
 
         $container->singleton('loader', function($container) {
-            return new \kitpress\library\Loader($container->get('plugin'), $container->get('config'), $container->get('log'));
+            return new \kitpress\library\Loader($container->get('log'));
         });
 
         // 载入通用配置文件

@@ -15,8 +15,8 @@ class Cache {
      */
     private $prefix;
 
-    public function __construct(Config $config) {
-        $this->prefix = 'kp_' . $config->get('app.database.prefix', '');
+    public function __construct(Log $log) {
+        $this->prefix = 'kp_' . $log->config->get('app.database.prefix', '');
     }
 
     /**

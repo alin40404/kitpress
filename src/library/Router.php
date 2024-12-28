@@ -17,9 +17,9 @@ class Router {
 
     private $log = null;
 
-    public function __construct(Plugin $plugin,Log $log) {
+    public function __construct(Log $log) {
         $this->log = $log;
-        $this->namespace = $plugin->getNamespace();
+        $this->namespace = $log->plugin->getNamespace();
     }
 
     /**

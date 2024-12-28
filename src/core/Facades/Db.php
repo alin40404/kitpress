@@ -51,7 +51,7 @@ if (!defined('ABSPATH')) {
  * @method static string getTableName()
  * @method static \wpdb getWpdb()
  */
-class DB extends Facade {
+class Db extends Facade {
     /**
      * 获取组件的注册名称
      * @return string

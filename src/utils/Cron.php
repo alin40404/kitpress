@@ -2,6 +2,7 @@
 namespace kitpress\utils;
 
 use kitpress\core\Facades\Config;
+use kitpress\core\Facades\Log;
 use kitpress\core\Facades\Plugin;
 
 if (!defined('ABSPATH')) {
