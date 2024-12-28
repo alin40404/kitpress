@@ -69,7 +69,24 @@ class Kitpress extends Singleton
         if(empty(self::$namespace)){
             throw new \RuntimeException('Kitpress框架初始化失败，请检查插件路径是否设置正确');
         }
-        return parent::getInstance();
+
+        $key = self::getInstanceKey();
+
+        if (!isset(self::$instances[$key])) {
+            self::$instances[$key] = new static();
+        }
+
+        return self::$instances[$key];
+    }
+
+    /**
+     * 获取实例存储键名
+     *
+     * @return string
+     */
+    private static function getInstanceKey(): string
+    {
+        return md5(self::$namespace . '\\' . static::class);
     }
 
     /**
@@ -85,100 +102,9 @@ class Kitpress extends Singleton
         self::includes($rootPath);
 
         $instance = self::getInstance();
-        $instance->container = Container::getInstance(self::$namespace,KITPRESS_VERSION);
+        $instance->container = Container::getInstance(self::$namespace);
 
         return $instance;
-    }
-
-    /**
-     * 初始化WordPress钩子
-     * 注册所有需要的WordPress动作和过滤器
-     * 
-     * @return void
-     */
-    private function initHooks()
-    {
-        // $this->container->get('log')->error('容器服务：' . json_encode($this->container->getServices()));
-        // $this->container->get('log')->error('初始化钩子' . $this->container->getNamespace());
-        // WordPress 默认优先级是 10
-        // 优先级数字越小越早执行，越大越晚执行
-        \add_action('init', array($this, 'init'), 10);
-        if( \is_admin() ){
-            \add_action('admin_init', array($this, 'adminInit'), 10);
-            \add_action('admin_menu', array($this, 'registerAdminMenus'), 10);
-            \add_action('admin_enqueue_scripts', array($this, 'enqueueAdminScripts'), 10);
-        }
-        \add_action('wp_enqueue_scripts', array($this, 'enqueueScripts'), 10);
-    }
-
-    /**
-     * WordPress init钩子回调
-     * 初始化前台路由、REST API和后台路由
-     * 
-     * @return void
-     */
-    public function init()
-    {
-        // 初始化前台路由
-        $this->container->get('frontend')->init();
-
-        // 初始化接口路由
-        $this->container->get('restapi')->init();
-
-        if ( \is_admin() ) {
-            // 注册后台路由
-            $this->container->get('backend')->registerRoutes();
-        }
-
-        // 初始化所有可初始化类
-        Bootstrap::boot($this->container)->initializeAll();
-
-    }
-
-    /**
-     * WordPress admin_init钩子回调
-     * 初始化后台功能
-     * 
-     * @return void
-     */
-    public function adminInit()
-    {
-        $this->container->get('backend')->init();
-    }
-
-    /**
-     * 注册后台菜单
-     * WordPress admin_menu钩子回调
-     * 
-     * @return void
-     */
-    public function registerAdminMenus()
-    {
-        // 注册后台管理菜单
-        $this->container->get('backend')->registerAdminMenus();
-    }
-
-    /**
-     * 注册前端资源
-     * WordPress wp_enqueue_scripts钩子回调
-     * 
-     * @return void
-     */
-    public function enqueueScripts()
-    {
-        $this->container->get('frontend')->registerAssets();
-    }
-
-    /**
-     * 注册后台资源
-     * WordPress admin_enqueue_scripts钩子回调
-     * 
-     * @param string $hook 当前后台页面的钩子名称
-     * @return void
-     */
-    public function enqueueAdminScripts($hook)
-    {
-        $this->container->get('backend')->registerAssets($hook);
     }
 
     /**
@@ -298,36 +224,14 @@ class Kitpress extends Singleton
     {
         try{
             // 框架引导启动
-            Bootstrap::boot($this->container)->start();
-
-            // 初始化钩子
-            $this->initHooks();
-            $this->shutdown();
+            $bootstap = Bootstrap::boot($this->container);
+            $bootstap->start();
+            $bootstap->run();
+            $bootstap->shutdown();
 
         } catch (BootstrapException $e) {
             ErrorHandler::die($e->getMessage());
         }
-    }
-
-    /**
-     * 注册WordPress关闭时的回调函数
-     * 在请求结束时执行会话保存和日志记录
-     *
-     * 该方法会在WordPress的shutdown钩子中：
-     * 1. 保存会话数据
-     * 2. 记录框架执行完成的日志
-     *
-     * @see add_action() WordPress钩子API
-     * @see Container::get() 容器服务获取
-     * @return void
-     */
-    private function shutdown(): void
-    {
-        // WordPress 钩子系统
-        \add_action('shutdown', function () {
-            $this->container->get('session')->saveSession();
-            $this->container->get('log')->debug('Kitpress已执行完毕');
-        });
     }
 
     /**
@@ -359,7 +263,7 @@ class Kitpress extends Singleton
     public static function setContainer(): void
     {
         $instance = self::getInstance();
-        $instance->container = Container::getInstance(self::$namespace,KITPRESS_VERSION);
+        $instance->container = Container::getInstance(self::$namespace);
     }
 
    /**

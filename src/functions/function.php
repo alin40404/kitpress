@@ -16,7 +16,7 @@ if( !function_exists('kp') ){
      */
     function kp(string $namespace = null): Container
     {
-        return $namespace ? Container::getInstance($namespace,KITPRESS_VERSION) : Kitpress::getContainer();
+        return $namespace ? Container::getInstance($namespace) : Kitpress::getContainer();
     }
 }
 

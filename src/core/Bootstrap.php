@@ -20,13 +20,36 @@ class Bootstrap extends Singleton {
      */
     private array $initializables = [];
 
-    protected function __construct() {
+    protected function __construct(Container $container = null) {
         parent::__construct();
+        $this -> container = $container;
+    }
+
+    /**
+     * 获取插件实例
+     * 如果命名空间未设置会抛出异常
+     *
+     * @return static
+     * @throws \RuntimeException
+     */
+    public static function getInstance(Container $container = null): self
+    {
+        if(empty($container)){
+            throw new \RuntimeException('Bootstrap 容器设置不正确');
+        }
+
+        $key = md5($container->getNamespace() . '\\' . static::class);
+
+        if (!isset(self::$instances[$key])) {
+            self::$instances[$key] = new static($container);
+        }
+
+        return self::$instances[$key];
     }
 
     public static function boot(Container $container = null)
     {
-        $instance = self::getInstance();
+        $instance = self::getInstance($container);
         if ($container !== null ) {
             $instance->container = $container;
         }
@@ -292,7 +315,7 @@ class Bootstrap extends Singleton {
     /**
      * 初始化所有注册的类
      */
-    public function initializeAll(): void {
+    private function initializeAll(): void {
         foreach ($this->initializables as $initializable) {
             try {
                 $initializable->init();
@@ -302,4 +325,118 @@ class Bootstrap extends Singleton {
             }
         }
     }
+
+    /**
+     * 初始化WordPress钩子
+     * 注册所有需要的WordPress动作和过滤器
+     *
+     * @return void
+     */
+    public function run() : void
+    {
+        // $this->container->get('log')->error('容器服务：' . json_encode($this->container->getServices()));
+        // $this->container->get('log')->error('初始化钩子' . $this->container->getNamespace());
+        // WordPress 默认优先级是 10
+        // 优先级数字越小越早执行，越大越晚执行
+        \add_action('init', array($this, 'init'), 10);
+        if( \is_admin() ){
+            \add_action('admin_init', array($this, 'adminInit'), 10);
+            \add_action('admin_menu', array($this, 'registerAdminMenus'), 10);
+            \add_action('admin_enqueue_scripts', array($this, 'enqueueAdminScripts'), 10);
+        }
+        \add_action('wp_enqueue_scripts', array($this, 'enqueueScripts'), 10);
+    }
+
+    /**
+     * WordPress init钩子回调
+     * 初始化前台路由、REST API和后台路由
+     *
+     * @return void
+     */
+    public function init()
+    {
+        // 初始化前台路由
+        $this->container->get('frontend')->init();
+
+        // 初始化接口路由
+        $this->container->get('restapi')->init();
+
+        if ( \is_admin() ) {
+            // 注册后台路由
+            $this->container->get('backend')->registerRoutes();
+        }
+
+        // 初始化所有可初始化类
+        $this->initializeAll();
+
+    }
+
+    /**
+     * WordPress admin_init钩子回调
+     * 初始化后台功能
+     *
+     * @return void
+     */
+    public function adminInit()
+    {
+        $this->container->get('backend')->init();
+    }
+
+    /**
+     * 注册后台菜单
+     * WordPress admin_menu钩子回调
+     *
+     * @return void
+     */
+    public function registerAdminMenus()
+    {
+        // 注册后台管理菜单
+        $this->container->get('backend')->registerAdminMenus();
+    }
+
+    /**
+     * 注册前端资源
+     * WordPress wp_enqueue_scripts钩子回调
+     *
+     * @return void
+     */
+    public function enqueueScripts()
+    {
+        $this->container->get('frontend')->registerAssets();
+    }
+
+    /**
+     * 注册后台资源
+     * WordPress admin_enqueue_scripts钩子回调
+     *
+     * @param string $hook 当前后台页面的钩子名称
+     * @return void
+     */
+    public function enqueueAdminScripts($hook)
+    {
+        $this->container->get('backend')->registerAssets($hook);
+    }
+
+
+    /**
+     * 注册WordPress关闭时的回调函数
+     * 在请求结束时执行会话保存和日志记录
+     *
+     * 该方法会在WordPress的shutdown钩子中：
+     * 1. 保存会话数据
+     * 2. 记录框架执行完成的日志
+     *
+     * @see add_action() WordPress钩子API
+     * @see Container::get() 容器服务获取
+     * @return void
+     */
+    public function shutdown(): void
+    {
+        // WordPress 钩子系统
+        \add_action('shutdown', function () {
+            $this->container->get('session')->saveSession();
+            $this->container->get('log')->debug('Kitpress已执行完毕');
+        });
+    }
+
 }

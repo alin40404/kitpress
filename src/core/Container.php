@@ -50,9 +50,9 @@ class Container extends Singleton implements ContainerInterface {
      * @param string $namespace 插件命名空间
      * @param string $version 框架版本
      */
-    protected function __construct(string $namespace = '', string $version = '1.0.0') {
+    protected function __construct(string $namespace = '') {
         $this->namespace = $namespace;
-        $this->version = $version;
+        $this->version = KITPRESS_VERSION;
         parent::__construct();
     }
 
@@ -61,10 +61,10 @@ class Container extends Singleton implements ContainerInterface {
      * @param string $namespace 插件命名空间
      * @param string $version 框架版本
      */
-    public static function getInstance(string $namespace = '', string $version = '1.0.0'): self {
+    public static function getInstance(string $namespace = ''): self {
         $key = $namespace ?: 'default';
         if (!isset(static::$containers[$key])) {
-            static::$containers[$key] = new static($namespace, $version);
+            static::$containers[$key] = new static($namespace);
         }
         return static::$containers[$key];
     }
@@ -320,17 +320,7 @@ class Container extends Singleton implements ContainerInterface {
      * @return array
      */
     public function getServices(): array {
-        if (empty($this->namespace)) {
-            return $this->serviceInstances;
-        }
-
-        return array_filter(
-            $this->serviceInstances,
-            function($key) {
-                return strpos($key, $this->namespace . '.') === 0;
-            },
-            ARRAY_FILTER_USE_KEY
-        );
+        return $this->serviceInstances;
     }
 
     /**
@@ -338,17 +328,7 @@ class Container extends Singleton implements ContainerInterface {
      * @return array
      */
     protected function getNamespacedBindings(): array {
-        if (empty($this->namespace)) {
-            return $this->bindings;
-        }
-
-        return array_filter(
-            $this->bindings,
-            function($key) {
-                return strpos($key, $this->namespace . '.') === 0;
-            },
-            ARRAY_FILTER_USE_KEY
-        );
+        return $this->bindings;
     }
 
     /**
