@@ -206,7 +206,7 @@ class Kitpress extends Singleton
      * 加载插件
      * @return void
      */
-    public function loaded()
+    public function loaded(): void
     {
         $this->activate();
 
@@ -217,10 +217,9 @@ class Kitpress extends Singleton
 
     /**
      * 运行
-     * @param $rootPath 插件根目录
-     * @return Kitpress|mixed
+     * @return void
      */
-    public function run()
+    public function run(): void
     {
         try{
             // 初始化钩子
@@ -233,7 +232,7 @@ class Kitpress extends Singleton
         return;
     }
 
-    public function shutdown()
+    public function shutdown(): void
     {
         // WordPress 钩子系统
         \add_action('shutdown', function () {
