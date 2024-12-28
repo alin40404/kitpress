@@ -57,23 +57,20 @@ class Backend {
     }
 
     public function registerRoutes() {
-        if (is_admin()) {
-
-            // 注册后台路由
-            if ($this->routes) {
-                if (isset($this->routes['post']) && !empty($this->routes['post'])) {
-                    foreach ($this->routes['post'] as $action => $handler) {
-                        add_action('admin_post_' . $action, function() use ($action) {
-                            $this->handleRoute('post', $action);
-                        });
-                    }
+        // 注册后台路由
+        if ($this->routes) {
+            if (isset($this->routes['post']) && !empty($this->routes['post'])) {
+                foreach ($this->routes['post'] as $action => $handler) {
+                    add_action('admin_post_' . $action, function() use ($action) {
+                        $this->handleRoute('post', $action);
+                    });
                 }
-                if (isset($this->routes['ajax']) && !empty($this->routes['ajax'])) {
-                    foreach ($this->routes['ajax'] as $action => $handler) {
-                        add_action('wp_ajax_' . $action, function() use ($action) {
-                            $this->handleRoute('ajax', $action);
-                        });
-                    }
+            }
+            if (isset($this->routes['ajax']) && !empty($this->routes['ajax'])) {
+                foreach ($this->routes['ajax'] as $action => $handler) {
+                    add_action('wp_ajax_' . $action, function() use ($action) {
+                        $this->handleRoute('ajax', $action);
+                    });
                 }
             }
         }

@@ -24,27 +24,6 @@ class Installer {
     }
 
     /**
-     * 注册插件的激活和停用钩子
-     * @return void
-     */
-    public function register() {
-
-        \register_activation_hook(
-           $this->plugin->getRootFile() ,
-            function() {
-                $this->activate();
-            }
-        );
-
-        \register_deactivation_hook(
-           $this->plugin->getRootFile(),
-            function() {
-                $this->deactivate();
-            }
-        );
-    }
-
-    /**
      * 激活插件时执行
      */
     public function activate() {
@@ -86,6 +65,9 @@ class Installer {
 
             // 9. 清理缓存
             \wp_cache_flush();
+
+            // 初始化计划任务
+             Cron::init();
 
             $this->log->debug('Installer::activate 执行完成');
         } catch (\Exception $e) {
