@@ -62,7 +62,7 @@ trait ViewTrait {
      * @return string
      */
     protected function getViewFile($view) {
-        return kp_plugin($this->plugin->getNamespace())->getRootPath() . $this->viewPath . '/' . $view . '.php';
+        return $this->plugin->getRootPath() . $this->viewPath . '/' . $view . '.php';
     }
 
     /**
