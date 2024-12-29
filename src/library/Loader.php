@@ -10,7 +10,7 @@ class Loader {
     private $plugin = null;
     private $log = null;
 
-    public function __construct(Log $log) {
+    public function __construct(Log $log = null) {
         $this->config = $log->config;
         $this->plugin = $log->plugin;
         $this->log = $log;

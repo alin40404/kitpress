@@ -9,13 +9,20 @@ if (!defined('ABSPATH')) {
 }
 
 /**
+ * Bootstrap Facade
  *
- * @see \kitpress\library\Bootstrap 实际的后台功能实现类
- *
+ * @method static self getInstance(Container $container = null)
+ * @method static self boot(Container $container = null)
  * @method static bool start()
- * @method static void initializeAll()
- * @method static void registerInitializable(\kitpress\core\abstracts\Initializable $instance)
+ * @method static void run()
+ * @method static void init()
+ * @method static void adminInit()
+ * @method static void registerAdminMenus()
+ * @method static void enqueueScripts()
+ * @method static void enqueueAdminScripts(string $hook)
+ * @method static void shutdown()
  *
+ * @see \kitpress\core\Bootstrap
  */
 class Bootstrap extends Facade
 {

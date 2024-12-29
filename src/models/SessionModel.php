@@ -11,17 +11,23 @@ if (!defined('ABSPATH')) {
 }
 
 class SessionModel extends Model {
-    protected $table_name = 'sessions';
+    protected $tableName = 'sessions';
+    private ?Installer $installer = null;
 
+    public function __construct(Log $log = null)
+    {
+        parent::__construct($log);
+        $this->installer = new Installer($log);
+    }
 
     /**
      * 检查并创建会话表
      */
     public function ensureTableExists() {
 
-        if( $this->tableExists($this->table_name) == false ) {
-            Installer::createTables([
-                $this->table_name => $this->config->get('database.versions.kp.tables.sessions', [])
+        if( $this->tableExists($this->tableName) == false ) {
+             $this->installer->createTables([
+                $this->tableName => $this->config->get('database.versions.kp.tables.sessions', [])
             ]);
         }
 

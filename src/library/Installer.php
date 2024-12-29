@@ -17,7 +17,7 @@ class Installer {
     private ?Plugin $plugin = null;
     private ?Log $log = null;
 
-    public function __construct(Log $log) {
+    public function __construct(Log $log = null) {
         $this->plugin = $log->plugin;
         $this->config = $log->config;
         $this->log = $log;

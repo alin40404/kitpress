@@ -26,7 +26,7 @@ class Model {
     protected Config $config;
     protected Log $log;
 
-    public function __construct(Log $log) {
+    public function __construct(Log $log = null) {
         $this->config = $log->config;
         $this->log = $log;
 
