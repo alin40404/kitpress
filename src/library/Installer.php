@@ -198,7 +198,7 @@ class Installer {
         if( empty($tables) ) return;
 
         global $wpdb;
-        require(ABSPATH . 'wp-admin/includes/upgrade.php');
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
         foreach ($tables as  $definition) {
             $table_name = $wpdb->prefix . $this->config->get('app.database.prefix') . $definition['name'];
@@ -238,7 +238,7 @@ class Installer {
         if(empty($definition)) return;
 
         global $wpdb;
-        require(ABSPATH . 'wp-admin/includes/upgrade.php');
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
         $table_name = $wpdb->prefix . $this->config->get('app.database.prefix') . $definition['name'];
         $columns = $definition['columns'];
