@@ -21,6 +21,7 @@ class Installer {
         $this->plugin = $log->plugin;
         $this->config = $log->config;
         $this->log = $log;
+        $this->config->load('database');
     }
 
     /**
@@ -56,7 +57,7 @@ class Installer {
 
             // 7. 更新数据库版本号
             \update_option(
-                $this->config->get('app.options.db_version_key'),
+                Helper::optionKey('db_version'),
                 $this->config->get('app.db_version')
             );
 
@@ -150,7 +151,7 @@ class Installer {
     public function checkVersion($rootPath) {
 
         $current_version = $this->config->get('app.db_version');
-        $installed_version = \get_option($this->config->get('app.options.db_version_key'));
+        $installed_version = \get_option(Helper::optionKey('db_version'));
 
         if (!$installed_version) {
             $this->activate();
@@ -185,7 +186,7 @@ class Installer {
         }
 
         \update_option(
-            $this->config->get('app.options.db_version_key'),
+            Helper::optionKey('db_version'),
             $this->config->get('app.db_version')
         );
     }
