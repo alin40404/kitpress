@@ -14,6 +14,7 @@ abstract class Controller {
     use ViewTrait;
 
     protected $model = null;
+    protected $config = null;
 
     /**
      * 当前容器
@@ -41,6 +42,7 @@ abstract class Controller {
     protected function init() {
         $this->plugin = $this->container->get('plugin');
         $this->model = $this->container->get('model');
+        $this->config = $this->container->get('config');
     }
 
     /**
