@@ -298,7 +298,7 @@ class Model {
      */
     public function join($table, $condition, $type = 'INNER', $isFullName = false) {
         // 如果不是完整表名，且不是 WordPress 核心表，则添加插件前缀
-        if (!$isFullName && !strpos($table, $this->prefix)) {
+        if (!$isFullName && stripos($table, $this->prefix) !== 0) {
             $table = $this->prefix . $this->pluginPrefix . $table;
         }
 
