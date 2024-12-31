@@ -12,6 +12,7 @@ if (!defined('ABSPATH')) {
 abstract class BackendController extends Controller {
 
     protected array $styles = [];
+    protected array $scripts = [];
     protected string $page = '';
     protected string $controllerName = '';
     protected string $formatControllerName = '';
@@ -115,8 +116,8 @@ abstract class BackendController extends Controller {
     {
         // 加载多个样式文件
         $styles = [
-            $this->plugin->getPrefix() . 'common' => 'backend/assets/component/common.css',
-            $this->page => 'backend/assets/css/'. $this->formatControllerName .'.css',
+            $this->page . '-common' => 'backend/assets/component/common.css',
+            $this->page  => 'backend/assets/css/'. $this->formatControllerName .'.css',
         ];
 
         $styles = array_merge($styles, $this->styles);
@@ -128,7 +129,7 @@ abstract class BackendController extends Controller {
             }
 
             \wp_enqueue_style(
-                $handle,
+                $handle . '-style',
                 $path,
                 [],
                 $this->config->get('app.version')
@@ -156,13 +157,34 @@ abstract class BackendController extends Controller {
      */
     protected function setupJs()
     {
-        \wp_enqueue_script(
-            $this->page,
-            $this->plugin->getRootUrl() . 'backend/assets/js/'. $this->formatControllerName .'.js',
-            ['vue', 'jquery'],  // 添加 jquery 依赖
-            $this->config->get('app.version'),
-            true
-        );
+        // 加载多个样式文件
+        $scripts = [
+            $this->page . '-common' => 'backend/assets/component/common.js',
+            $this->page  => 'backend/assets/js/'. $this->formatControllerName .'.js',
+        ];
+
+        $scripts = array_merge($scripts, $this->scripts);
+
+        foreach ($scripts as $handle => $path) {
+            if (!preg_match('/^https?:\/\//', $path)) {
+                $path = $this->plugin->getRootUrl() . $path;
+            }
+
+            // 设置依赖关系
+            $deps = ['vue', 'jquery'];
+            // 如果不是公共脚本，添加对公共脚本的依赖
+            if ($handle !==  $this->page . '-common') {
+                $deps[] =  $this->page . '-common-script';
+            }
+
+            \wp_enqueue_script(
+                $handle . '-script',
+                $path,
+                $deps,
+                $this->config->get('app.version'),
+                true
+            );
+        }
     }
 
     /**
