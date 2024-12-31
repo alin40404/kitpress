@@ -103,7 +103,7 @@ abstract class BackendController extends Controller {
     {
         // 添加必要的数据
         \wp_localize_script(
-            $this->page,
+            $this->page . '-common-script',
             $this->scriptObjectName() ,
             $this->setL10n()
         );
