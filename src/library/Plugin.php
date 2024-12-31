@@ -49,4 +49,9 @@ class Plugin {
         }
         return $file_name;
     }
+
+    public function getPrefix()
+    {
+        return $this->namespace . '-';
+    }
 }
