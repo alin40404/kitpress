@@ -163,7 +163,7 @@ abstract class Command {
                 return $base_content . "// " . basename($filename, '.php') . " content here\n";
         }
     }
-    
+
     abstract public function getRootPath() : string;
 
 
