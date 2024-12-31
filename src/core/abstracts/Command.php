@@ -9,7 +9,6 @@ if (!defined('ABSPATH')) {
 }
 
 abstract class Command {
-    protected string $rootPath = '';
     /**
      * 项目基础目录结构
      */
@@ -164,13 +163,8 @@ abstract class Command {
                 return $base_content . "// " . basename($filename, '.php') . " content here\n";
         }
     }
-
-    public function getRootPath()
-    {
-        return $this->rootPath;
-    }
-
-    abstract public function setRootPath(string $rootPath) : string;
+    
+    abstract public function getRootPath() : string;
 
 
 }
