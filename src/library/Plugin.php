@@ -50,6 +50,11 @@ class Plugin {
         return $file_name;
     }
 
+    public function getRootUrl(): string
+    {
+        return \plugin_dir_url( $this->getRootFile() );
+    }
+
     public function getPrefix()
     {
         return $this->namespace . '-';

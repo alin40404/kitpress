@@ -15,6 +15,7 @@ if (!defined('ABSPATH')) {
 * @method static string key() 获取插件根路径键名|同命名空间
 * @method static string getRootPath() 获取插件根路径
 * @method static string getRootFile() 获取插件根目录主文件
+* @method static string getRootUrl() 获取插件根目录URL
 * @method static string getPrefix() 获取插件前缀
 *
 * @see \kitpress\library\Plugin 实际的插件功能实现类

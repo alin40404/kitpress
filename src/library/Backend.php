@@ -139,7 +139,7 @@ class Backend {
         // 获取处理器配置
         if ( !empty($handler) ) {
             try {
-                
+
                 // 解析控制器和方法
                 list($controller, $method) = $this->parseHandler($handler);
 
