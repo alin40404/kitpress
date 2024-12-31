@@ -56,19 +56,30 @@ class Backend {
         }
     }
 
+    // 添加新的辅助方法
+    private function formatActionName(string $action): string {
+        $prefix = $this->plugin->getPrefix();
+        // 将前缀中的连字符转换为下划线
+        // $prefix = str_replace('-', '_', $prefix);
+        if( stripos($action, $prefix) === 0 ){
+            return $action;
+        }
+        return $prefix . $action;
+    }
+
     public function registerRoutes() {
         // 注册后台路由
         if ($this->routes) {
             if (isset($this->routes['post']) && !empty($this->routes['post'])) {
                 foreach ($this->routes['post'] as $action => $handler) {
-                    add_action('admin_post_' . $action, function() use ($action) {
+                    \add_action('admin_post_' . $this->formatActionName($action), function() use ($action) {
                         $this->handleRoute('post', $action);
                     });
                 }
             }
             if (isset($this->routes['ajax']) && !empty($this->routes['ajax'])) {
                 foreach ($this->routes['ajax'] as $action => $handler) {
-                    add_action('wp_ajax_' . $action, function() use ($action) {
+                    \add_action('wp_ajax_' . $this->formatActionName($action), function() use ($action) {
                         $this->handleRoute('ajax', $action);
                     });
                 }
@@ -82,22 +93,22 @@ class Backend {
 
         foreach ($this->menus as $menu) {
             if (!isset($menu['parent_slug']) || is_null($menu['parent_slug'])) {
-                add_menu_page(
+                \add_menu_page(
                     $menu['page_title'] ?? '',
                     $menu['menu_title'] ?? '',
                     $menu['capability'] ?? 'manage_options',
-                    $menu['menu_slug'] ?? '',
+                    ($menu['use_prefix'] ?? true) ? $this->plugin->getPrefix() . ($menu['menu_slug'] ?? '') : ($menu['menu_slug'] ?? ''),
                     [$this, 'handleMenuCallback'],
                     $menu['icon'] ?? '',
                     $menu['position'] ?? null
                 );
             } else {
-                add_submenu_page(
-                    $menu['parent_slug'] ?? '',
+                \add_submenu_page(
+                    ($menu['use_prefix'] ?? true) ? $this->plugin->getPrefix() . ($menu['parent_slug'] ?? '') : ($menu['parent_slug'] ?? ''),
                     $menu['page_title'] ?? '',
                     $menu['menu_title'] ?? '',
                     $menu['capability'] ?? 'manage_options',
-                    $menu['menu_slug'] ?? '',
+                    ($menu['use_prefix'] ?? true) ? $this->plugin->getPrefix() . ($menu['menu_slug'] ?? '') : ($menu['menu_slug'] ?? ''),
                     [$this, 'handleMenuCallback']
                 );
             }
@@ -170,8 +181,13 @@ class Backend {
             ));
         }
 
-        if (isset($this->routes['page'][$page])) {
-            $handler = $this->routes['page'][$page];
+        $handler = isset($this->routes['page'][$page]) ? $this->routes['page'][$page] : null;
+        if( empty($handler) && stripos($page,$this->plugin->getPrefix()) === 0 ){
+            $subPage = substr($page,strlen($this->plugin->getPrefix()));
+            $handler = $this->routes['page'][$subPage] ?? null;
+        }
+
+        if ( !empty($handler) ) {
             $this->handleRequest($handler,$action);
         }else{// 未配置
             return ErrorHandler::die(sprintf(
@@ -220,7 +236,7 @@ class Backend {
             }
 
             if ($type === 'ajax') {
-                wp_send_json_error(['message' => $message]);
+                \wp_send_json_error(['message' => $message]);
             } else {
                 ErrorHandler::die($message);
             }

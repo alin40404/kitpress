@@ -11,6 +11,7 @@ if (!defined('ABSPATH')) {
 //        'menu_slug' => 'nine-box-survey',  // 菜单slug
 //        'icon' => 'dashicons-clipboard',   // 图标
 //        'position' => 30,                  // 位置
+//        'use_prefix' => true,              // 使用前缀，默认true
 //    ],
 //    [
 //        'parent_slug' => 'nine-box-survey',
