@@ -85,12 +85,12 @@ abstract class BackendController extends Controller {
     {
         return [
             'ajaxurl' => \admin_url('admin-ajax.php'),
-            'action_list' => $this->plugin->getPrefix() . $this->formatControllerName . '-list',
-            'action_create' => $this->plugin->getPrefix() . $this->formatControllerName . '-create',
-            'action_update' => $this->plugin->getPrefix() . $this->formatControllerName . '-update',
-            //'action_status' => $this->plugin->getPrefix() . $this->formatControllerName . '-status',
-            //'action_sort' => $this->plugin->getPrefix() . $this->formatControllerName . '-sort',
-            'nonce' => \wp_create_nonce($this->plugin->getPrefix() . $this->formatControllerName .'-nonce')
+            'action_list' => $this->page . '-list',
+            'action_create' => $this->page . '-create',
+            'action_update' => $this->page . '-update',
+            //'action_status' => $this->page . '-status',
+            //'action_sort' => $this->page . '-sort',
+            'nonce' => \wp_create_nonce($this->page .'-nonce')
         ];
     }
 
@@ -102,7 +102,7 @@ abstract class BackendController extends Controller {
     {
         // 添加必要的数据
         \wp_localize_script(
-            $this->plugin->getPrefix() . $this->formatControllerName,
+            $this->page,
             $this->scriptObjectName() ,
             $this->setL10n()
         );
@@ -116,7 +116,7 @@ abstract class BackendController extends Controller {
         // 加载多个样式文件
         $styles = [
             $this->plugin->getPrefix() . 'common' => 'backend/assets/component/common.css',
-            $this->plugin->getPrefix() . $this->formatControllerName => 'backend/assets/css/'. $this->formatControllerName .'.css',
+            $this->page => 'backend/assets/css/'. $this->formatControllerName .'.css',
         ];
 
         $styles = array_merge($styles, $this->styles);
@@ -157,7 +157,7 @@ abstract class BackendController extends Controller {
     protected function setupJs()
     {
         \wp_enqueue_script(
-            $this->plugin->getPrefix() . $this->formatControllerName,
+            $this->page,
             $this->plugin->getRootUrl() . 'backend/assets/js/'. $this->formatControllerName .'.js',
             ['vue', 'jquery'],  // 添加 jquery 依赖
             $this->config->get('app.version'),
