@@ -130,12 +130,16 @@ class Backend {
             ));
         }
 
-        // 如果在路由配置中存在该页面
-        if (isset($this->routes['page'][$page])) {
-            try {
-                // 获取处理器配置
-                $handler = $this->routes['page'][$page];
+        $handler = isset($this->routes['page'][$page]) ? $this->routes['page'][$page] : null;
+        if( empty($handler) && stripos($page,$this->plugin->getPrefix()) === 0 ){
+            $subPage = substr($page,strlen($this->plugin->getPrefix()));
+            $handler = $this->routes['page'][$subPage] ?? null;
+        }
 
+        // 获取处理器配置
+        if ( !empty($handler) ) {
+            try {
+                
                 // 解析控制器和方法
                 list($controller, $method) = $this->parseHandler($handler);
 
