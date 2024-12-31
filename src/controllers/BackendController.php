@@ -44,7 +44,7 @@ abstract class BackendController extends Controller {
         // 移除 Controller 后缀
         $this->controllerName = str_replace('Controller', '', $className);
 
-        // 将驼峰式转换为下划线格式
+        // 将驼峰式转换为-格式
         $formatted = preg_replace('/(?<!^)[A-Z]/', '-$0', $this->controllerName);
 
         // 转换为小写
