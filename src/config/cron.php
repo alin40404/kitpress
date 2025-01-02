@@ -4,7 +4,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-
 return [
     /// recurrence  默认支持
     /// hourly - 每小时执行一次

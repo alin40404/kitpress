@@ -30,6 +30,7 @@ abstract class Command {
             'app.php',
             'database.php',
             'menu.php',
+            'cron.php',
         ],
         'functions' => [
             'function.php'
@@ -42,8 +43,9 @@ abstract class Command {
             'frontend.php',
         ],
         'utils',
+        'commands',
     ];
-    
+
     /**
      * 初始化项目结构
      *
@@ -131,33 +133,19 @@ abstract class Command {
      */
     private function getFileContent(string $filename): string
     {
+        $stub_path = dirname(__DIR__) . '/templates/stubs/';
         $base_content = "<?php\n\nif (!defined('ABSPATH')) {\n    exit;\n}\n\n";
 
-        switch ($filename) {
-            case 'app.php':
-                return $base_content . "return [\n    'version' => '1.0.0',\n    'name' => 'KitPress',\n];";
+        // 获取不带扩展名的文件名
+        $name = basename($filename, '.php');
 
-            case 'database.php':
-                return $base_content . "return [\n    'prefix' => 'wp_',\n    'charset' => 'utf8mb4',\n];";
-
-            case 'menu.php':
-                return $base_content . "return [\n    'admin' => [],\n    'frontend' => [],\n];";
-
-            case 'function.php':
-                return $base_content . "// Add your helper functions here\n";
-
-            case 'api.php':
-                return $base_content . "// Register your API routes here\n";
-
-            case 'backend.php':
-                return $base_content . "// Register your backend routes here\n";
-
-            case 'frontend.php':
-                return $base_content . "// Register your frontend routes here\n";
-
-            default:
-                return $base_content . "// " . basename($filename, '.php') . " content here\n";
+        // 检查是否存在对应的模板文件
+        if (file_exists($stub_path . $name . '.stub')) {
+            return file_get_contents($stub_path . $name . '.stub');
         }
+
+        // 如果没有找到模板文件，返回默认内容
+        return $base_content . "// " . $name . " content here\n";
     }
 
     abstract public function getRootPath() : string;

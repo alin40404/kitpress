@@ -1,0 +1,15 @@
+<?php
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+return [
+//    'v1' => [
+//        'demo' => [
+//            'methods' => 'POST',
+//            'callback' => 'DemoController@index',
+//            'permission_callback' => '__return_true',
+//        ],
+//    ]
+];

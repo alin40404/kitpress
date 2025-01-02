@@ -1,0 +1,24 @@
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+return [
+    [
+        'page_title' => '插件主菜单',     // 页面标题
+        'menu_title' => '插件主菜单',     // 菜单标题
+        'capability' => 'manage_options',  // 权限
+        'menu_slug' => 'kitpress-plugin-menu',  // 菜单slug
+        'icon' => 'dashicons-clipboard',   // 图标
+        'position' => 30,                  // 位置
+        'use_prefix' => true,              // 使用前缀，默认true
+    ],
+    [
+        'parent_slug' => 'kitpress-plugin-menu',
+        'page_title' => '插件二级菜单',
+        'menu_title' => '插件二级菜单',
+        'capability' => 'manage_options',
+        'menu_slug' => 'kitpress-plugin-submenu',
+        'use_prefix' => true,
+    ],
+];

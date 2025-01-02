@@ -16,13 +16,7 @@ return [
 
     // 保存到数据库的常量字段名
     'options' => [
-    ],
-
-    'session' => [
-        'enabled' => false, // 是否启用 session
-        'table' => 'sessions',
-        'cookie' => 'kp_session',
-        'expires' => 48 * 60,
+        // 'key' => 'value',
     ],
 
     'database' => [
@@ -38,8 +32,10 @@ return [
     ],
 
 	'init' => [
+        // \Namespace\frontend\controllers\DemoController::class
 	],
 
     'providers' => [
+        // \Namespace\providers\DemoProvider::class
     ],
 ];

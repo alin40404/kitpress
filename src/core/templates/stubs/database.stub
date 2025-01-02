@@ -1,0 +1,14 @@
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+return [
+    'versions' => [
+        '100' => [
+            'tables' => [
+            ],
+            'default_data' => [
+            ],
+        ],
+    ],
+];

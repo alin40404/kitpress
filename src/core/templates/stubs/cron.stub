@@ -1,0 +1,15 @@
+<?php
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+return [
+    // 定时任务列表
+    'tasks' => [
+    ],
+
+    // 自定义时间间隔
+    'intervals' => [
+    ]
+];
