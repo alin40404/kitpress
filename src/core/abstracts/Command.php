@@ -50,15 +50,12 @@ abstract class Command {
      *
      * ## OPTIONS
      *
-     * <path>
-     * : 项目根目录路径
-     *
      * [--force]
      * : 强制创建（如果目录已存在则覆盖）
      *
      * ## EXAMPLES
-     *     wp kitpress init /path/to/project
-     *     wp kitpress init . --force
+     *     wp kitpress init
+     *     wp kitpress init --force
      */
     public function __invoke($args, $assoc_args)
     {
