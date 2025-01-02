@@ -58,9 +58,9 @@ abstract class Command {
      *     wp kitpress init
      *     wp kitpress init --force
      */
-    public function __invoke($args, $assoc_args)
+    public function init($args, $assoc_args)
     {
-        $force = isset($assoc_args['force']);
+        $force = \WP_CLI\Utils\get_flag_value($assoc_args, 'force', false);
 
         $root_path = $this->getRootPath();
 
@@ -149,6 +149,4 @@ abstract class Command {
     }
 
     abstract public function getRootPath() : string;
-
-
 }
