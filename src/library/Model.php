@@ -26,6 +26,30 @@ class Model {
     protected Config $config;
     protected Log $log;
 
+    /**
+     * 是否自动写入时间戳
+     * @var bool
+     */
+    protected $autoWriteTimestamp = true;
+
+    /**
+     * 创建时间字段
+     * @var string|false
+     */
+    protected $createTime = 'created_at';
+
+    /**
+     * 更新时间字段
+     * @var string|false
+     */
+    protected $updateTime = 'updated_at';
+
+    /**
+     * 时间字段格式
+     * @var string
+     */
+    protected $dateFormat = 'Y-m-d H:i:s';
+
     public function __construct(Log $log = null) {
         $this->config = $log->config;
         $this->log = $log;
@@ -117,6 +141,9 @@ class Model {
      * @return bool|int
      */
     public function insertOrUpdate(array $data, array $update_fields = []) {
+        // 自动处理时间戳
+        $data = $this->autoTimestamp($data, 'insert');
+
         global $wpdb;
 
         if (empty($data)) {
@@ -141,7 +168,17 @@ class Model {
             $sql .= implode(', ', $updates);
         }
 
-        return $wpdb->query($wpdb->prepare($sql, $values));
+        $prepared_sql = $wpdb->prepare($sql, $values);
+
+        // 保存最后执行的 SQL
+        $this->lastSql = $prepared_sql;
+
+        // 如果开启了调试模式
+        if ($this->debug) {
+            $this->log->info("Insert SQL: " . $this->lastSql);
+        }
+
+        return $wpdb->query($prepared_sql);
     }
 
     /**
@@ -170,11 +207,22 @@ class Model {
      * @return int|false 返回插入的ID或false
      */
     public function insert($data, $format = null) {
+        // 自动处理时间戳
+        $data = $this->autoTimestamp($data, 'insert');
+
         $result = $this->wpdb->insert(
             $this->table,
             $data,
             $format
         );
+
+        // 保存最后执行的 SQL
+        $this->lastSql = $this->wpdb->last_query;
+
+        // 如果开启了调试模式
+        if ($this->debug) {
+            $this->log->info("Insert SQL: " . $this->lastSql);
+        }
 
         return $result !== false ? $this->wpdb->insert_id : false;
     }
@@ -190,26 +238,49 @@ class Model {
      * @return false|int
      */
     public function update($data, $conditions = null, $format = null, $where_format = null) {
+        // 自动处理时间戳
+        $data = $this->autoTimestamp($data, 'update');
+
         if (is_numeric($conditions)) {
             // 如果是单个ID，使用简单更新
-            return $this->wpdb->update(
+            $result = $this->wpdb->update(
                 $this->table,
                 $data,
                 ['id' => $conditions],
                 $format,
                 $where_format ?? ['%d']
             );
+
+            // 保存最后执行的 SQL
+            $this->lastSql = $this->wpdb->last_query;
+
+            // 如果开启了调试模式
+            if ($this->debug) {
+                $this->log->info("Update SQL: " . $this->lastSql);
+            }
+
+            return $result;
         }
 
         if (is_array($conditions)) {
             // 如果是条件数组，直接使用 wpdb->update
-            return $this->wpdb->update(
+            $result = $this->wpdb->update(
                 $this->table,
                 $data,
                 $conditions,
                 $format,
                 $where_format
             );
+
+            // 保存最后执行的 SQL
+            $this->lastSql = $this->wpdb->last_query;
+
+            // 如果开启了调试模式
+            if ($this->debug) {
+                $this->log->info("Update SQL: " . $this->lastSql);
+            }
+
+            return $result;
         }
 
         // 使用 where 条件的情况
@@ -228,9 +299,18 @@ class Model {
             // 合并 SET 子句的值和 WHERE 子句的值
             $values = array_merge($values, $this->values);
 
-            $result = $this->wpdb->query(
-                $this->wpdb->prepare($sql, $values)
-            );
+            // 准备 SQL
+            $prepared_sql = $this->wpdb->prepare($sql, $values);
+
+            // 保存最后执行的 SQL
+            $this->lastSql = $prepared_sql;
+
+            // 如果开启了调试模式
+            if ($this->debug) {
+                $this->log->info("Update SQL: " . $this->lastSql);
+            }
+
+            $result = $this->wpdb->query($prepared_sql);
 
             $this->where = null;
             $this->values = [];
@@ -247,30 +327,62 @@ class Model {
      * @return false|int
      */
     public function delete($conditions = null, $format = null) {
+
         if (is_numeric($conditions)) {
             // 如果是单个ID，使用简单删除
-            return $this->wpdb->delete(
+            $result = $this->wpdb->delete(
                 $this->table,
                 ['id' => $conditions],
                 ['%d']
             );
+
+            // 保存最后执行的 SQL
+            $this->lastSql = $this->wpdb->last_query;
+
+            // 如果开启了调试模式
+            if ($this->debug) {
+                $this->log->info("Delete SQL: " . $this->lastSql);
+            }
+
+            return $result;
         }
 
         if (is_array($conditions)) {
             // 如果是条件数组，直接使用 wpdb->delete
-            return $this->wpdb->delete(
+            $result = $this->wpdb->delete(
                 $this->table,
                 $conditions,
                 $format
             );
+
+            // 保存最后执行的 SQL
+            $this->lastSql = $this->wpdb->last_query;
+
+            // 如果开启了调试模式
+            if ($this->debug) {
+                $this->log->info("Delete SQL: " . $this->lastSql);
+            }
+
+            return $result;
         }
 
         // 使用 where 条件的情况
         if (!empty($this->where)) {
             $sql = "DELETE FROM {$this->table} WHERE " . $this->where;
-            $result = $this->wpdb->query(
-                $this->wpdb->prepare($sql, $this->values)
-            );
+
+            // 准备 SQL
+            $prepared_sql = $this->wpdb->prepare($sql, $this->values);
+
+            // 保存最后执行的 SQL
+            $this->lastSql = $prepared_sql;
+
+            // 如果开启了调试模式
+            if ($this->debug) {
+                $this->log->info("Delete SQL: " . $this->lastSql);
+            }
+
+            $result = $this->wpdb->query($prepared_sql);
+
             $this->where = null;
             $this->values = [];
             return $result;
@@ -573,6 +685,52 @@ class Model {
             $wpdb->esc_like($tableName)
         );
         return $wpdb->get_var($query) === $tableName;
+    }
+
+
+    /**
+     * 自动处理时间戳
+     * @param array $data 数据
+     * @param string $type 类型 insert/update
+     * @return array
+     */
+    protected function autoTimestamp(array $data, string $type = 'insert'): array
+    {
+        if (!$this->autoWriteTimestamp) {
+            return $data;
+        }
+
+        $timestamp = \current_time($this->dateFormat);
+
+        if ($type === 'insert' && $this->createTime && !isset($data[$this->createTime])) {
+            $data[$this->createTime] = $timestamp;
+        }
+
+        if ($this->updateTime && !isset($data[$this->updateTime])) {
+            $data[$this->updateTime] = $timestamp;
+        }
+
+        return $data;
+    }
+
+    /**
+     * 禁用时间戳
+     * @return $this
+     */
+    public function withoutTimestamp()
+    {
+        $this->autoWriteTimestamp = false;
+        return $this;
+    }
+
+    /**
+     * 启用时间戳
+     * @return $this
+     */
+    public function withTimestamp()
+    {
+        $this->autoWriteTimestamp = true;
+        return $this;
     }
 
     /**
