@@ -96,6 +96,7 @@ abstract class BackendController extends Controller {
     {
         return [
             'ajaxurl' => \admin_url('admin-ajax.php'),
+            'posturl' => \admin_url('admin-post.php'),
             'action_list' => $this->page . '-list',       // ajax
             'action_add' => $this->page . '-add',         // post
             'action_edit' => $this->page . '-edit',       // post
