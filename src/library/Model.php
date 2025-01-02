@@ -35,6 +35,8 @@ class Model {
         $this->prefix = $wpdb->prefix;
         $this->pluginPrefix = $this->config->get('app.database.prefix');
 
+        $this->where = '';
+        $this->orderBy = '';
         // 设置表名
         $this->setTableName();
     }
@@ -460,9 +462,43 @@ class Model {
      * @param string $direction 排序方向 (ASC/DESC)
      * @return $this
      */
-    public function order($column, $direction = '') {
-        $this->orderBy = "$column $direction";
+    public function order($column, $direction = 'DESC') {
+        // 如果是数组，处理多个排序条件
+        if (is_array($column)) {
+            foreach ($column as $key => $value) {
+                if (is_numeric($key)) {
+                    $this->addOrderBy($value);
+                } else {
+                    $this->addOrderBy($key, $value);
+                }
+            }
+            return $this;
+        }
+
+        // 单个排序条件
+        $this->addOrderBy($column, $direction);
         return $this;
+    }
+
+    /**
+     * 添加排序条件
+     * @param string $column 排序字段
+     * @param string $direction 排序方向
+     */
+    protected function addOrderBy($column, $direction = 'DESC') {
+        // 验证并标准化排序方向
+        $direction = strtoupper($direction);
+        if (!in_array($direction, ['ASC', 'DESC', ''])) {
+            $direction = 'DESC';
+        }
+
+        // 如果已经有排序条件，添加逗号
+        if (!empty($this->orderBy)) {
+            $this->orderBy .= ', ';
+        }
+
+        // 添加新的排序条件
+        $this->orderBy .= trim("$column $direction");
     }
 
     /**
@@ -589,7 +625,7 @@ class Model {
         $this->joins = [];
         $this->where = null;
         $this->values = [];
-        $this->orderBy = null;
+        $this->orderBy = '';
         $this->limit = null;
         $this->debug = false;
     }

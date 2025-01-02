@@ -32,7 +32,7 @@ return [
     // 默认值
     'features' => [
         'debug_mode' => false,
-        'per_page' => 10,
+        'per_page' => 20,
         'delete_data_on_uninstall' => false,
         'requires_license' => false,
     ],
