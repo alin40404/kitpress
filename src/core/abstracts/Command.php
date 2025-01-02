@@ -43,8 +43,7 @@ abstract class Command {
         ],
         'utils',
     ];
-
-
+    
     /**
      * 初始化项目结构
      *
