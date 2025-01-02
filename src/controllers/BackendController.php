@@ -8,7 +8,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-
 abstract class BackendController extends Controller {
 
     protected array $styles = [];
@@ -20,6 +19,17 @@ abstract class BackendController extends Controller {
     public function __construct() {
         parent::__construct();
     }
+
+    public function index(): ?string
+    {
+        return $this->render('index',[
+            'addUrl' => \admin_url('admin.php?page=' . $this->page . '&action=add'),
+        ]);
+    }
+
+
+
+
 
     /**
      * 在admin_init钩子之后加载
@@ -86,12 +96,15 @@ abstract class BackendController extends Controller {
     {
         return [
             'ajaxurl' => \admin_url('admin-ajax.php'),
-            'action_list' => $this->page . '-list',
-            'action_create' => $this->page . '-create',
-            'action_update' => $this->page . '-update',
-            //'action_status' => $this->page . '-status',
-            //'action_sort' => $this->page . '-sort',
-            'nonce' => \wp_create_nonce($this->page .'-nonce')
+            'action_list' => $this->page . '-list',       // ajax
+            'action_add' => $this->page . '-add',         // post
+            'action_edit' => $this->page . '-edit',       // post
+            'action_delete' => $this->page . '-delete',   // ajax
+            'action_batch' => $this->page . '-batch',     // ajax
+            'action_status' => $this->page . '-status',   // ajax
+            'action_sort' => $this->page . '-sort',       // ajax
+            'nonce' => \wp_create_nonce($this->page .'-nonce'),
+            'perPage' => $this->config->get('app.features.per_page') ?? 10,
         ];
     }
 
