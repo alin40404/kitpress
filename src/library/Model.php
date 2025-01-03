@@ -49,6 +49,7 @@ class Model {
      * @var string
      */
     protected $dateFormat = 'Y-m-d H:i:s';
+    protected $primaryKey = 'id';
 
     public function __construct(Log $log = null) {
         $this->config = $log->config;
@@ -68,6 +69,26 @@ class Model {
     public function getWpdb()
     {
         return $this->wpdb;
+    }
+
+    /**
+     * 获取模型的主键名
+     * @return string
+     */
+    public function getPrimaryKey(): string
+    {
+        return $this->primaryKey;
+    }
+
+    /**
+     * 设置模型的主键名
+     * @param string $key
+     * @return $this
+     */
+    public function setPrimaryKey(string $key): Model
+    {
+        $this->primaryKey = $key;
+        return $this;
     }
 
     /**
@@ -125,7 +146,7 @@ class Model {
 
     public function find($id) {
         return $this->wpdb->get_row($this->wpdb->prepare(
-            "SELECT * FROM {$this->table} WHERE id = %d",
+            "SELECT * FROM {$this->table} WHERE {$this->primaryKey} = %d",
             $id
         ));
     }
@@ -246,7 +267,7 @@ class Model {
             $result = $this->wpdb->update(
                 $this->table,
                 $data,
-                ['id' => $conditions],
+                [$this->primaryKey => $conditions],
                 $format,
                 $where_format ?? ['%d']
             );
@@ -332,7 +353,7 @@ class Model {
             // 如果是单个ID，使用简单删除
             $result = $this->wpdb->delete(
                 $this->table,
-                ['id' => $conditions],
+                [$this->primaryKey => $conditions],
                 ['%d']
             );
 

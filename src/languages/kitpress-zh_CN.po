@@ -143,3 +143,111 @@ msgstr "无效的回调函数格式，请使用 \"Controller@method\""
 msgid "安全验证失败"
 msgstr "安全验证失败"
 
+# 验证器错误消息
+msgid "%s 验证失败"
+msgstr "%s 验证失败"
+
+msgid "%s 字段是必需的"
+msgstr "%s 字段是必需的"
+
+msgid "%s 必须是字符串"
+msgstr "%s 必须是字符串"
+
+msgid "%s 必须是整数"
+msgstr "%s 必须是整数"
+
+msgid "%s 必须是布尔值"
+msgstr "%s 必须是布尔值"
+
+msgid "%s 不能小于 %s"
+msgstr "%s 不能小于 %s"
+
+msgid "%s 不能大于 %s"
+msgstr "%s 不能大于 %s"
+
+msgid "%s 必须是有效的邮箱地址"
+msgstr "%s 必须是有效的邮箱地址"
+
+msgid "%s 必须是有效的URL"
+msgstr "%s 必须是有效的URL"
+
+msgid "%s 必须是有效的日期"
+msgstr "%s 必须是有效的日期"
+
+msgid "%s 必须是数字"
+msgstr "%s 必须是数字"
+
+msgid "请选择要操作的项目"
+msgstr "请选择要操作的项目"
+
+msgid "无效的ID"
+msgstr "无效的ID"
+
+msgid "删除"
+msgstr "删除"
+
+msgid "启用"
+msgstr "启用"
+
+msgid "禁用"
+msgstr "禁用"
+
+msgid "修改"
+msgstr "修改"
+
+msgid "未知的操作类型"
+msgstr "未知的操作类型"
+
+msgid "操作失败"
+msgstr "操作失败"
+
+msgid "操作成功"
+msgstr "操作成功"
+
+# Status update messages (状态更新消息)
+msgid "无效的ID"
+msgstr "无效的ID"
+
+msgid "记录不存在"
+msgstr "记录不存在"
+
+msgid "状态更新失败"
+msgstr "状态更新失败"
+
+msgid "状态更新成功"
+msgstr "状态更新成功"
+
+# Sort update messages (排序更新消息)
+msgid "排序更新失败"
+msgstr "排序更新失败"
+
+msgid "排序更新成功"
+msgstr "排序更新成功"
+
+# CRUD messages (增删改查消息)
+msgid "数据验证失败"
+msgstr "数据验证失败"
+
+msgid "添加失败"
+msgstr "添加失败"
+
+msgid "添加成功"
+msgstr "添加成功"
+
+msgid "记录不存在"
+msgstr "记录不存在"
+
+msgid "更新失败"
+msgstr "更新失败"
+
+msgid "更新成功"
+msgstr "更新成功"
+
+msgid "无效的ID"
+msgstr "无效的ID"
+
+msgid "删除失败"
+msgstr "删除失败"
+
+msgid "删除成功"
+msgstr "删除成功"

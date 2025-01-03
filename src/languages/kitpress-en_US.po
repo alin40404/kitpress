@@ -145,3 +145,113 @@ msgstr "Invalid callback format. Use \"Controller@method\""
 
 msgid "安全验证失败"
 msgstr "Security verification failed"
+
+# Validator error messages
+msgid "%s 验证失败"
+msgstr "%s validation failed"
+
+msgid "%s 字段是必需的"
+msgstr "%s field is required"
+
+msgid "%s 必须是字符串"
+msgstr "%s must be a string"
+
+msgid "%s 必须是整数"
+msgstr "%s must be an integer"
+
+msgid "%s 必须是布尔值"
+msgstr "%s must be a boolean"
+
+msgid "%s 不能小于 %s"
+msgstr "%s cannot be less than %s"
+
+msgid "%s 不能大于 %s"
+msgstr "%s cannot be greater than %s"
+
+msgid "%s 必须是有效的邮箱地址"
+msgstr "%s must be a valid email address"
+
+msgid "%s 必须是有效的URL"
+msgstr "%s must be a valid URL"
+
+msgid "%s 必须是有效的日期"
+msgstr "%s must be a valid date"
+
+msgid "%s 必须是数字"
+msgstr "%s must be a numeric value"
+
+# Batch operation messages
+msgid "请选择要操作的项目"
+msgstr "Please select items to operate"
+
+msgid "无效的ID"
+msgstr "Invalid ID"
+
+msgid "删除"
+msgstr "Delete"
+
+msgid "启用"
+msgstr "Enable"
+
+msgid "禁用"
+msgstr "Disable"
+
+msgid "修改"
+msgstr "Modify"
+
+msgid "未知的操作类型"
+msgstr "Unknown operation type"
+
+msgid "操作失败"
+msgstr "Operation failed"
+
+msgid "操作成功"
+msgstr "Operation successful"
+
+# Status update messages
+msgid "无效的ID"
+msgstr "Invalid ID"
+
+msgid "记录不存在"
+msgstr "Record not found"
+
+msgid "状态更新失败"
+msgstr "Status update failed"
+
+msgid "状态更新成功"
+msgstr "Status updated successfully"
+
+# Sort update messages
+msgid "排序更新失败"
+msgstr "Sort order update failed"
+
+msgid "排序更新成功"
+msgstr "Sort order updated successfully"
+
+# CRUD messages
+msgid "数据验证失败"
+msgstr "Data validation failed"
+
+msgid "添加失败"
+msgstr "Add failed"
+
+msgid "添加成功"
+msgstr "Added successfully"
+
+msgid "记录不存在"
+msgstr "Record not found"
+
+msgid "更新失败"
+msgstr "Update failed"
+
+msgid "更新成功"
+msgstr "Updated successfully"
+
+msgid "无效的ID"
+msgstr "Invalid ID"
+
+msgid "删除失败"
+msgstr "Delete failed"
+
+msgid "删除成功"
+msgstr "Deleted successfully"

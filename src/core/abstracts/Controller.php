@@ -2,19 +2,51 @@
 namespace kitpress\core\abstracts;
 
 use kitpress\core\Container;
-use kitpress\library\Model;
 use kitpress\core\traits\ViewTrait;
-use kitpress\utils\Lang;
+use kitpress\library\Config;
+use kitpress\library\Model;
+use kitpress\library\Plugin;
+use kitpress\library\Validator;
 
 if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * 控制器基类
+ *
+ * 提供基础的控制器功能，包括：
+ * - 请求处理（GET/POST）
+ * - 数据验证和清理
+ * - 视图渲染
+ * - 响应处理
+ * - 安全检查
+ * - 用户权限验证
+ *
+ * @package kitpress\core\abstracts
+ * @since 1.0.0
+ *
+ * @property-read Container $container 容器实例
+ * @property-read Plugin $plugin 插件实例
+ * @property-read Model $model 模型实例
+ * @property-read Config $config 配置实例
+ *
+ * @method string render(string $view, array $data = []) 渲染视图
+ */
 abstract class Controller {
     use ViewTrait;
 
-    protected $model = null;
-    protected $config = null;
+    /**
+     * 模型实例
+     * @var mixed
+     */
+    protected ?Model $model = null;
+
+    /**
+     * 配置实例
+     * @var mixed
+     */
+    protected ?Config $config = null;
 
     /**
      * 当前容器
@@ -29,6 +61,12 @@ abstract class Controller {
         // $this->init();
     }
 
+    /**
+     * 设置容器实例
+     *
+     * @param Container $container 容器实例
+     * @return void
+     */
     public function setContainer(Container $container)
     {
         $this->container = $container;
@@ -36,7 +74,9 @@ abstract class Controller {
     }
 
     /**
-     * 初始化方法，子类可以重写
+     * 初始化方法
+     * 子类可以重写此方法以添加自定义初始化逻辑
+     *
      * @return void
      */
     protected function init() {
@@ -47,19 +87,24 @@ abstract class Controller {
 
     /**
      * 验证 nonce
-     * @param string $action
-     * @param string $nonce_key
+     *
+     * @param string $action 动作名称
+     * @param string $nonce_key nonce键名
+     * @param bool $stop 验证失败时是否停止执行
      * @return bool
      */
-    protected function verifyNonce($action, $nonce_key = 'nonce',$stop = true): bool
+    protected function verifyNonce(string $action, string $nonce_key = 'nonce', bool $stop = true): bool
     {
         return \check_ajax_referer($action, $nonce_key, $stop);
     }
 
     /**
      * 获取请求参数
-     * @param string $key
-     * @param mixed $default
+     *
+     * 从 GET 或 POST 请求中获取并清理参数
+     *
+     * @param string $key 参数键名
+     * @param mixed $default 默认值
      * @return mixed
      */
     protected function input($key, $default = null) {
@@ -74,7 +119,10 @@ abstract class Controller {
 
     /**
      * 清理输入数据
-     * @param mixed $data
+     *
+     * 递归清理数组或字符串数据，防止 XSS 攻击
+     *
+     * @param mixed $data 需要清理的数据
      * @return mixed
      */
     protected function sanitize($data) {
@@ -86,59 +134,27 @@ abstract class Controller {
 
     /**
      * 验证数据
-     * @param array $data
-     * @param array $rules
-     * @return array
+     *
+     * 使用验证器验证数据是否符合规则
+     *
+     * @param array $data 待验证的数据
+     * @param array $rules 验证规则
+     * @return Validator
      */
-    protected function validate($data, $rules) {
-        $errors = [];
-        foreach ($rules as $field => $rule) {
-            $rules_array = explode('|', $rule);
-            foreach ($rules_array as $single_rule) {
-                if ($error = $this->validateField($field, $data[$field] ?? null, $single_rule)) {
-                    $errors[$field] = $error;
-                    break;
-                }
-            }
-        }
-        return $errors;
-    }
-
-    /**
-     * 验证单个字段
-     * @param string $field
-     * @param mixed $value
-     * @param string $rule
-     * @return string|null
-     */
-    protected function validateField($field, $value, $rule) {
-        switch ($rule) {
-            case 'required':
-                if (empty($value)) {
-                    return sprintf(Lang::kit('%s is required' ), $field);
-                }
-                break;
-            case 'email':
-                if (!empty($value) && !is_email($value)) {
-                    return sprintf(Lang::kit('%s must be a valid email'), $field);
-                }
-                break;
-            case 'numeric':
-                if (!empty($value) && !is_numeric($value)) {
-                    return sprintf(Lang::kit('%s must be numeric'), $field);
-                }
-                break;
-        }
-        return null;
+    protected function validate(array $data, array $rules) : Validator
+    {
+        return new Validator($data, $rules);
     }
 
     /**
      * 发送 JSON 响应
-     * @param mixed $data
-     * @param bool $success
-     * @param string $message
+     *
+     * @param mixed $data 响应数据
+     * @param int $code 响应代码
+     * @param string $message 响应消息
+     * @return bool
      */
-    protected function json($data = null, $code = 1, string $message = ''): bool
+    protected function json(array $data = null, int $code = 1, string $message = ''): bool
     {
         \wp_send_json([
             'code' => $code,
@@ -150,20 +166,24 @@ abstract class Controller {
 
     /**
      * 发送成功响应
-     * @param mixed $data
-     * @param string $message
+     *
+     * @param mixed $data 响应数据
+     * @param string $message 成功消息
+     * @return bool
      */
-    protected function success($data = null, string $message = ''): bool
+    protected function success(array $data = null, string $message = ''): bool
     {
         return $this->json($data, 1, $message);
     }
 
     /**
      * 发送错误响应
-     * @param string $message
-     * @param mixed $data
+     *
+     * @param string $message 错误消息
+     * @param mixed $data 错误数据
+     * @return bool
      */
-    protected function error($message = '', $data = null): bool
+    protected function error(string $message = '', $data = null): bool
     {
         return $this->json($data, 0, $message);
     }
@@ -172,7 +192,8 @@ abstract class Controller {
      * 获取当前用户
      * @return \WP_User|null
      */
-    protected function getCurrentUser() {
+    protected function getCurrentUser(): ?\WP_User
+    {
         return \wp_get_current_user();
     }
 
@@ -189,16 +210,19 @@ abstract class Controller {
      * @param string $capability
      * @return bool
      */
-    protected function checkCapability(string $capability) {
+    protected function checkCapability(string $capability): bool
+    {
         return \current_user_can($capability);
     }
 
     /**
      * 重定向
-     * @param string $url
-     * @param int $status
+     *
+     * @param string $url 目标URL
+     * @param int $status HTTP状态码
+     * @return void
      */
-    protected function redirect($url, $status = 302) {
+    protected function redirect(string $url, int $status = 302) {
         \wp_redirect($url, $status);
         exit;
     }
@@ -215,7 +239,8 @@ abstract class Controller {
      * 检查是否是 AJAX 请求
      * @return bool
      */
-    protected function isAjax() {
+    protected function isAjax(): bool
+    {
         return \wp_doing_ajax();
     }
 
@@ -223,7 +248,8 @@ abstract class Controller {
      * 检查是否是 POST 请求
      * @return bool
      */
-    protected function isPost() {
+    protected function isPost(): bool
+    {
         return $this->getMethod() === 'POST';
     }
 
@@ -231,8 +257,26 @@ abstract class Controller {
      * 检查是否是 GET 请求
      * @return bool
      */
-    protected function isGet() {
+    protected function isGet(): bool
+    {
         return $this->getMethod() === 'GET';
     }
 
+    /**
+     * 检查是否是 JSON 请求
+     *
+     * 通过检查 Content-Type 或 Accept 头来判断
+     *
+     * @return bool
+     */
+    protected function isJsonRequest(): bool
+    {
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+
+        return (
+            strpos($contentType, 'application/json') !== false ||
+            strpos($accept, 'application/json') !== false
+        );
+    }
 }

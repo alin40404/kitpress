@@ -2,7 +2,6 @@
 namespace kitpress\core\traits;
 
 use kitpress\library\Plugin;
-use function kitpress\functions\kp_plugin;
 
 trait ViewTrait {
     /** @var string 视图文件的基础路径 */
@@ -18,12 +17,12 @@ trait ViewTrait {
 
     /**
      * 渲染视图
-     * @param string $view 视图名称
+     * @param string|null $view 视图名称
      * @param array $data 视图数据
      * @param bool $return 是否返回而不是输出
      * @return string|void
      */
-    protected function render($view = null, $data = [], $return = false) {
+    protected function render(string $view = null, array $data = [], bool $return = false) {
         // 获取调用类的反射信息
         $calledClass = get_called_class();
         $reflection = new \ReflectionClass($calledClass);
@@ -61,7 +60,8 @@ trait ViewTrait {
      * @param string $view
      * @return string
      */
-    protected function getViewFile($view) {
+    protected function getViewFile(string $view): string
+    {
         return $this->plugin->getRootPath() . $this->viewPath . '/' . $view . '.php';
     }
 
@@ -69,7 +69,7 @@ trait ViewTrait {
      * 渲染视图文件
      * @param string $viewFile
      */
-    protected function renderView($viewFile) {
+    protected function renderView(string $viewFile) {
         extract($this->viewData);
         include $viewFile;
     }
@@ -78,7 +78,7 @@ trait ViewTrait {
      * 设置布局
      * @param string $layout
      */
-    protected function setLayout($layout) {
+    protected function setLayout(string $layout) {
         $this->layout = $layout;
     }
 

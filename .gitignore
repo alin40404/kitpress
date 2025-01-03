@@ -1,6 +1,6 @@
 wp-content/debug.log
 .maintenance
-idea/
+.idea/
 vscode/
 DS_Store
 humbs.db
