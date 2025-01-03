@@ -1,0 +1,55 @@
+<?php
+namespace {{NAMESPACE}}\Backend\Controllers;
+
+use kitpress\controllers\BackendController;
+use function kitpress\functions\kp;
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+/**
+ * {{NAME}} 模块控制器
+ *
+ * @package {{NAMESPACE}}\Backend\Controllers
+ * @author  Your Name
+ * @since   1.0.0
+ */
+class {{NAME}}Controller extends BackendController {
+    protected function init(): void
+    {
+        parent::init();
+        $this->model = kp($this->plugin->getNamespace())->model->table('{{SNAKE_NAME}}');
+    }
+
+    protected function buildListWhere(): array
+    {
+        $where = [];
+
+        {{BUILD_LIST_WHERE}}
+
+        return $where;
+    }
+
+    /**
+     * 创建空的数据对象
+     * @return \stdClass
+     */
+    protected function createEmptyModel(): \stdClass
+    {
+        $detail = new \stdClass();
+
+        {{CREATE_EMPTY_MODEL}}
+
+        return $detail;
+    }
+
+    protected function validationRules(): array
+    {
+        $rules = [];
+
+        {{VALIDATION_RULES}}
+
+        return $rules;
+    }
+}

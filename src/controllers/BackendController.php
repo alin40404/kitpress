@@ -7,6 +7,7 @@ use kitpress\library\Model;
 use kitpress\library\Plugin;
 use kitpress\utils\ErrorHandler;
 use kitpress\utils\Lang;
+use kitpress\utils\Str;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -858,11 +859,8 @@ abstract class BackendController extends Controller {
         // 移除 Controller 后缀
         $this->controllerName = str_replace('Controller', '', $className);
 
-        // 将驼峰式转换为-格式
-        $formatted = preg_replace('/(?<!^)[A-Z]/', '-$0', $this->controllerName);
-
         // 转换为小写
-        $this->formatControllerName = strtolower($formatted);
+        $this->formatControllerName = Str::kebab($this->controllerName);
 
     }
 

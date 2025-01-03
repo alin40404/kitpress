@@ -1,0 +1,146 @@
+/* 行操作按钮样式 */
+.row-actions {
+    visibility: hidden;
+    padding: 2px 0 0;
+    color: #666;
+}
+
+.row-actions .delete a {
+    color: #a00;
+}
+
+.row-actions .delete a:hover {
+    color: #dc3232;
+}
+
+tr:hover .row-actions {
+    visibility: visible;
+}
+
+/* 表格响应式布局 */
+@media screen and (max-width: 782px) {
+    .row-actions {
+        visibility: visible;
+    }
+}
+
+/* 加载提示样式 */
+.spinner{
+    vertical-align: unset;
+}
+.spinner.is-active {
+    visibility: visible;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+/* 分页样式优化 */
+.tablenav-pages {
+    float: right;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.tablenav-pages .page-numbers {
+    display: inline-block;
+    min-width: 28px;
+    padding: 0 5px;
+    text-align: center;
+    line-height: 28px;
+    color: #555;
+    border: 1px solid #ccc;
+    background: #f7f7f7;
+    text-decoration: none;
+}
+
+.tablenav-pages .page-numbers.current {
+    background: #0073aa;
+    border-color: #0073aa;
+    color: #fff;
+}
+
+.page-input {
+    width: 60px !important;
+    height: 28px;
+    margin: 0 5px;
+    text-align: center;
+}
+
+/* 提示框样式 */
+/* 提示框容器 */
+.toast-container {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+/* 单个提示框 */
+.toast {
+    z-index: 10000;
+    transform: translateX(150%);
+    transition: transform 0.3s ease-in-out;
+}
+
+.toast.show {
+    transform: translateX(0);
+}
+
+.toast-content,.toast-content.error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 300px;
+}
+
+.toast-icon {
+    flex-shrink: 0;
+}
+
+.toast-icon svg {
+    display: none;
+}
+
+.toast-content.error .error-icon {
+    display: block;
+    color: #ef4444;
+}
+
+.toast-content.success .success-icon {
+    display: block;
+    color: #10b981;
+}
+
+.toast-message {
+    font-size: 14px;
+    color: #374151;
+    line-height: 1.4;
+}
+
+.active {
+    color: #46b450;
+}
+.inactive {
+    color: #dc3232;
+}
+
+.status-badge {
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+.status-badge.success {
+    background: #dff0d8;
+    color: #3c763d;
+}
+.status-badge.error {
+    background: #f2dede;
+    color: #a94442;
+}

@@ -1,0 +1,98 @@
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+?>
+<div class="wrap" id="app">
+    <h1 class="wp-heading-inline">{{PAGE_TITLE}}</h1>
+    <a :href="'<?php echo $addUrl ?? '' ?>'" class="page-title-action">添加{{NAME}}</a>
+    <span class="spinner is-active" v-if="loading" style="float: none; margin-top: 0;"></span>
+
+    <!-- 搜索筛选区 -->
+    <div class="tablenav top">
+        <div class="alignleft actions bulkactions">
+            <!-- 添加批量操作下拉框 -->
+            <select v-model="batchActions" @change="handleBulkAction">
+                <option value="">批量操作</option>
+                <option value="delete">删除</option>
+                <!--<option value="enable">启用</option>
+                <option value="disable">禁用</option>-->
+            </select>
+            <button class="button" @click.stop="applyBulkAction">应用</button>
+        </div>
+        <div class="alignleft actions">
+            {{SEARCH_FIELDS}}
+        </div>
+
+        <div class="tablenav-pages">
+            <div class="alignleft actions">
+                <label>
+                    <select v-model="perPage" @change="changePerPage">
+                        <option v-for="n in [10, 20, 30, 50, 100]" :key="n" :value="n">
+                            显示 {{n}} 条
+                        </option>
+                    </select>
+                </label>
+            </div>
+            <span class="displaying-num">共 {{total}} 项</span>
+            <span class="pagination-links">
+                    <button class="button" :disabled="page <= 1" @click.prevent="changePage(1)">«</button>
+                    <button class="button" :disabled="page <= 1" @click.prevent="changePage(page - 1)">‹</button>
+                    <span class="paging-input">
+                        第 <input class="page-input current-page" type="text" v-model.number="page" @keyup.enter="goToPage"> 页，共 {{totalPages}} 页
+                    </span>
+                    <button class="button" :disabled="page >= totalPages" @click.prevent="changePage(page + 1)">›</button>
+                    <button class="button" :disabled="page >= totalPages" @click.prevent="changePage(totalPages)">»</button>
+                </span>
+        </div>
+    </div>
+
+    <table class="wp-list-table widefat fixed striped">
+        <thead>
+        <tr>
+            <td id="cb" class="manage-column column-cb check-column">
+                <input type="checkbox" id="select-all" @click="toggleSelectAll">
+                <label for="select-all"><span class="screen-reader-text">全选</span></label></td>
+            {{TABLE_HEADERS}}
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="item in items" :key="item.id">
+            <th scope="row" class="check-column">
+                <input :id="'cb-select-' + item.id" type="checkbox" v-model="selectedItems" :value="item.id">
+                <label :for="'cb-select-' + item.id">
+                    <span class="screen-reader-text">{{ item.id }}</span>
+                </label>
+            </th>
+            {{TABLE_ROWS}}
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 分页 -->
+    <div class="tablenav bottom">
+        <div class="tablenav-pages">
+            <div class="alignleft actions">
+                <label>
+                    <select v-model="perPage" @change="changePerPage">
+                        <option v-for="n in [10, 20, 30, 50, 100]" :key="n" :value="n">
+                            显示 {{n}} 条
+                        </option>
+                    </select>
+                </label>
+            </div>
+            <span class="displaying-num">共 {{total}} 项</span>
+            <span class="pagination-links">
+                    <button class="button" :disabled="page <= 1" @click.prevent="changePage(1)">«</button>
+                    <button class="button" :disabled="page <= 1" @click.prevent="changePage(page - 1)">‹</button>
+                    <span class="paging-input">
+                        第 <input class="page-input current-page" type="text" v-model.number="page" @keyup.enter="goToPage"> 页，共 {{totalPages}} 页
+                    </span>
+                    <button class="button" :disabled="page >= totalPages" @click.prevent="changePage(page + 1)">›</button>
+                    <button class="button" :disabled="page >= totalPages" @click.prevent="changePage(totalPages)">»</button>
+                </span>
+        </div>
+    </div>
+
+</div>

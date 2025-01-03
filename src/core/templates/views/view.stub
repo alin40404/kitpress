@@ -1,0 +1,110 @@
+<?php
+if (!defined('ABSPATH')) {
+    exit;
+}
+/**
+ * @var array $detail 数据
+ */
+?>
+<div class="wrap">
+    <h1 class="wp-heading-inline">查看模型</h1>
+
+    <table class="form-table">
+        <tr>
+            <th scope="row">模型名称</th>
+            <td><?php echo esc_html($detail->name); ?></td>
+        </tr>
+
+        <tr>
+            <th scope="row">模型标识</th>
+            <td><?php echo esc_html($detail->slug); ?></td>
+        </tr>
+
+        <tr>
+            <th scope="row">类型</th>
+            <td><?php echo $detail->type === 'chat' ? '对话模型' : '图像模型'; ?></td>
+        </tr>
+
+        <tr>
+            <th scope="row">提供商</th>
+            <td><?php echo esc_html($detail->provider); ?></td>
+        </tr>
+
+        <tr>
+            <th scope="row">价格信息</th>
+            <td>
+                输入：$<?php echo number_format($detail->input_price, 6); ?>/1K tokens<br>
+                输出：$<?php echo number_format($detail->output_price, 6); ?>/1K tokens
+            </td>
+        </tr>
+
+        <?php if ($detail->type === 'image' && !empty($detail->image_prices)): ?>
+            <tr>
+                <th scope="row">图片价格</th>
+                <td>
+                    <?php
+                    $prices = json_decode($detail->image_prices, true);
+                    foreach ($prices as $size => $price): ?>
+                        <div>
+                            <?php echo esc_html($size); ?>:
+                            标准质量 $<?php echo isset($price['standard']) ? number_format($price['standard'], 2) : '无'; ?>,
+                            高清质量 $<?php echo isset($price['hd']) ? number_format($price['hd'] , 2) : '无'; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </td>
+            </tr>
+        <?php endif; ?>
+
+        <tr>
+            <th scope="row">最大token数</th>
+            <td><?php echo $detail->max_tokens ?: '默认'; ?></td>
+        </tr>
+
+        <tr>
+            <th scope="row">高级功能</th>
+            <td>
+                <?php if ($detail->supports_functions): ?>
+                    <div>✓ 支持函数调用</div>
+                <?php endif; ?>
+                <?php if ($detail->supports_vision): ?>
+                    <div>✓ 支持图像识别</div>
+                <?php endif; ?>
+            </td>
+        </tr>
+
+        <tr>
+            <th scope="row">状态</th>
+            <td>
+                <span class="<?php echo $detail->is_active ? 'active' : 'inactive'; ?>">
+                    <?php echo $detail->is_active ? '启用' : '禁用'; ?>
+                </span>
+            </td>
+        </tr>
+
+        <tr>
+            <th scope="row">排序</th>
+            <td><?php echo (int)$detail->sort_order; ?></td>
+        </tr>
+
+        <tr>
+            <th scope="row">创建时间</th>
+            <td><?php echo esc_html($detail->created_at); ?></td>
+        </tr>
+
+        <tr>
+            <th scope="row">更新时间</th>
+            <td><?php echo esc_html($detail->updated_at); ?></td>
+        </tr>
+    </table>
+
+    <p>
+        <a href="<?php echo admin_url('admin.php?page=wan-api-models&action=edit&id=' . $detail->id); ?>"
+           class="button button-primary">
+            编辑
+        </a>
+        <a href="<?php echo admin_url('admin.php?page=wan-api-models'); ?>"
+           class="button">
+            返回列表
+        </a>
+    </p>
+</div>

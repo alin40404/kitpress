@@ -1,0 +1,333 @@
+function initModelsList() {
+    if (!document.getElementById('app')) {
+        return;
+    }
+    new Vue({
+        el: '#app',
+        data(){
+            return {
+                items: [],
+                total: 0,
+                page: 1,
+                perPage: wanApiModelsAdmin.perPage,
+                filters: {
+                    type: '',
+                    provider: '',
+                    is_active: ''
+                },
+                loading: false,
+                selectedItems: [], // 存储选中ID
+                batchActions: '',
+                // 使用对象来跟踪状态
+                processingState: {
+                    sorting: {},  // 排序状态
+                    status: {}   // 切换状态
+                }
+            }
+        },
+        computed: {
+            totalPages() {
+                return Math.ceil(this.total / this.perPage);
+            },
+        },
+        methods: {
+            loadData() {
+                this.loading = true;
+                jQuery.post(ajaxurl, {
+                    action: wanApiModelsAdmin.action_list,
+                    page: this.page,
+                    per_page: this.perPage,
+                    type: this.filters.type,
+                    provider: this.filters.provider,
+                    is_active: this.filters.is_active,
+                    nonce: wanApiModelsAdmin.nonce,
+                }).then(response => {
+                    if (response.code === 1) {
+                        this.items = response.data.items;
+                        this.total = response.data.total;
+                        this.page = response.data.page;
+                        this.perPage = response.data.per_page;
+                    } else {
+                        kitpress.showToast(response.msg || '加载数据失败');
+                    }
+                }).fail(() => {
+                    kitpress.showToast('网络请求失败');
+                }).always(() => {
+                    this.loading = false;
+                });
+            },
+
+            deleteItem(item) { // 删除模型
+                if (!confirm('确定要删除该项目吗？此操作不可恢复。')) {
+                    return;
+                }
+
+                this.loading = true;
+                jQuery.post(ajaxurl, {
+                    action: wanApiModelsAdmin.action_delete,
+                    id: item.id,
+                    nonce: wanApiModelsAdmin.nonce
+                }).then(response => {
+                    if (response.code === 1) {
+                        kitpress.showToast(response.message,'success');
+                        this.loadData();
+                        return true;
+                    }
+                    kitpress.showToast(response.message);
+                }).fail(() => {
+                    kitpress.showToast('删除失败');
+                }).always(() => {
+                    this.loading = false;
+                });
+            },
+
+            isSorting(id) {
+                return !!this.processingState.sorting[id];
+            },
+
+            isProcessing(id) {
+                return !!this.processingState.status[id];
+            },
+
+            async toggleStatus(item) {
+                if (this.isProcessing(item.id)) {
+                    return;
+                }
+                try {
+                    this.$set(this.processingState.status, item.id, true);
+                    this.loading = true;
+
+                    const response = await jQuery.post(ajaxurl, {
+                        action: wanApiModelsAdmin.action_status,
+                        id: item.id,
+                        nonce: wanApiModelsAdmin.nonce
+                    });
+
+                    if (response.code === 1) {
+                        kitpress.showToast(response.message, 'success');
+                        this.loadData();
+                    } else {
+                        kitpress.showToast(response.message);
+                    }
+                } catch (error) {
+                    kitpress.showToast('操作失败');
+                } finally {
+                    this.$delete(this.processingState.status, item.id);
+                    this.loading = false;
+                }
+            },
+
+            changePerPage() {
+                // 修改每页显示数量
+                this.page = 1;
+                this.loadData();
+            },
+
+            changePage(page) {
+                if (page >= 1 && page <= this.totalPages) {
+                    this.page = page;
+                    this.loadData();
+                }
+            },
+
+            goToPage() {
+                // 跳转到指定页
+                let page = parseInt(this.page);
+                if (isNaN(page)) {
+                    page = 1;
+                }
+                if (page < 1) {
+                    page = 1;
+                }
+                if (page > this.totalPages) {
+                    page = this.totalPages;
+                }
+                this.changePage(page);
+            },
+
+            toggleSelectAll(e) {
+                if (e.target.checked) {
+                    this.selectedItems = this.items.map(item => item.id)
+                } else {
+                    this.selectedItems = []
+                }
+            },
+
+            handleBulkAction() {
+                // 处理批量操作选择
+            },
+
+            async applyBulkAction() {
+                // 执行批量操作
+                if (!this.selectedItems.length) {
+                    kitpress.showToast('请选择要操作的项目');
+                    return;
+                }
+
+                if (!this.batchActions) {
+                    kitpress.showToast('请选择要执行的操作');
+                    return;
+                }
+
+                const confirmMessage = {
+                    'delete': '确定要删除选中的项目吗？此操作不可恢复。',
+                    'enable': '确定要启用选中的项目吗？',
+                    'disable': '确定要禁用选中的项目吗？'
+                };
+
+                if (!confirm(confirmMessage[this.batchActions])) {
+                    return;
+                }
+                if(this.loading) return;
+
+                this.loading = true;
+                try {
+                    const response = await jQuery.post(ajaxurl, {
+                        action: wanApiModelsAdmin.action_batch,
+                        operation: this.batchActions,
+                        ids: this.selectedItems,
+                        nonce: wanApiModelsAdmin.nonce
+                    });
+
+                    if (response.code === 1) {
+                        kitpress.showToast(response.message,'success');
+                        this.selectedItems = []; // 清空选择
+                        this.batchActions = ''; // 重置操作
+                        this.loadData(); // 重新加载数据
+                    } else {
+                        kitpress.showToast(response.message);
+                    }
+                } catch (error) {
+                    kitpress.showToast('网络请求失败');
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async updateSort(item) {
+                // 检查是否正在处理
+                if (this.isSorting(item.id)) {
+                    return;
+                }
+                // 验证输入值
+                if (isNaN(item.sort_order) || item.sort_order < 0) {
+                    kitpress.showToast('请输入有效的排序数值');
+                    return;
+                }
+
+                try {
+                    // 使用 $set 设置状态
+                    this.$set(this.processingState.sorting, item.id, true);
+                    this.loading = true;
+
+                    const response = await jQuery.post(ajaxurl, {
+                        action: wanApiModelsAdmin.action_sort,
+                        id: item.id,
+                        sort_order: item.sort_order,
+                        nonce: wanApiModelsAdmin.nonce
+                    });
+
+                    if (response.code === 1) {
+                        kitpress.showToast(response.message, 'success');
+                        this.loadData();
+                    } else {
+                        kitpress.showToast(response.message);
+                    }
+                } catch (error) {
+                    console.log(error,'error')
+                    kitpress.showToast('网络请求失败');
+                } finally {
+                    // 使用 $delete 删除状态
+                    this.$delete(this.processingState.sorting, item.id);
+                    this.loading = false;
+                }
+            }
+        },
+        watch: {
+            // 监听筛选条件变化
+            filters: {
+                handler() {
+                    this.page = 1;
+                    this.loadData();
+                },
+                deep: true
+            }
+        },
+        mounted() {
+            this.loadData();
+        }
+    });
+}
+
+function initModelsForm() {
+    if (!document.getElementById('table-form')) {
+        return;
+    }
+
+    new Vue({
+        el: '#table-form',
+        data() {
+            return {
+                loading: false,
+                form: window.modelsDetail || {},
+                imagePrices: {
+                    '1024x1024': { standard: 0.04, hd: 0.08 },
+                    '512x512': { standard: 0.02, hd: 0.04 }
+                }
+            }
+        },
+        created() {
+            // 解析已有的图片价格配置
+            if (this.form.image_prices) {
+                try {
+                    this.imagePrices = JSON.parse(this.form.image_prices);
+                } catch (e) {
+                    console.error('Invalid image prices format');
+                }
+            }
+        },
+        methods: {
+            async submitForm() {
+                if (this.loading) return;
+
+                try {
+                    this.loading = true;
+
+                    // 处理图片价格
+                    if (this.form.type === 'image') {
+                        this.form.image_prices = JSON.stringify(this.imagePrices);
+                    } else {
+                        this.form.image_prices = null;
+                    }
+
+                    let action = this.form.id == 0 ? wanApiModelsAdmin.action_add : wanApiModelsAdmin.action_edit;
+
+                    const response = await jQuery.post(wanApiModelsAdmin.posturl, {
+                        action: action,
+                        model: this.form,
+                        nonce: wanApiModelsAdmin.nonce
+                    });
+
+                    if (response.code === 1) {
+                        kitpress.showToast(response.message, 'success');
+                        setTimeout(() => {
+                            window.location.href = response.data.listUrl;
+                        }, 2000);  // 2秒后跳转
+                    } else {
+                        kitpress.showToast(response.message);
+                    }
+                } catch (error) {
+                    kitpress.showToast('保存失败');
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }
+    });
+}
+
+// 页面加载完成后初始化
+jQuery(document).ready(function() {
+    initModelsList();
+    initModelsForm();
+});

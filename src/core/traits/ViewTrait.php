@@ -2,6 +2,7 @@
 namespace kitpress\core\traits;
 
 use kitpress\library\Plugin;
+use kitpress\utils\Str;
 
 trait ViewTrait {
     /** @var string 视图文件的基础路径 */
@@ -26,7 +27,7 @@ trait ViewTrait {
         // 获取调用类的反射信息
         $calledClass = get_called_class();
         $reflection = new \ReflectionClass($calledClass);
-        $className = strtolower($reflection->getShortName());
+        $className = $reflection->getShortName();
 
 	    // 如果视图为空，获取当前方法名
 	    if (empty($view)) {
@@ -35,7 +36,8 @@ trait ViewTrait {
 
         // 如果视图路径包含 '/'，说明是完整路径，否则使用类名构建路径
         if (strpos($view, '/') === false) {
-            $baseName = str_replace('controller', '', $className);
+            // 中划线: user-profile
+            $baseName = Str::kebab(str_replace('controller', '', $className));
             $view = $baseName . '/' . $view;
         }
 

@@ -1,0 +1,56 @@
+// 全局提示框方法
+window.kitpress = {
+    init() {
+        // 如果页面中还没有 toast 容器，则添加
+        if (!document.querySelector('.toast-container')) {
+            const toastHTML = `
+                <div class="toast-container"></div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', toastHTML);
+        }
+    },
+    createToastElement(message, type = 'error') {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = `
+            <div class="toast-content ${type}">
+                <div class="toast-icon">
+                    <svg class="error-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    <svg class="success-icon" viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                </div>
+                <div class="toast-message">${message}</div>
+            </div>
+        `;
+        return toast;
+    },
+    showToast(message, type = 'error') {
+        const container = document.querySelector('.toast-container');
+        const toast = this.createToastElement(message, type);
+
+        // 将新的提示插入到容器的最前面
+        container.insertBefore(toast, container.firstChild);
+
+        // 添加显示动画
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+
+        // 3秒后移除
+        setTimeout(() => {
+            toast.classList.remove('show');
+            // 等待动画完成后删除元素
+            setTimeout(() => {
+                toast.remove();
+            }, 300);
+        }, 3000);
+    }
+};
+
+// 页面加载完成后初始化
+jQuery(document).ready(() => {
+    kitpress.init();
+});
