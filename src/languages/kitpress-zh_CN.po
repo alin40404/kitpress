@@ -140,3 +140,6 @@ msgstr "端点回调函数是必需的"
 msgid "无效的回调函数格式，请使用 \"Controller@method\""
 msgstr "无效的回调函数格式，请使用 \"Controller@method\""
 
+msgid "安全验证失败"
+msgstr "安全验证失败"
+

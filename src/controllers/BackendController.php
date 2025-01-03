@@ -2,6 +2,7 @@
 namespace kitpress\controllers;
 
 use kitpress\core\abstracts\Controller;
+use kitpress\utils\Lang;
 use function kitpress\functions\kp;
 
 if (!defined('ABSPATH')) {
@@ -27,9 +28,18 @@ abstract class BackendController extends Controller {
         ]);
     }
 
-
-
-
+    /**
+     * 验证 nonce
+     * @param string $action
+     * @param string $nonce_key
+     * @return bool
+     */
+    protected function verifyNonce($action, $nonce_key = 'nonce',$stop = true) {
+        if( parent::verifyNonce($action, $nonce_key, $stop) ){
+            return true;
+        }
+        return $this->error(Lang::kit('安全验证失败'));
+    }
 
     /**
      * 在admin_init钩子之后加载

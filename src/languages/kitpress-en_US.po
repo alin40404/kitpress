@@ -142,3 +142,6 @@ msgstr "Endpoint callback is required"
 
 msgid "无效的回调函数格式，请使用 \"Controller@method\""
 msgstr "Invalid callback format. Use \"Controller@method\""
+
+msgid "安全验证失败"
+msgstr "Security verification failed"
