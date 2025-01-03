@@ -34,7 +34,7 @@ abstract class BackendController extends Controller {
      * @param string $nonce_key
      * @return bool
      */
-    protected function verifyNonce($action, $nonce_key = 'nonce',$stop = true): bool
+    protected function verifyNonce($action, $nonce_key = 'nonce',$stop = false): bool
     {
         if( parent::verifyNonce($action, $nonce_key, $stop) ){
             return true;

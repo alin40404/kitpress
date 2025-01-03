@@ -145,7 +145,7 @@ abstract class Controller {
             'message' => $message,
             'data' => $data
         ]);
-        return true;
+        return $code == 1;
     }
 
     /**
