@@ -513,7 +513,24 @@ abstract class MakeCommand extends Command
             return '';
         }
 
-        return file_get_contents($stub_path);
+        $content = file_get_contents($stub_path);
+
+        // 替换 js 文件中的变量名
+        if ($type === 'js') {
+            $replacements = [
+                'wanApiModelsAdmin' => $this->kebabName . 'Admin',
+                'initModelsList' => 'init' . $this->studlyName . 'List',
+                'initModelsForm' => 'init' . $this->studlyName . 'Form',
+            ];
+
+            $content = str_replace(
+                array_keys($replacements),
+                array_values($replacements),
+                $content
+            );
+        }
+
+        return $content;
     }
 
     /**
