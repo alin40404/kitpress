@@ -51,7 +51,8 @@ abstract class Controller {
      * @param string $nonce_key
      * @return bool
      */
-    protected function verifyNonce($action, $nonce_key = 'nonce',$stop = true) {
+    protected function verifyNonce($action, $nonce_key = 'nonce',$stop = true): bool
+    {
         return \check_ajax_referer($action, $nonce_key, $stop);
     }
 
