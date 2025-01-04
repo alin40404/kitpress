@@ -758,6 +758,12 @@ HTML;
 
     private function generateTableHeaders(array $columns): string
     {
+        // 处理 ID 列
+        if (isset($columns['id'])) {
+            // $rows[] = "<td>{{ item.id }}</td>";
+            unset($columns['id']); // 从后续处理中移除 ID 列
+        }
+
         $headers = [];
         foreach ($columns as $column => $definition) {
             $label = $definition['comment'] ?: $this->formatLabel($column);
