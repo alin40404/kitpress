@@ -18,11 +18,11 @@ class Log
     const DEBUG     = 'debug';     // 调试信息
 
     /**
-     * @var string 当前请求的ID
+     * @var string|null 当前请求的ID
      */
-    private $requestId = null;
-    public $config = null;
-    public $plugin = null;
+    private ?string $requestId = null;
+    public ?Config $config = null;
+    public ?Plugin $plugin = null;
 
     public function __construct(Plugin $plugin, Config $config)
     {
@@ -34,7 +34,7 @@ class Log
      * 获取当前请求的ID
      * @return string
      */
-    protected function getRequestId()
+    protected function getRequestId(): ?string
     {
         if ($this->requestId === null) {
             $this->requestId = substr(uniqid(), -6) . mt_rand(100, 999);
@@ -44,80 +44,80 @@ class Log
 
     /**
      * 记录调试信息
-     * @param string $message 日志消息
+     * @param mixed $message 日志消息
      * @param array $context 上下文数据
      */
-    public function debug($message, array $context = [])
+    public function debug(string $message, array $context = [])
     {
         $this->log(self::DEBUG, $message, $context);
     }
 
     /**
      * 记录信息性消息
-     * @param string $message 日志消息
+     * @param mixed $message 日志消息
      * @param array $context 上下文数据
      */
-    public function info($message, array $context = [])
+    public function info(string $message, array $context = [])
     {
         $this->log(self::INFO, $message, $context);
     }
 
     /**
      * 记录通知消息
-     * @param string $message 日志消息
+     * @param mixed $message 日志消息
      * @param array $context 上下文数据
      */
-    public function notice($message, array $context = [])
+    public function notice(string $message, array $context = [])
     {
         $this->log(self::NOTICE, $message, $context);
     }
 
     /**
      * 记录警告信息
-     * @param string $message 日志消息
+     * @param mixed $message 日志消息
      * @param array $context 上下文数据
      */
-    public function warning($message, array $context = [])
+    public function warning(string $message, array $context = [])
     {
         $this->log(self::WARNING, $message, $context);
     }
 
     /**
      * 记录错误信息
-     * @param string $message 日志消息
+     * @param mixed $message 日志消息
      * @param array $context 上下文数据
      */
-    public function error($message, array $context = [])
+    public function error(string $message, array $context = [])
     {
         $this->log(self::ERROR, $message, $context);
     }
 
     /**
      * 记录严重错误信息
-     * @param string $message 日志消息
+     * @param mixed $message 日志消息
      * @param array $context 上下文数据
      */
-    public function critical($message, array $context = [])
+    public function critical(string $message, array $context = [])
     {
         $this->log(self::CRITICAL, $message, $context);
     }
 
     /**
      * 记录需要立即处理的信息
-     * @param string $message 日志消息
+     * @param mixed $message 日志消息
      * @param array $context 上下文数据
      */
-    public function alert($message, array $context = [])
+    public function alert(string $message, array $context = [])
     {
         $this->log(self::ALERT, $message, $context);
     }
 
     /**
      * 记录系统不可用信息
-     * @param string $message 日志消息
+     * @param mixed $message 日志消息
      * @param array $context 上下文数据
      */
-    public function emergency($message, array $context = [])
+    public function emergency(string $message, array $context = [])
     {
         $this->log(self::EMERGENCY, $message, $context);
     }
@@ -128,7 +128,7 @@ class Log
      * @param mixed $message 日志消息（支持字符串、数组、对象）
      * @param array $context 上下文数据
      */
-    protected function log($level, $message, array $context = [])
+    protected function log(string $level, $message, array $context = [])
     {
         // 只在调试模式下记录 DEBUG 级别的日志
         if ($level === self::DEBUG && !$this->config->get('app.features.debug_mode')) {
@@ -166,7 +166,7 @@ class Log
      * 获取请求的详细信息
      * @return string
      */
-    protected function getRequestInfo()
+    protected function getRequestInfo(): string
     {
         $info = [
             $this->getRequestId(),
@@ -192,7 +192,7 @@ class Log
      * @param mixed $message
      * @return string
      */
-    protected function formatMessage($message)
+    protected function formatMessage($message): string
     {
         if (is_string($message)) {
             return $message;
@@ -224,7 +224,7 @@ class Log
      * @param int $maxDepth 最大深度
      * @return string
      */
-    protected function formatArray(array $array, $depth = 0, $maxDepth = 3)
+    protected function formatArray(array $array, int $depth = 0, int $maxDepth = 3): string
     {
         if ($depth >= $maxDepth) {
             return '[Array...]';
@@ -252,7 +252,7 @@ class Log
      * @param int $maxDepth 最大深度
      * @return string
      */
-    protected function formatObject($object, $depth = 0, $maxDepth = 3)
+    protected function formatObject(object $object, int $depth = 0, int $maxDepth = 3): string
     {
         if ($depth >= $maxDepth) {
             return get_class($object) . '{...}';
@@ -291,7 +291,7 @@ class Log
      * @param array $context 上下文数据
      * @return string
      */
-    protected function interpolate($message, array $context = [])
+    protected function interpolate(string $message, array $context = []): string
     {
         if (empty($context)) {
             return $message;
@@ -331,7 +331,7 @@ class Log
      * 在指定目录创建保护文件
      * @param string $dir 目录路径
      */
-    protected function createProtectionFiles($dir)
+    protected function createProtectionFiles(string $dir)
     {
         // 只在 kitpress-logs 目录下创建保护文件
         if (strpos($dir, 'kitpress-logs') === false) {
@@ -361,7 +361,7 @@ class Log
      * 递归创建目录并添加保护文件
      * @param string $path 目标路径
      */
-    protected function createSecureDirectory($path)
+    protected function createSecureDirectory(string $path)
     {
         // 统一目录分隔符并去除末尾的斜杠
         $path = rtrim(str_replace('\\', '/', $path), '/');
@@ -386,7 +386,7 @@ class Log
             $current .= $part . '/';
 
             if (!file_exists($current)) {
-                wp_mkdir_p($current);
+                \wp_mkdir_p($current);
             }
 
             // 只在 WordPress 目录范围内创建保护文件
@@ -401,7 +401,7 @@ class Log
      * @param string $path 要检查的路径
      * @return bool
      */
-    protected function isInWordPressPath($path)
+    protected function isInWordPressPath(string $path): bool
     {
         $wp_root = str_replace('\\', '/', ABSPATH);
         $wp_content = str_replace('\\', '/', WP_CONTENT_DIR);
@@ -418,19 +418,19 @@ class Log
      * @return string
      * @throws \Exception
      */
-    public function getLogDir()
+    public function getLogDir(): string
     {
         try {
             // 获取上传目录
-            $upload_dir = wp_upload_dir();
-            if (is_wp_error($upload_dir)) {
+            $upload_dir = \wp_upload_dir();
+            if (\is_wp_error($upload_dir)) {
                 throw new \Exception('Failed to get WordPress upload directory');
             }
 
             // 构建并标准化路径
-            $plugin_name = sanitize_file_name(basename($this->plugin->getRootPath()));
-            $log_dir = wp_normalize_path(
-                trailingslashit($upload_dir['basedir']) . 'kitpress-logs/' . $plugin_name
+            $plugin_name = \sanitize_file_name(basename($this->plugin->getRootPath()));
+            $log_dir = \wp_normalize_path(
+                \trailingslashit($upload_dir['basedir']) . 'kitpress-logs/' . $plugin_name
             );
 
             // 确保路径在 WordPress 允许的范围内
@@ -447,7 +447,7 @@ class Log
         } catch (\Exception $e) {
             // 记录错误并返回默认目录
             error_log('Log directory creation failed: ' . $e->getMessage());
-            return trailingslashit(WP_CONTENT_DIR) . 'logs';
+            return \trailingslashit(WP_CONTENT_DIR) . 'logs';
         }
     }
 
@@ -456,7 +456,7 @@ class Log
      * @param string $level 日志级别
      * @return string
      */
-    protected function getLogFile($level)
+    protected function getLogFile(string $level): string
     {
         try {
             // 获取日志目录
@@ -466,11 +466,11 @@ class Log
             $filename = sprintf(
                 '%s-%s.log',
                 date('Y-m-d'),
-                sanitize_file_name($level)
+                \sanitize_file_name($level)
             );
 
             // 构建完整路径
-            $log_file = wp_normalize_path($log_dir . '/' . $filename);
+            $log_file = \wp_normalize_path($log_dir . '/' . $filename);
 
             // 确保父目录存在
             $parent_dir = dirname($log_file);
@@ -502,7 +502,7 @@ class Log
      * 获取指定插件的所有日志文件
      * @return array
      */
-    public function getLogFiles()
+    public function getLogFiles(): array
     {
         $log_dir = $this->getLogDir();
         if (!is_dir($log_dir)) {
@@ -516,7 +516,7 @@ class Log
      * 清理指定插件的旧日志文件
      * @param int $days 保留天数
      */
-    public function cleanOldLogs($days = 30)
+    public function cleanOldLogs(int $days = 30)
     {
         $files = $this->getLogFiles();
         $now = time();

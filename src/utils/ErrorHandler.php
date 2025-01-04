@@ -122,12 +122,12 @@ class ErrorHandler {
         $type = in_array($error['type'], $allowed_types) ? $error['type'] : 'error';
         
         ?>
-        <div class="notice notice-<?php echo esc_attr($type); ?> is-dismissible">
+        <div class="notice notice-<?php echo \esc_attr($type); ?> is-dismissible">
             <p>
                 <?php if (!empty($error['title'])): ?>
-                    <strong><?php echo esc_html($error['title']); ?>：</strong>
+                    <strong><?php echo \esc_html($error['title']); ?>：</strong>
                 <?php endif; ?>
-                <?php echo wp_kses_post($error['message']); ?>
+                <?php echo \wp_kses_post($error['message']); ?>
             </p>
         </div>
         <?php
@@ -141,7 +141,7 @@ class ErrorHandler {
      */
     public static function logError($message, array $context = []) {
         if (defined('WP_DEBUG') && WP_DEBUG) {
-            Log::error(sprintf(
+           error_log(sprintf(
                 'Kitpress Framework Error: %s | Context: %s',
                 $message,
                 json_encode($context, JSON_UNESCAPED_UNICODE)
