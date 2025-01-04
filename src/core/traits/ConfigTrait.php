@@ -127,7 +127,7 @@ trait ConfigTrait {
             return [];
         }
 
-        $config = require_once $path;
+        $config = require $path;
 
         if (!is_array($config)) {
             throw new \RuntimeException("配置文件必须返回数组: {$path}");
