@@ -46,10 +46,9 @@ class {{NAME}}Controller extends BackendController {
 
     protected function validationRules(): array
     {
-        $rules = [];
-
-        {{VALIDATION_RULES}}
-
+        $rules = [
+            {{VALIDATION_RULES}}
+        ];
         return $rules;
     }
 }

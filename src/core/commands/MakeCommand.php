@@ -188,8 +188,8 @@ class MakeCommand extends Command
                 if( $item == 'vue.min.js' || $item == 'common.js' || $item == 'common.css' ){
                     $folder = $item == 'vue.min.js' ? 'vue/' : '';
                     if( !file_exists($base_path .'backend/assets/component/' . $folder . $item) ){
-                        $common_file = KITPRESS_PATH . 'core/templates/assets/' . $item . '.stub';
-                        file_put_contents($base_path .'backend/assets/component/'. $folder . $item, $common_file);
+                        $content = file_get_contents( KITPRESS_PATH . 'core/templates/assets/' . $item . '.stub');
+                        file_put_contents($base_path .'backend/assets/component/'. $folder . $item, $content);
                     }
                     continue;
                 }
@@ -333,24 +333,26 @@ CODE;
 
             $ruleSet = [];
 
-            // 检查是否允许为空
-            if (stripos($definition['definition'], 'NOT NULL') !== false) {
-                $ruleSet[] = 'required';
-            }
-
             // 根据字段类型添加验证规则
             switch ($definition['type']) {
                 case 'int':
                 case 'bigint':
                 case 'tinyint':
+                    $ruleSet[] = 'required';
                     $ruleSet[] = 'integer';
                     break;
 
                 case 'varchar':
-                    // 提取最大长度
-                    if (preg_match('/varchar\((\d+)\)/i', $definition['definition'], $matches)) {
-                        $ruleSet[] = 'max:' . $matches[1];
+                    $ruleSet[] = 'required';
+                    $ruleSet[] = 'string';
+                    // 如果有默认值，则不是必填
+                    if ($definition['default'] !== null) {
+                        array_shift($ruleSet); // 移除 required
                     }
+                    break;
+
+                case 'text':
+                    $ruleSet[] = 'string';
                     break;
             }
 
@@ -377,8 +379,9 @@ CODE;
         $validColumns = [];
 
         foreach ($columns as $column => $definition) {
-            // 跳过主键和索引定义
-            if (in_array($column, ['PRIMARY KEY', 'UNIQUE KEY', 'KEY'])) {
+            // 跳过索引定义
+            if (strpos($column, 'KEY ') === 0 ||
+                in_array($column, ['PRIMARY KEY', 'UNIQUE KEY', 'KEY'])) {
                 continue;
             }
 
