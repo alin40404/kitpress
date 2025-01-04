@@ -38,7 +38,7 @@ if (!defined('ABSPATH')) {
  *     }
  * }
  */
-abstract class BackendController extends Controller {
+class BackendController extends Controller {
 
     /**
      * 后台样式文件列表
@@ -147,7 +147,10 @@ abstract class BackendController extends Controller {
      * 构建列表查询条件
      * @return array 查询条件数组
      */
-    abstract protected function buildListWhere(): array;
+    protected function buildListWhere(): array
+    {
+        return [];
+    }
 
     /**
      * 获取数据列表
@@ -288,7 +291,10 @@ abstract class BackendController extends Controller {
         return false;
     }
 
-    abstract protected function createEmptyModel(): \stdClass;
+    protected function createEmptyModel(): \stdClass
+    {
+        return new \stdClass();
+    }
 
     /**
      * 生成并验证唯一的 slug
@@ -374,19 +380,21 @@ abstract class BackendController extends Controller {
      *
      * @return array 验证规则数组
      */
-    abstract protected function validationRules(): array;
+    protected function validationRules(): array
+    {
+        return [];
+    }
 
     /**
      * 验证模型数据
      *
      * 验证数据是否符合规则要求
      *
+     * @param array $data
+     * @return bool|array 验证通过返回true，失败返回错误信息数组
      * @since 1.0.0
      * @access protected
      *
-     * @param array $modelData 待验证的数据
-     * @return bool|array 验证通过返回true，失败返回错误信息数组
-     * @throws \Exception 验证器不存在时抛出异常
      */
     protected function validateModelData(array $data): bool
     {
