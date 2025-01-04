@@ -37,7 +37,7 @@ trait ViewTrait {
         // 如果视图路径包含 '/'，说明是完整路径，否则使用类名构建路径
         if (strpos($view, '/') === false) {
             // 中划线: user-profile
-            $baseName = Str::kebab(str_replace('controller', '', $className));
+            $baseName = str_replace('-controller', '', Str::kebab($className));
             $view = $baseName . '/' . $view;
         }
 

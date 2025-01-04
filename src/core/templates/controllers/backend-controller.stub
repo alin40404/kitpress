@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
 /**
  * {{NAME}} 模块控制器
  *
- * @package {{NAMESPACE}}\Backend\Controllers
+ * @package {{NAMESPACE}}\backend\controllers
  * @author  Kitpress
  * @since   1.0.0
  */
