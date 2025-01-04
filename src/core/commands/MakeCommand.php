@@ -139,7 +139,8 @@ class MakeCommand extends Command
                 'assets' => [
                     'component' => [
                         'vue' => [
-                            'vue.min.js'
+                            'vue.min.js',
+                            'vue.filters.js',
                         ],
                         'common.js',
                         'common.css',
@@ -185,8 +186,8 @@ class MakeCommand extends Command
                 if(!empty($item)) $this->createStructure($base_path, $item, $current_path . $name . '/');
             } else {
 
-                if( $item == 'vue.min.js' || $item == 'common.js' || $item == 'common.css' ){
-                    $folder = $item == 'vue.min.js' ? 'vue/' : '';
+                if( $item == 'vue.min.js' || $item == 'vue.filters.js' || $item == 'common.js' || $item == 'common.css' ){
+                    $folder = $item == 'vue.min.js' || $item == 'vue.filters.js' ? 'vue/' : '';
                     if( !file_exists($base_path .'backend/assets/component/' . $folder . $item) ){
                         $content = file_get_contents( KITPRESS_PATH . 'core/templates/assets/' . $item . '.stub');
                         file_put_contents($base_path .'backend/assets/component/'. $folder . $item, $content);

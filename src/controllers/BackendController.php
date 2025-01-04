@@ -1018,6 +1018,7 @@ class BackendController extends Controller {
     {
         // 加载多个样式文件
         $scripts = [
+            $this->page . '-filters' => 'backend/assets/component/vue/vue.filters.js',
             $this->page . '-common' => 'backend/assets/component/common.js',
             $this->page  => 'backend/assets/js/'. $this->formatControllerName .'.js',
         ];

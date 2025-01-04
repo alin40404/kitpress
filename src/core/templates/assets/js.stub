@@ -11,9 +11,7 @@ function init{{STUDLY_NAME}}List() {
                 page: 1,
                 perPage: {{ADMIN}}.perPage,
                 filters: {
-                    type: '',
-                    provider: '',
-                    is_active: ''
+
                 },
                 loading: false,
                 selectedItems: [], // 存储选中ID
