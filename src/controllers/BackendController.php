@@ -1012,7 +1012,7 @@ class BackendController extends Controller {
 
         // 加载工具
         \wp_enqueue_script(
-            'utils',
+            $this->page . '-utils-script',
             $this->plugin->getRootUrl() . 'backend/assets/component/utils.js',
             ['vue', 'jquery'],
             $this->config->get('app.version'),
@@ -1039,7 +1039,7 @@ class BackendController extends Controller {
             }
 
             // 设置依赖关系
-            $deps = ['vue', 'jquery','utils'];
+            $deps = ['vue', 'jquery',$this->page . '-utils-script'];
             // 如果不是公共脚本，添加对公共脚本的依赖
             if ($handle !==  $this->page . '-common') {
                 $deps[] =  $this->page . '-common-script';
