@@ -494,7 +494,7 @@ CODE;
         $default = $definition['default'];
 
         // 如果字段定义了默认值，优先使用定义的默认值
-        if ($default !== null) {
+        if ($default !== null && $default !== '') {
             if ($default === 'CURRENT_TIMESTAMP') {
                 return 'date("Y-m-d H:i:s")';
             }
@@ -506,18 +506,19 @@ CODE;
             return "'" . $default . "'";
         }
 
+        // 特殊字段的默认值处理
+        if ($column === 'sort_order') {
+            return '0'; // 排序字段默认为0
+        }
+        if (in_array($column, ['is_active', 'status', 'enabled'])) {
+            return '1'; // 状态字段默认为1（启用）
+        }
+
         // 没有默认值时，根据字段类型设置合理的默认值
         switch ($type) {
             case 'bigint':
             case 'int':
             case 'tinyint':
-                // 特殊字段的默认值处理
-                if ($column === 'sort_order') {
-                    return '0'; // 排序字段默认为0
-                }
-                if (in_array($column, ['is_active', 'status', 'enabled'])) {
-                    return '1'; // 状态字段默认为1（启用）
-                }
                 return '0';
 
             case 'decimal':
