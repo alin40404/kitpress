@@ -231,7 +231,7 @@ class MakeCommand extends Command
      */
     private function getControllerContent(string $studlyName, string $kebabName, string $snakeName): string
     {
-        $stub_path = dirname(__DIR__) . '/templates/controllers/backend-controller.stub';
+        $stub_path = KITPRESS_PATH . 'core/templates/controllers/backend-controller.stub';
         $content = file_get_contents($stub_path);
 
         // 获取数据库表结构
@@ -240,6 +240,8 @@ class MakeCommand extends Command
 
         // 生成 createEmptyModel 方法的内容
         $modelProperties = $this->generateModelProperties($table);
+        $buildListWhere = $this->generateBuildListWhere($table);
+        $validationRules = $this->generateValidationRules($table);
 
         // 替换模板中的变量
         $replacements = [
@@ -247,6 +249,8 @@ class MakeCommand extends Command
             '{{NAME_KEBAB}}' => $kebabName,
             '{{NAME_SNAKE}}' => $snakeName,
             '{{MODEL_PROPERTIES}}' => $modelProperties,
+            '{{BUILD_LIST_WHERE}}' => $buildListWhere,
+            '{{VALIDATION_RULES}}' => $validationRules,
             '{{NAMESPACE}}' => $this->container->config->get('app.namespace')
         ];
 
@@ -271,6 +275,97 @@ class MakeCommand extends Command
         }
 
         return implode("\n        ", $properties);
+    }
+
+    /**
+     * 生成构建查询条件的代码
+     */
+    private function generateBuildListWhere(array $table): string
+    {
+        $columns = $this->extractTableColumns($table);
+        $conditions = [];
+
+        foreach ($columns as $column => $definition) {
+            // 跳过不需要搜索的字段
+            if (in_array($column, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                continue;
+            }
+
+            // 根据字段类型生成不同的查询条件
+            switch ($definition['type']) {
+                case 'tinyint':
+                    if (in_array($column, ['status', 'is_active', 'enabled'])) {
+                        $conditions[] = <<<CODE
+        if (isset(\$this->filters['{$column}']) && \$this->filters['{$column}'] !== '') {
+            \$where[] = ['{$column}', '=', (int)\$this->filters['{$column}']];
+        }
+CODE;
+                    }
+                    break;
+
+                case 'varchar':
+                case 'text':
+                    $conditions[] = <<<CODE
+        if (!empty(\$this->filters['{$column}'])) {
+            \$where[] = ['{$column}', 'LIKE', '%' . \$this->filters['{$column}'] . '%'];
+        }
+CODE;
+                    break;
+            }
+        }
+
+        return implode("\n\n", $conditions);
+    }
+
+    /**
+     * 生成验证规则
+     */
+    private function generateValidationRules(array $table): string
+    {
+        $columns = $this->extractTableColumns($table);
+        $rules = [];
+
+        foreach ($columns as $column => $definition) {
+            // 跳过不需要验证的字段
+            if (in_array($column, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                continue;
+            }
+
+            $ruleSet = [];
+
+            // 检查是否允许为空
+            if (stripos($definition['definition'], 'NOT NULL') !== false) {
+                $ruleSet[] = 'required';
+            }
+
+            // 根据字段类型添加验证规则
+            switch ($definition['type']) {
+                case 'int':
+                case 'bigint':
+                case 'tinyint':
+                    $ruleSet[] = 'integer';
+                    break;
+
+                case 'varchar':
+                    // 提取最大长度
+                    if (preg_match('/varchar\((\d+)\)/i', $definition['definition'], $matches)) {
+                        $ruleSet[] = 'max:' . $matches[1];
+                    }
+                    break;
+            }
+
+            if (!empty($ruleSet)) {
+                $rulesStr = implode('|', $ruleSet);
+                $rules[] = <<<CODE
+        '{$column}' => [
+            'rules' => '{$rulesStr}',
+            'message' => '{$definition['comment']}不正确'
+        ],
+CODE;
+            }
+        }
+
+        return implode("\n", $rules);
     }
 
     /**
@@ -805,7 +900,7 @@ HTML;
 
     private function getViewContent(string $template_name): string
     {
-        $stub_path = dirname(__DIR__) . '/templates/views/' . $template_name . '.stub';
+        $stub_path = KITPRESS_PATH . 'core/templates/views/' . $template_name . '.stub';
         if (!file_exists($stub_path)) {
             return "<?php\n// Template not found: {$template_name}";
         }

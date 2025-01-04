@@ -65,6 +65,13 @@ class BackendController extends Controller {
     protected array $scripts = [];
 
     /**
+     * 列表筛选条件
+     *
+     * @var array
+     */
+    protected array $filters = [];
+
+    /**
      * 页面标识符
      *
      * WordPress后台页面的唯一标识符
@@ -120,6 +127,31 @@ class BackendController extends Controller {
         $this->setControllerName();
 
         $this->page = $this->plugin->getPrefix() . $this->formatControllerName;
+
+        $this->initFilters();
+    }
+
+    /**
+     * 初始化筛选条件
+     * 从请求中获取并清理筛选参数
+     *
+     * @return void
+     */
+    protected function initFilters(): void
+    {
+        // 从请求中获取筛选参数
+        $this->filters = $this->input('filters', []);
+
+        // 确保 filters 是数组
+        if (!is_array($this->filters)) {
+            $this->filters = [];
+            return;
+        }
+
+        // 过滤和清理输入
+        array_walk_recursive($this->filters, function(&$value) {
+            $value = \sanitize_text_field($value);
+        });
     }
 
     /**

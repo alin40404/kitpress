@@ -12,14 +12,14 @@ if (!defined('ABSPATH')) {
  * {{NAME}} 模块控制器
  *
  * @package {{NAMESPACE}}\Backend\Controllers
- * @author  Your Name
+ * @author  Kitpress
  * @since   1.0.0
  */
 class {{NAME}}Controller extends BackendController {
     protected function init(): void
     {
         parent::init();
-        $this->model = kp($this->plugin->getNamespace())->model->table('{{SNAKE_NAME}}');
+        $this->model = kp($this->plugin->getNamespace())->model->table('{{NAME_SNAKE}}');
     }
 
     protected function buildListWhere(): array
@@ -39,7 +39,7 @@ class {{NAME}}Controller extends BackendController {
     {
         $detail = new \stdClass();
 
-        {{CREATE_EMPTY_MODEL}}
+        {{MODEL_PROPERTIES}}
 
         return $detail;
     }

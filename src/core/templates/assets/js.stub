@@ -37,9 +37,7 @@ function init{{STUDLY_NAME}}List() {
                     action: {{ADMIN}}.action_list,
                     page: this.page,
                     per_page: this.perPage,
-                    type: this.filters.type,
-                    provider: this.filters.provider,
-                    is_active: this.filters.is_active,
+                    filters: this.filters,
                     nonce: {{ADMIN}}.nonce,
                 }).then(response => {
                     if (response.code === 1) {
