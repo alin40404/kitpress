@@ -371,22 +371,63 @@ CODE;
     }
 
     /**
-     * 从表定义中提取字段信息
+     * 从表定义中提取字段信息，排除所有索引、键和约束定义
+     *
+     * @param array $table 表结构定义
+     * @return array 处理后的字段信息
      */
     private function extractTableColumns(array $table): array
     {
         $columns = $table['columns'] ?? [];
         $validColumns = [];
 
+        // MySQL 保留关键字列表 - 用于排除非字段定义
+        $reservedKeywords = [
+            'PRIMARY KEY',
+            'UNIQUE KEY',
+            'UNIQUE',
+            'KEY',
+            'INDEX',
+            'FULLTEXT KEY',
+            'FULLTEXT',
+            'SPATIAL KEY',
+            'SPATIAL',
+            'FOREIGN KEY',
+            'CONSTRAINT'
+        ];
+
         foreach ($columns as $column => $definition) {
-            // 跳过索引定义
-            if (strpos($column, 'KEY ') === 0 ||
-                in_array($column, ['PRIMARY KEY', 'UNIQUE KEY', 'KEY'])) {
+            // 跳过空定义
+            if (empty($column) || empty($definition)) {
                 continue;
             }
 
-            // 解析字段定义
-            $validColumns[$column] = $this->parseColumnDefinition($definition);
+            // 1. 检查是否为索引、键或约束定义
+            if (preg_match('/^(PRIMARY\s+KEY|UNIQUE(?:\s+KEY)?|KEY|INDEX|FULLTEXT(?:\s+KEY)?|SPATIAL(?:\s+KEY)?|FOREIGN\s+KEY|CONSTRAINT)\s/i', $column) ||
+                in_array(strtoupper($column), $reservedKeywords)) {
+                continue;
+            }
+
+            // 2. 检查字段定义是否包含有效的 MySQL 数据类型
+            if (!preg_match('/(tinyint|smallint|mediumint|int|bigint|decimal|float|double|char|varchar|tinytext|text|mediumtext|longtext|date|datetime|timestamp|time|year|enum|set|binary|varbinary|blob|json)/i', $definition)) {
+                continue;
+            }
+
+            try {
+                // 3. 解析字段定义
+                $columnInfo = $this->parseColumnDefinition($definition);
+
+                // 4. 确保解析结果包含必要的信息
+                if (!isset($columnInfo['type'])) {
+                    continue;
+                }
+
+                $validColumns[$column] = $columnInfo;
+            } catch (\Exception $e) {
+                // 如果解析出错，跳过该字段
+                \WP_CLI::debug("解析字段 {$column} 失败: " . $e->getMessage());
+                continue;
+            }
         }
 
         return $validColumns;
@@ -394,33 +435,50 @@ CODE;
 
     /**
      * 解析字段定义
+     *
+     * @param string $definition 字段定义字符串
+     * @return array 解析后的字段信息
      */
     private function parseColumnDefinition(string $definition): array
     {
-        $type = '';
-        $default = null;
-        $comment = '';
+        $result = [
+            'type' => '',
+            'length' => null,
+            'unsigned' => false,
+            'nullable' => false,
+            'default' => null,
+            'auto_increment' => false,
+            'comment' => ''
+        ];
 
-        // 提取字段类型
-        if (preg_match('/^(\w+)/', $definition, $matches)) {
-            $type = strtolower($matches[1]);
+        // 提取数据类型和长度
+        if (preg_match('/^(\w+)(?:\(([^)]+)\))?/', $definition, $matches)) {
+            $result['type'] = strtolower($matches[1]);
+            if (isset($matches[2])) {
+                $result['length'] = $matches[2];
+            }
         }
+
+        // 检查是否无符号
+        $result['unsigned'] = (bool) preg_match('/\bunsigned\b/i', $definition);
+
+        // 检查是否可空
+        $result['nullable'] = !preg_match('/\bNOT\s+NULL\b/i', $definition);
 
         // 提取默认值
-        if (preg_match('/DEFAULT\s+([^\s]+)/i', $definition, $matches)) {
-            $default = trim($matches[1], "'\"");
+        if (preg_match('/DEFAULT\s+(?:\'([^\']+)\'|(\d+)|NULL)/i', $definition, $matches)) {
+            $result['default'] = $matches[1] ?? $matches[2] ?? null;
         }
+
+        // 检查是否自增
+        $result['auto_increment'] = (bool) preg_match('/\bauto_increment\b/i', $definition);
 
         // 提取注释
-        if (preg_match('/COMMENT\s+"([^"]+)"/i', $definition, $matches)) {
-            $comment = $matches[1];
+        if (preg_match('/COMMENT\s+[\'"]([^\'"]+)[\'"]/', $definition, $matches)) {
+            $result['comment'] = $matches[1];
         }
 
-        return [
-            'type' => $type,
-            'default' => $default,
-            'comment' => $comment
-        ];
+        return $result;
     }
 
     /**
