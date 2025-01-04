@@ -864,10 +864,22 @@ HTML;
         }
 
         $headers = [];
+        $hasStatusColumn = false;
+
         foreach ($columns as $column => $definition) {
+            if (in_array($column, ['status', 'is_active', 'enabled'])) {
+                $hasStatusColumn = true;
+            }
+
             $label = $definition['comment'] ?: $this->formatLabel($column);
             $headers[] = "<th>{$label}</th>";
         }
+
+        // 如果有状态字段，添加操作列
+        if ($hasStatusColumn) {
+            $headers[] = "<th>操作</th>";
+        }
+
         return implode("\n            ", $headers);
     }
 
@@ -881,6 +893,8 @@ HTML;
     {
         $rows = [];
         $sortFields = ['sort_order', 'order', 'weight']; // 定义需要排序处理的字段
+        $hasStatusColumn = false;
+        $statusHtml = '';
 
         // 处理 ID 列
         if (isset($columns['id'])) {
@@ -939,12 +953,18 @@ HTML;
 
                 case 'tinyint':
                     if (in_array($column, ['status', 'is_active', 'enabled'])) {
+                        $hasStatusColumn = true;
                         $rows[] = <<<HTML
                     <td>
                         <span :class="['status-badge', item.{$column} == 1 ? 'success' : 'error']">
                             {{ item.{$column} == 1 ? '启用' : '禁用' }}
                         </span>
+                    </td>
+HTML;
+                        $statusHtml = <<<HTML
+                    <td>
                         <button
+                            :class="item.{$column} == 1 ? 'button-secondary' : 'button-primary'"
                             class="button"
                             @click.stop="toggleStatus(item)"
                             :disabled="isProcessing(item.id)"
@@ -954,6 +974,7 @@ HTML;
                         </button>
                     </td>
 HTML;
+
                     } else {
                         $rows[] = "<td>{{ item.{$column} }}</td>";
                     }
@@ -967,6 +988,11 @@ HTML;
                 default:
                     $rows[] = "<td>{{ item.{$column} }}</td>";
             }
+        }
+
+        // 如果有状态列，添加操作列
+        if ($hasStatusColumn) {
+            $rows[] = $statusHtml;
         }
 
         return implode("\n            ", $rows);
