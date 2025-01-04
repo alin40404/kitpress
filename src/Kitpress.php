@@ -114,7 +114,8 @@ class Kitpress extends Singleton
      * @param string $rootPath 插件根目录路径
      * @return void
      */
-    private static function includes(string $rootPath){
+    private static function includes(string $rootPath): void
+    {
         $files = [
             'function',
         ];
@@ -143,7 +144,7 @@ class Kitpress extends Singleton
      * @return void
      * @throws \RuntimeException
      */
-    private static function setRootPath($rootPath)
+    private static function setRootPath(string $rootPath): void
     {
         if (empty($rootPath) || !is_dir($rootPath)) ErrorHandler::die('插件根目录不正确');
 
@@ -161,7 +162,7 @@ class Kitpress extends Singleton
      * @return string
      * @throws \Exception
      */
-    public static function getRootPath(string $namespace)
+    public static function getRootPath(string $namespace): string
     {
         if( !isset(self::$rootPaths[$namespace])) throw new \Exception('插件目录不存在');
         return self::$rootPaths[$namespace];
@@ -174,7 +175,8 @@ class Kitpress extends Singleton
      * @return void
      * @throws BootstrapException
      */
-    public function activate(){
+    public function activate(): void
+    {
         try{
             Bootstrap::boot($this->container)->start();
             $this->container->get('installer')->activate();
@@ -190,7 +192,7 @@ class Kitpress extends Singleton
      * @return void
      * @throws BootstrapException
      */
-    public function deactivate()
+    public function deactivate(): void
     {
         try{
             Bootstrap::boot($this->container)->start();

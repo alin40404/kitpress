@@ -16,7 +16,7 @@ class Config {
 
     /**
      * 构造函数
-     * @param string $namespace 插件命名空间
+     * @param Plugin $plugin
      */
     public function __construct(Plugin $plugin) {
         $this->namespace = $plugin->getNamespace();
@@ -25,7 +25,6 @@ class Config {
     /**
      * 加载配置文件
      * @param string|array $names 配置文件名
-     * @param string $namespace 插件命名空间
      * @return void
      */
     public function load($names) {
@@ -38,7 +37,7 @@ class Config {
      * @param mixed $default 默认值
      * @return mixed
      */
-    public function get($key = null, $default = null) {
+    public function get(string $key = null, $default = null) {
         return $this->getValue(
             $this->items,
             $key,
@@ -51,7 +50,7 @@ class Config {
      * @param string $key 配置键名
      * @param mixed $value 配置值
      */
-    public function set($key, $value) {
+    public function set(string $key, $value) {
         $this->setValue(
             $this->items,
             $key,
@@ -64,7 +63,8 @@ class Config {
      * @param string $key 配置键名
      * @return bool
      */
-    public function has($key) {
+    public function has(string $key): bool
+    {
         return $this->getValue(
                 $this->items,
                 $key
@@ -74,7 +74,8 @@ class Config {
     /**
      * 重置配置（静态代理方法）
      */
-    public function reset() {
+    public function reset() : void
+    {
         $this->items = [];
         $this->loaded = [];
     }

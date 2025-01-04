@@ -17,38 +17,38 @@ trait ConfigTrait {
      * 配置存储
      * @var array
      */
-    protected $items = [];
+    protected array $items = [];
 
     /**
      * 已加载的配置文件记录
      * @var array
      */
-    protected $loaded = [];
+    protected array $loaded = [];
 
     /**
      * 框架默认路径
      * @var string
      */
-    private $defaultPath = null;
+    private ?string $defaultPath = null;
 
     /**
      * 自定义路径
      * @var string
      */
-    private $customPath = null;
+    private ?string $customPath = null;
 
     /**
      * 插件根目录
      * @var string|null
      */
-    private $rootPath = null;
+    private ?string $rootPath = null;
 
 
     /**
      * 受保护的配置文件（不允许外部修改）
      * @var array
      */
-    protected $protectedFiles = ['service'];
+    protected array $protectedFiles = ['service'];
 
     /**
      * 插件命名空间
@@ -59,7 +59,8 @@ trait ConfigTrait {
      * 初始化配置路径
      * @param string $module 模块名称
      */
-    protected function init($module) {
+    protected function init(string $module): void
+    {
         $this->rootPath = $this->rootPath ?: Kitpress::getRootPath($this->namespace);
 
         $defaultPath = KITPRESS_PATH . $module;
@@ -75,7 +76,8 @@ trait ConfigTrait {
      * @param string|array $names 配置文件名
      * @param string $module 模块名称
      */
-    protected function loadResource($names, string $module) {
+    protected function loadResource($names, string $module)
+    {
         // 初始化路径
         $this->init($module);
 
@@ -119,8 +121,9 @@ trait ConfigTrait {
      * @param string $path 文件路径
      * @return array
      */
-    private function loadFile($path) {
-        return file_exists($path) ? require $path : [];
+    private function loadFile(string $path): array
+    {
+        return file_exists($path) ? require_once $path : [];
     }
 
     /**
@@ -129,7 +132,8 @@ trait ConfigTrait {
      * @param array $custom 自定义配置
      * @return array
      */
-    private function merge($default, $custom) {
+    private function merge(array $default, array $custom): array
+    {
         $merged = $default;
         if (is_array($custom) && !empty($custom)) {
             foreach ($custom as $key => $value) {
@@ -150,7 +154,8 @@ trait ConfigTrait {
      * @param mixed $default 默认值
      * @return mixed
      */
-    protected function getValue($array, $key, $default = null) {
+    protected function getValue(array $array, ?string $key, $default = null)
+    {
         if (is_null($key)) {
             return $array;
         }
@@ -171,7 +176,7 @@ trait ConfigTrait {
      * @param string $key 键名
      * @param mixed $value 值
      */
-    protected function setValue(&$array, $key, $value) {
+    protected function setValue(array &$array, string $key, $value) {
         $keys = explode('.', $key);
         $current = &$array;
 

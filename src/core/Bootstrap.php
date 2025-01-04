@@ -47,7 +47,7 @@ class Bootstrap extends Singleton {
         return self::$instances[$key];
     }
 
-    public static function boot(Container $container = null)
+    public static function boot(Container $container = null): Bootstrap
     {
         $instance = self::getInstance($container);
         if ($container !== null ) {
@@ -150,8 +150,11 @@ class Bootstrap extends Singleton {
 
     /**
      * 加载配置文件
+     * @return void
+     *
      */
-    private function loadConfiguration() {
+    private function loadConfiguration(): void
+    {
         $container = $this->container;
 
         // 注册 Plugin 服务

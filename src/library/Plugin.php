@@ -55,7 +55,7 @@ class Plugin {
         return \plugin_dir_url( $this->getRootFile() );
     }
 
-    public function getPrefix()
+    public function getPrefix(): string
     {
         return $this->namespace . '-';
     }
