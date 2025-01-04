@@ -20,7 +20,8 @@ function init{{STUDLY_NAME}}List() {
                 processingState: {
                     sorting: {},  // 排序状态
                     status: {}   // 切换状态
-                }
+                },
+                columnCount: 1,
             }
         },
         computed: {
@@ -251,6 +252,9 @@ function init{{STUDLY_NAME}}List() {
         },
         mounted() {
             this.loadData();
+            if (this.$refs.headerRow) {
+                this.columnCount = this.$refs.headerRow.children.length;
+            }
         }
     });
 }

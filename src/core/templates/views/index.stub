@@ -49,7 +49,7 @@ if (!defined('ABSPATH')) {
 
     <table class="wp-list-table widefat fixed striped">
         <thead>
-        <tr>
+        <tr ref="headerRow">
             <td id="cb" class="manage-column column-cb check-column">
                 <input type="checkbox" id="select-all" @click="toggleSelectAll">
                 <label for="select-all"><span class="screen-reader-text">全选</span></label></td>
@@ -57,7 +57,14 @@ if (!defined('ABSPATH')) {
         </tr>
         </thead>
         <tbody>
-        <tr v-for="item in items" :key="item.id">
+        <tr v-if="items.length === 0">
+            <td :colspan="columnCount" class="no-items">
+                <div style="text-align: center; padding: 20px;">
+                    暂无数据
+                </div>
+            </td>
+        </tr>
+        <tr v-else v-for="item in items" :key="item.id">
             <th scope="row" class="check-column">
                 <input :id="'cb-select-' + item.id" type="checkbox" v-model="selectedItems" :value="item.id">
                 <label :for="'cb-select-' + item.id">
@@ -68,7 +75,7 @@ if (!defined('ABSPATH')) {
         </tr>
         </tbody>
         <tfoot>
-        <tr>
+       <tr ref="headerRow">
             <td id="cb" class="manage-column column-cb check-column">
                 <input type="checkbox" id="select-all" @click="toggleSelectAll">
                 <label for="select-all"><span class="screen-reader-text">全选</span></label></td>

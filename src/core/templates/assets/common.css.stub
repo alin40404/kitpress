@@ -144,3 +144,8 @@ tr:hover .row-actions {
     background: #f2dede;
     color: #a94442;
 }
+.no-items {
+    background: #f8f8f8;
+    color: #666;
+    font-size: 14px;
+}
