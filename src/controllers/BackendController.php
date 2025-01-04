@@ -494,7 +494,8 @@ class BackendController extends Controller {
         }
 
         return $this->render('edit',[
-            'detail' => $this->createEmptyModel()
+            'detail' => $this->createEmptyModel(),
+            'listUrl' => \admin_url('admin.php?page='. $this->page ),
         ]);
     }
 

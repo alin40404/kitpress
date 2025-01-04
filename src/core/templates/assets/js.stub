@@ -268,10 +268,6 @@ function init{{STUDLY_NAME}}Form() {
             return {
                 loading: false,
                 form: window.{{CAMEL_NAME}}Detail || {},
-                imagePrices: {
-                    '1024x1024': { standard: 0.04, hd: 0.08 },
-                    '512x512': { standard: 0.02, hd: 0.04 }
-                }
             }
         },
         created() {

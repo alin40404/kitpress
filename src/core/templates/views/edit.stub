@@ -32,5 +32,5 @@ if (!defined('ABSPATH')) {
 </div>
 
 <script>
-    window.modelsDetail = <?php echo json_encode($detail); ?>;
+    window.{{NAME_CAMEL}}Detail = <?php echo json_encode($detail); ?>;
 </script>

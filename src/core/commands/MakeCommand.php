@@ -523,6 +523,7 @@ CODE;
                     '{{NAME}}' => $table_comment,  // 使用表注释
                     '{{NAME_KEBAB}}' => $this->kebabName,
                     '{{NAME_SNAKE}}' => $this->snakeName,
+                    '{{NAME_CAMEL}}' => Str::camel($this->kebabName),
                     '{{PAGE_TITLE}}' => $info['title'],
                     '{{DESCRIPTION}}' => $info['description'],
                     '{{LIST_URL}}' => "admin_url('admin.php?page={$this->kebabName}')",
@@ -687,7 +688,7 @@ HTML;
                 <input type="text" 
                        id="search_{$column}" 
                        v-model="filters.{$column}" 
-                       @input="loadData">
+                       @input="loadData" placeholder="{$label}">
 HTML;
 
         }
@@ -731,6 +732,7 @@ HTML;
     private function generateFormInput(string $column, array $definition): string
     {
         $type = $definition['type'];
+        $label = $definition['comment'] ?: $this->formatLabel($column);
 
         if ($column === 'type') {
             return <<<HTML
@@ -740,18 +742,18 @@ HTML;
 HTML;
         }
         if (in_array($column, ['is_active', 'status'])) {
-            return '<input type="checkbox" v-model="form.' . $column . '">';
+            return '<input type="checkbox" v-model="form.' . $column . '" placeholder="'. $label .'">';
         }
 
         if (in_array($type, ['tinyint', 'int', 'bigint'])) {
-            return '<input type="number" id="' . $column . '" v-model.number="form.' . $column . '" class="regular-text">';
+            return '<input type="number" id="' . $column . '" v-model.number="form.' . $column . '" class="regular-text" placeholder="'. $label .'">';
         }
 
         if ($type === 'text') {
             return '<textarea id="' . $column . '" v-model="form.' . $column . '" class="large-text"></textarea>';
         }
 
-        return '<input type="text" id="' . $column . '" v-model="form.' . $column . '" class="regular-text">';
+        return '<input type="text" id="' . $column . '" v-model="form.' . $column . '" class="regular-text" placeholder="'. $label .'">';
     }
 
     private function generateTableHeaders(array $columns): string
