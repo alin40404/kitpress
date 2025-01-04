@@ -1009,6 +1009,15 @@ class BackendController extends Controller {
             '2.6.14',
             true
         );
+
+        // 加载工具
+        \wp_enqueue_script(
+            'utils',
+            $this->plugin->getRootUrl() . 'backend/assets/component/utils.js',
+            ['vue', 'jquery'],
+            $this->config->get('app.version'),
+            true
+        );
     }
 
     /**
@@ -1018,7 +1027,6 @@ class BackendController extends Controller {
     {
         // 加载多个样式文件
         $scripts = [
-            $this->page . '-filters' => 'backend/assets/component/vue/vue.filters.js',
             $this->page . '-common' => 'backend/assets/component/common.js',
             $this->page  => 'backend/assets/js/'. $this->formatControllerName .'.js',
         ];
@@ -1031,7 +1039,7 @@ class BackendController extends Controller {
             }
 
             // 设置依赖关系
-            $deps = ['vue', 'jquery'];
+            $deps = ['vue', 'jquery','utils'];
             // 如果不是公共脚本，添加对公共脚本的依赖
             if ($handle !==  $this->page . '-common') {
                 $deps[] =  $this->page . '-common-script';

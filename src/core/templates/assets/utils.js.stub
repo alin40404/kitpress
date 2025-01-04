@@ -1,0 +1,18 @@
+// 定义工具函数对象
+const utils = {
+    // 文本截断函数
+    truncate(text, length = 50) {
+        if (!text) return '';
+        if (text.length <= length) return text;
+        return text.substring(0, length) + '...';
+    },
+
+    // 可以添加其他工具函数
+    formatDate(date) {
+        return moment(date).format('YYYY-MM-DD HH:mm:ss');
+    }
+    // ... 其他工具函数
+};
+
+// 挂载到全局
+window.utils = utils;
