@@ -54,7 +54,6 @@ if (!defined('ABSPATH')) {
                 <input type="checkbox" id="select-all" @click="toggleSelectAll">
                 <label for="select-all"><span class="screen-reader-text">全选</span></label></td>
             {{TABLE_HEADERS}}
-            <th>操作</th>
         </tr>
         </thead>
         <tbody>
