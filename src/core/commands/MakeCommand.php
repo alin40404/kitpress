@@ -269,7 +269,7 @@ class MakeCommand extends Command
 
         $properties = [];
         foreach ($columns as $column => $definition) {
-            $defaultValue = $this->getDefaultValue($definition);
+            $defaultValue = $this->getDefaultValue($definition,$column);
             $comment = $definition['comment'] ? "// {$definition['comment']}" : '';
             $properties[] = "\$detail->{$column} = {$defaultValue}; {$comment}";
         }
@@ -483,26 +483,65 @@ CODE;
 
     /**
      * 获取字段默认值
+     *
+     * @param array $definition 字段定义
+     * @param string $column 字段名
+     * @return string 默认值
      */
-    private function getDefaultValue(array $definition): string
+    private function getDefaultValue(array $definition, string $column): string
     {
         $type = $definition['type'];
         $default = $definition['default'];
 
+        // 如果字段定义了默认值，优先使用定义的默认值
+        if ($default !== null) {
+            if ($default === 'CURRENT_TIMESTAMP') {
+                return 'date("Y-m-d H:i:s")';
+            }
+            // 对于数字类型，直接返回数值
+            if (in_array($type, ['bigint', 'int', 'tinyint'])) {
+                return $default;
+            }
+            // 对于字符串类型，添加引号
+            return "'" . $default . "'";
+        }
+
+        // 没有默认值时，根据字段类型设置合理的默认值
         switch ($type) {
             case 'bigint':
             case 'int':
             case 'tinyint':
-                if ($default === 'CURRENT_TIMESTAMP') {
-                    return 'time()';
+                // 特殊字段的默认值处理
+                if ($column === 'sort_order') {
+                    return '0'; // 排序字段默认为0
                 }
-                return $default ?? '0';
+                if (in_array($column, ['is_active', 'status', 'enabled'])) {
+                    return '1'; // 状态字段默认为1（启用）
+                }
+                return '0';
+
+            case 'decimal':
+            case 'float':
+            case 'double':
+                return '0.00';
+
             case 'varchar':
+            case 'char':
             case 'text':
-                if ($default === 'CURRENT_TIMESTAMP') {
-                    return 'date("Y-m-d H:i:s")';
-                }
-                return "'" . ($default ?? '') . "'";
+            case 'mediumtext':
+            case 'longtext':
+                return "''";
+
+            case 'datetime':
+            case 'timestamp':
+                return 'date("Y-m-d H:i:s")';
+
+            case 'date':
+                return 'date("Y-m-d")';
+
+            case 'time':
+                return 'date("H:i:s")';
+
             default:
                 return 'null';
         }
