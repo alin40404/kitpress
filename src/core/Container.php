@@ -5,6 +5,7 @@ use InvalidArgumentException;
 use Closure;
 use kitpress\core\abstracts\Singleton;
 use kitpress\core\interfaces\ContainerInterface;
+use RuntimeException;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -48,11 +49,9 @@ class Container extends Singleton implements ContainerInterface {
     /**
      * 初始化容器
      * @param string $namespace 插件命名空间
-     * @param string $version 框架版本
      */
     protected function __construct(string $namespace = '') {
         $this->namespace = $namespace;
-        $this->version = KITPRESS_VERSION;
         parent::__construct();
     }
 
@@ -71,8 +70,8 @@ class Container extends Singleton implements ContainerInterface {
 
     /**
      * 检查容器是否已设置
+     * @param string $namespace
      * @return bool
-     * @throws RuntimeException
      */
     public static function checkContainer(string $namespace): bool
     {
@@ -344,6 +343,6 @@ class Container extends Singleton implements ContainerInterface {
      * @return string
      */
     public function getVersion(): string {
-        return $this->version;
+        return $this->version ?: KITPRESS_VERSION;
     }
 }
