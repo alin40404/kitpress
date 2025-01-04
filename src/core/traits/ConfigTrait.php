@@ -123,7 +123,17 @@ trait ConfigTrait {
      */
     private function loadFile(string $path): array
     {
-        return file_exists($path) ? require_once $path : [];
+        if (!file_exists($path)) {
+            return [];
+        }
+
+        $config = require_once $path;
+
+        if (!is_array($config)) {
+            throw new \RuntimeException("配置文件必须返回数组: {$path}");
+        }
+
+        return $config;
     }
 
     /**
