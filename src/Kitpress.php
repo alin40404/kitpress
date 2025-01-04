@@ -1,5 +1,4 @@
 <?php
-
 namespace kitpress;
 
 use kitpress\core\abstracts\Singleton;
@@ -18,7 +17,6 @@ if (!defined('ABSPATH')) {
  */
 class Kitpress extends Singleton
 {
-
     /**
      * 插件根目录路径数组
      * @var array 键为命名空间，值为路径
@@ -30,7 +28,6 @@ class Kitpress extends Singleton
      * @var string
      */
     private static string $namespace = '';
-
 
     /**
      * 当前容器实例
@@ -87,20 +84,12 @@ class Kitpress extends Singleton
      */
     public static function constants(): void
     {
-        $constants = [
-            'KITPRESS_VERSION' => '1.0.2',
-            'KITPRESS_NAME' => 'kitpress',
-            'KITPRESS___FILE__' => __FILE__,
-            'KITPRESS_PATH' => \plugin_dir_path(__FILE__),
-            'KITPRESS_CORE_NAMESPACE' => 'kitpress',
-            'KITPRESS_TEXT_DOMAIN' => md5('kitpress'),
-        ];
-
-        foreach ($constants as $name => $value) {
-            if (!defined($name)) {
-                define($name, $value);
-            }
-        }
+        !defined('KITPRESS_VERSION') && define('KITPRESS_VERSION', '1.0.2');
+        !defined('KITPRESS_NAME') && define('KITPRESS_NAME', 'kitpress');
+        !defined('KITPRESS___FILE__') && define('KITPRESS___FILE__', __FILE__);
+        !defined('KITPRESS_PATH') && define('KITPRESS_PATH', \plugin_dir_path(__FILE__));
+        !defined('KITPRESS_CORE_NAMESPACE') && define('KITPRESS_CORE_NAMESPACE', KITPRESS_NAME);
+        !defined('KITPRESS_TEXT_DOMAIN') && define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
     }
 
     /**
