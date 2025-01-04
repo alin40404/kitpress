@@ -13,16 +13,6 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-// 定义框架基础常量
-define('KITPRESS_VERSION', '1.0.2');
-define('KITPRESS_NAME', 'kitpress');
-define('KITPRESS___FILE__', __FILE__);
-// 框架根目录
-define('KITPRESS_PATH', \plugin_dir_path(KITPRESS___FILE__));
-// 框架命名空间
-define('KITPRESS_CORE_NAMESPACE', KITPRESS_NAME);
-define('KITPRESS_TEXT_DOMAIN', md5(KITPRESS_NAME));
-
 /**
  * 框架唯一入口类，提供外部调用。
  */
@@ -90,6 +80,30 @@ class Kitpress extends Singleton
     }
 
     /**
+     * 定义框架基础常量
+     * 初始化框架所需的全局常量
+     *
+     * @return void
+     */
+    public static function constants(): void
+    {
+        $constants = [
+            'KITPRESS_VERSION' => '1.0.2',
+            'KITPRESS_NAME' => 'kitpress',
+            'KITPRESS___FILE__' => __FILE__,
+            'KITPRESS_PATH' => \plugin_dir_path(__FILE__),
+            'KITPRESS_CORE_NAMESPACE' => 'kitpress',
+            'KITPRESS_TEXT_DOMAIN' => md5('kitpress'),
+        ];
+
+        foreach ($constants as $name => $value) {
+            if (!defined($name)) {
+                define($name, $value);
+            }
+        }
+    }
+
+    /**
      * 创建或获取实例并初始化根路径
      * 框架入口方法，用于初始化插件
      * 
@@ -98,6 +112,7 @@ class Kitpress extends Singleton
      */
     public static function boot(string $rootPath): Kitpress
     {
+        self::constants();
         self::setRootPath($rootPath);
         self::includes($rootPath);
 

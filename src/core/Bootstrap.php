@@ -7,6 +7,7 @@ use kitpress\core\abstracts\Singleton;
 use kitpress\core\exceptions\BootstrapException;
 use kitpress\core\Facades\Log;
 use kitpress\core\interfaces\ProviderInterface;
+use kitpress\Kitpress;
 use kitpress\utils\Lang;
 
 if (!defined('ABSPATH')) {
@@ -47,8 +48,23 @@ class Bootstrap extends Singleton {
         return self::$instances[$key];
     }
 
+    /**
+     * 定义框架基础常量
+     * 通过 Kitpress 类初始化框架所需的全局常量
+     * 包括版本号、框架名称、文件路径等
+     *
+     * @return void
+     * @see Kitpress::constants()
+     */
+    public static function constants(): void
+    {
+        Kitpress::constants();
+    }
+
     public static function boot(Container $container = null): Bootstrap
     {
+        self::constants();
+
         $instance = self::getInstance($container);
         if ($container !== null ) {
             $instance->container = $container;
