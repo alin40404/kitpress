@@ -214,7 +214,11 @@ class Kitpress extends Singleton
      */
     public function loaded(): void
     {
-        \add_action('plugins_loaded', function () {
+        // 保存当前命名空间
+        $currentNamespace = self::$namespace;
+
+        \add_action('plugins_loaded', function () use ($currentNamespace) {
+            self::useNamespace($currentNamespace);
             $this->run();
         }, 20);
     }
@@ -224,7 +228,6 @@ class Kitpress extends Singleton
      * 执行插件的主要初始化流程
      *
      * @return void
-     * @throws BootstrapException
      */
     public function run(): void
     {
