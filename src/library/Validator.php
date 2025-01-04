@@ -121,10 +121,24 @@ class Validator
      */
     protected function validate(): bool
     {
-        foreach ($this->rules as $field => $ruleString) {
-            $this->validateField($field, $ruleString);
+        foreach ($this->rules as $field => $ruleConfig) {
+            if (!isset($this->data[$field]) && !$this->isFieldRequired($ruleConfig['rules'])) {
+                continue;
+            }
+            $this->validateField($field, $ruleConfig);
         }
         return empty($this->errors);
+    }
+
+    /**
+     * 检查字段是否必需
+     *
+     * @param string $rules 规则字符串
+     * @return bool
+     */
+    protected function isFieldRequired(string $rules): bool
+    {
+        return strpos($rules, 'required') !== false;
     }
 
     /**
@@ -138,6 +152,22 @@ class Validator
         $parsed = [];
         foreach ($rules as $field => $rule) {
             if (is_array($rule)) {
+                // 验证规则数组格式
+                if (!isset($rule['rules'])) {
+                    throw new \InvalidArgumentException("验证规则 '{$field}' 缺少 'rules' 键");
+                }
+                if (!is_string($rule['rules'])) {
+                    throw new \InvalidArgumentException("字段 '{$field}' 的 'rules' 必须是字符串");
+                }
+
+                // 验证 message 和 messages 字段
+                if (isset($rule['message']) && !is_string($rule['message'])) {
+                    throw new \InvalidArgumentException("字段 '{$field}' 的 'message' 必须是字符串");
+                }
+                if (isset($rule['messages']) && !is_array($rule['messages'])) {
+                    throw new \InvalidArgumentException("字段 '{$field}' 的 'messages' 必须是数组");
+                }
+
                 $parsed[$field] = [
                     'rules' => $rule['rules'],
                     'messages' => $this->parseMessages($rule)
@@ -192,7 +222,7 @@ class Validator
         }
 
         foreach ($rules as $rule) {
-            $this->applyRule($field, $value, $rule, $ruleData['message']);
+            $this->applyRule($field, $value, $rule, $ruleData['messages']);
         }
     }
 
@@ -202,9 +232,9 @@ class Validator
      * @param string $field 字段名
      * @param mixed $value 字段值
      * @param string $rule 规则
-     * @param array|null $messages 错误消息数组
+     * @param array $messages 错误消息数组
      */
-    protected function applyRule(string $field, $value, string $rule, ?array $messages = []): void
+    protected function applyRule(string $field, $value, string $rule, array $messages = []): void
     {
         // 解析规则和参数
         if (strpos($rule, ':') !== false) {
