@@ -202,9 +202,9 @@ class Validator
      * @param string $field 字段名
      * @param mixed $value 字段值
      * @param string $rule 规则
-     * @param array $messages 错误消息数组
+     * @param array|null $messages 错误消息数组
      */
-    protected function applyRule(string $field, $value, string $rule, array $messages = []): void
+    protected function applyRule(string $field, $value, string $rule, ?array $messages = []): void
     {
         // 解析规则和参数
         if (strpos($rule, ':') !== false) {
