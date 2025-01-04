@@ -17,8 +17,9 @@ if (!defined('ABSPATH')) {
  * @author Allan
  * @since 1.0.0
  */
-abstract class InitCommand extends Command
+class InitCommand extends Command
 {
+    protected string $rootPath;
     /**
      * 项目基础目录结构
      */
@@ -55,6 +56,16 @@ abstract class InitCommand extends Command
         'utils',
         'commands',
     ];
+
+    public function __construct(string $rootPath)
+    {
+        $this->rootPath = $rootPath;
+    }
+
+    public function getRootPath(): string
+    {
+        return $this->rootPath;
+    }
 
     /**
      * 执行初始化命令

@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
  * @author Allan
  * @since 1.0.0
  */
-abstract class MakeCommand extends Command
+class MakeCommand extends Command
 {
     /**
      * 模块名称（大驼峰格式）
@@ -37,6 +37,26 @@ abstract class MakeCommand extends Command
      * 模块名称（下划线格式）
      */
     protected string $snakeName;
+
+    protected string $rootPath;
+
+    public function __construct(string $rootPath)
+    {
+        $this->rootPath = $rootPath;
+        try {
+            // 加载容器
+            $this->container = Container::getInstance(Helper::key($rootPath));
+            Bootstrap::boot($this->container)->start();
+            $this->container->config->load('database');
+        } catch (\Exception $e) {
+            \WP_CLI::error($e->getMessage());
+        }
+    }
+
+    public function getRootPath(): string
+    {
+        return $this->rootPath;
+    }
 
     /**
      * 创建后台模块
@@ -76,12 +96,6 @@ abstract class MakeCommand extends Command
 
             $force = \WP_CLI\Utils\get_flag_value($assoc_args, 'force', false);
             $root_path = $this->getRootPath();
-
-            // 加载容器
-            $this->container = Container::getInstance(Helper::key($root_path));
-            Bootstrap::boot($this->container)->start();
-
-            $this->container->config->load('database');
 
             // 创建模块结构
             $this->createModuleStructure($root_path, $force);
@@ -515,12 +529,14 @@ abstract class MakeCommand extends Command
 
         $content = file_get_contents($stub_path);
 
+        $camelNamespace = Str::camel($this->container->get('plugin')->getNamespace());
+
         // 替换 js 文件中的变量名
         if ($type === 'js') {
             $replacements = [
-                'wanApiModelsAdmin' => $this->kebabName . 'Admin',
-                'initModelsList' => 'init' . $this->studlyName . 'List',
-                'initModelsForm' => 'init' . $this->studlyName . 'Form',
+                '{{ADMIN}}' => $camelNamespace . $this->studlyName . 'Admin',
+                '{{CAMEL_NAME}}' => Str::camel($this->kebabName),
+                '{{STUDLY_NAME}}' => $this->studlyName ,
             ];
 
             $content = str_replace(
@@ -629,7 +645,14 @@ HTML;
     {
         $type = $definition['type'];
 
-        if ($column === 'is_active') {
+        if ($column === 'type') {
+            return <<<HTML
+            <select id="{$column}" v-model="form.{$column}" class="regular-text">
+                <option value="">请选择</option>
+            </select>
+HTML;
+        }
+        if (in_array($column, ['is_active', 'status'])) {
             return '<input type="checkbox" v-model="form.' . $column . '">';
         }
 

@@ -1,4 +1,4 @@
-function initModelsList() {
+function init{{STUDLY_NAME}}List() {
     if (!document.getElementById('app')) {
         return;
     }
@@ -9,7 +9,7 @@ function initModelsList() {
                 items: [],
                 total: 0,
                 page: 1,
-                perPage: wanApiModelsAdmin.perPage,
+                perPage: {{ADMIN}}.perPage,
                 filters: {
                     type: '',
                     provider: '',
@@ -34,13 +34,13 @@ function initModelsList() {
             loadData() {
                 this.loading = true;
                 jQuery.post(ajaxurl, {
-                    action: wanApiModelsAdmin.action_list,
+                    action: {{ADMIN}}.action_list,
                     page: this.page,
                     per_page: this.perPage,
                     type: this.filters.type,
                     provider: this.filters.provider,
                     is_active: this.filters.is_active,
-                    nonce: wanApiModelsAdmin.nonce,
+                    nonce: {{ADMIN}}.nonce,
                 }).then(response => {
                     if (response.code === 1) {
                         this.items = response.data.items;
@@ -64,9 +64,9 @@ function initModelsList() {
 
                 this.loading = true;
                 jQuery.post(ajaxurl, {
-                    action: wanApiModelsAdmin.action_delete,
+                    action: {{ADMIN}}.action_delete,
                     id: item.id,
-                    nonce: wanApiModelsAdmin.nonce
+                    nonce: {{ADMIN}}.nonce
                 }).then(response => {
                     if (response.code === 1) {
                         kitpress.showToast(response.message,'success');
@@ -98,9 +98,9 @@ function initModelsList() {
                     this.loading = true;
 
                     const response = await jQuery.post(ajaxurl, {
-                        action: wanApiModelsAdmin.action_status,
+                        action: {{ADMIN}}.action_status,
                         id: item.id,
-                        nonce: wanApiModelsAdmin.nonce
+                        nonce: {{ADMIN}}.nonce
                     });
 
                     if (response.code === 1) {
@@ -183,10 +183,10 @@ function initModelsList() {
                 this.loading = true;
                 try {
                     const response = await jQuery.post(ajaxurl, {
-                        action: wanApiModelsAdmin.action_batch,
+                        action: {{ADMIN}}.action_batch,
                         operation: this.batchActions,
                         ids: this.selectedItems,
-                        nonce: wanApiModelsAdmin.nonce
+                        nonce: {{ADMIN}}.nonce
                     });
 
                     if (response.code === 1) {
@@ -221,10 +221,10 @@ function initModelsList() {
                     this.loading = true;
 
                     const response = await jQuery.post(ajaxurl, {
-                        action: wanApiModelsAdmin.action_sort,
+                        action: {{ADMIN}}.action_sort,
                         id: item.id,
                         sort_order: item.sort_order,
-                        nonce: wanApiModelsAdmin.nonce
+                        nonce: {{ADMIN}}.nonce
                     });
 
                     if (response.code === 1) {
@@ -259,7 +259,7 @@ function initModelsList() {
     });
 }
 
-function initModelsForm() {
+function init{{STUDLY_NAME}}Form() {
     if (!document.getElementById('table-form')) {
         return;
     }
@@ -269,7 +269,7 @@ function initModelsForm() {
         data() {
             return {
                 loading: false,
-                form: window.modelsDetail || {},
+                form: window.{{CAMEL_NAME}}Detail || {},
                 imagePrices: {
                     '1024x1024': { standard: 0.04, hd: 0.08 },
                     '512x512': { standard: 0.02, hd: 0.04 }
@@ -300,12 +300,12 @@ function initModelsForm() {
                         this.form.image_prices = null;
                     }
 
-                    let action = this.form.id == 0 ? wanApiModelsAdmin.action_add : wanApiModelsAdmin.action_edit;
+                    let action = this.form.id == 0 ? {{ADMIN}}.action_add : {{ADMIN}}.action_edit;
 
-                    const response = await jQuery.post(wanApiModelsAdmin.posturl, {
+                    const response = await jQuery.post({{ADMIN}}.posturl, {
                         action: action,
                         model: this.form,
-                        nonce: wanApiModelsAdmin.nonce
+                        nonce: {{ADMIN}}.nonce
                     });
 
                     if (response.code === 1) {
@@ -328,6 +328,6 @@ function initModelsForm() {
 
 // 页面加载完成后初始化
 jQuery(document).ready(function() {
-    initModelsList();
-    initModelsForm();
+    init{{STUDLY_NAME}}List();
+    init{{STUDLY_NAME}}Form();
 });

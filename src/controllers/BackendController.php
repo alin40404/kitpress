@@ -558,7 +558,9 @@ abstract class BackendController extends Controller {
         }
 
         return $this->render('view',[
-            'detail' => $detail
+            'detail' => $detail,
+            'editUrl' => \admin_url('admin.php?page='. $this->page .'&action=edit&id=' . $id),
+            'listUrl' => \admin_url('admin.php?page='. $this->page ),
         ]);
     }
 
