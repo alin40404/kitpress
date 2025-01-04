@@ -67,6 +67,14 @@ if (!defined('ABSPATH')) {
             {{TABLE_ROWS}}
         </tr>
         </tbody>
+        <tfoot>
+        <tr>
+            <td id="cb" class="manage-column column-cb check-column">
+                <input type="checkbox" id="select-all" @click="toggleSelectAll">
+                <label for="select-all"><span class="screen-reader-text">全选</span></label></td>
+            {{TABLE_HEADERS}}
+        </tr>
+        </tfoot>
     </table>
 
     <!-- 分页 -->

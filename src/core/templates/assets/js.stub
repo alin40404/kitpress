@@ -269,14 +269,7 @@ function init{{STUDLY_NAME}}Form() {
             }
         },
         created() {
-            // 解析已有的图片价格配置
-            if (this.form.image_prices) {
-                try {
-                    this.imagePrices = JSON.parse(this.form.image_prices);
-                } catch (e) {
-                    console.error('Invalid image prices format');
-                }
-            }
+
         },
         methods: {
             async submitForm() {
@@ -284,13 +277,6 @@ function init{{STUDLY_NAME}}Form() {
 
                 try {
                     this.loading = true;
-
-                    // 处理图片价格
-                    if (this.form.type === 'image') {
-                        this.form.image_prices = JSON.stringify(this.imagePrices);
-                    } else {
-                        this.form.image_prices = null;
-                    }
 
                     let action = this.form.id == 0 ? {{ADMIN}}.action_add : {{ADMIN}}.action_edit;
 

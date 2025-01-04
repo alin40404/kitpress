@@ -44,12 +44,78 @@ class Validator
     public function __construct(array $data, array $rules)
     {
         $this->data = $data;
-        $this->rules = $rules;
+        $this->rules = $this->parseRules($rules);
         $this->validate();
     }
 
     /**
      * 执行验证
+     *
+     * @example 基础用法：
+     * $rules = [
+     *     'username' => 'required|string|min:3',
+     *     'email' => 'required|email'
+     * ];
+     *
+     * @example 使用通用错误消息：
+     * $rules = [
+     *     'username' => [
+     *         'rules' => 'required|string|min:3',
+     *         'message' => '用户名格式不正确'
+     *     ]
+     * ];
+     *
+     * @example 使用独立规则错误消息：
+     * $rules = [
+     *     'username' => [
+     *         'rules' => 'required|string|min:3',
+     *         'messages' => [
+     *             'required' => '用户名不能为空',
+     *             'string' => '用户名必须是字符串',
+     *             'min' => '用户名最少需要3个字符'
+     *         ]
+     *     ]
+     * ];
+     *
+     * @example 完整验证规则示例：
+     * $rules = [
+     *     'code' => [
+     *         'rules' => 'required|string',
+     *         'messages' => [
+     *             'required' => '语言代码不能为空',
+     *             'string' => '语言代码必须是字符串格式'
+     *         ]
+     *     ],
+     *     'name' => [
+     *         'rules' => 'required|string',
+     *         'message' => '语言名称格式不正确'
+     *     ],
+     *     'native_name' => 'required|string',
+     *     'sort_order' => [
+     *         'rules' => 'required|integer',
+     *         'messages' => [
+     *             'required' => '排序不能为空',
+     *             'integer' => '排序必须是整数'
+     *         ]
+     *     ],
+     *     'is_active' => [
+     *         'rules' => 'required|boolean',
+     *         'message' => '状态值不正确'
+     *     ]
+     * ];
+     *
+     * $data = [
+     *     'code' => 'zh_CN',
+     *     'name' => '简体中文',
+     *     'native_name' => '简体中文',
+     *     'sort_order' => 1,
+     *     'is_active' => true
+     * ];
+     *
+     * $validator = new Validator($data, $rules);
+     * if ($validator->fails()) {
+     *     $errors = $validator->errors();
+     * }
      *
      * @return bool 验证是否通过
      */
@@ -62,14 +128,62 @@ class Validator
     }
 
     /**
+     * 解析规则数组
+     *
+     * @param array $rules 原始规则数组
+     * @return array 处理后的规则数组
+     */
+    protected function parseRules(array $rules): array
+    {
+        $parsed = [];
+        foreach ($rules as $field => $rule) {
+            if (is_array($rule)) {
+                $parsed[$field] = [
+                    'rules' => $rule['rules'],
+                    'messages' => $this->parseMessages($rule)
+                ];
+            } else {
+                $parsed[$field] = [
+                    'rules' => $rule,
+                    'messages' => []
+                ];
+            }
+        }
+        return $parsed;
+    }
+
+    /**
+     * 解析错误消息
+     *
+     * @param array $rule 规则配置
+     * @return array 处理后的消息数组
+     */
+    protected function parseMessages(array $rule): array
+    {
+        $messages = [];
+
+        // 处理单个通用消息
+        if (isset($rule['message']) && is_string($rule['message'])) {
+            return ['default' => $rule['message']];
+        }
+
+        // 处理针对具体规则的消息
+        if (isset($rule['messages']) && is_array($rule['messages'])) {
+            return $rule['messages'];
+        }
+
+        return $messages;
+    }
+
+    /**
      * 验证单个字段
      *
      * @param string $field 字段名
-     * @param string $ruleString 规则字符串
+     * @param array $ruleData 规则数据
      */
-    protected function validateField(string $field, string $ruleString): void
+    protected function validateField(string $field, array $ruleData): void
     {
-        $rules = explode('|', $ruleString);
+        $rules = explode('|', $ruleData['rules']);
         $value = $this->data[$field] ?? null;
 
         // 如果字段不存在且不是必需的，跳过验证
@@ -78,7 +192,7 @@ class Validator
         }
 
         foreach ($rules as $rule) {
-            $this->applyRule($field, $value, $rule);
+            $this->applyRule($field, $value, $rule, $ruleData['message']);
         }
     }
 
@@ -88,8 +202,9 @@ class Validator
      * @param string $field 字段名
      * @param mixed $value 字段值
      * @param string $rule 规则
+     * @param array $messages 错误消息数组
      */
-    protected function applyRule(string $field, $value, string $rule): void
+    protected function applyRule(string $field, $value, string $rule, array $messages = []): void
     {
         // 解析规则和参数
         if (strpos($rule, ':') !== false) {
@@ -103,9 +218,35 @@ class Validator
         if (method_exists($this, $method)) {
             $result = $this->$method($value, $parameter);
             if (!$result) {
-                $this->addError($field, $this->getErrorMessage($field, $ruleName, $parameter));
+                $message = $this->getCustomMessage($ruleName, $messages, $field, $parameter);
+                $this->addError($field, $message);
             }
         }
+    }
+
+    /**
+     * 获取自定义错误消息
+     *
+     * @param string $ruleName 规则名称
+     * @param array $messages 自定义消息数组
+     * @param string $field 字段名
+     * @param string|null $parameter 参数
+     * @return string
+     */
+    protected function getCustomMessage(string $ruleName, array $messages, string $field, ?string $parameter): string
+    {
+        // 优先使用针对具体规则的消息
+        if (isset($messages[$ruleName])) {
+            return $messages[$ruleName];
+        }
+
+        // 其次使用默认消息
+        if (isset($messages['default'])) {
+            return $messages['default'];
+        }
+
+        // 最后使用系统默认消息模板
+        return $this->getErrorMessage($field, $ruleName, $parameter);
     }
 
     /**
