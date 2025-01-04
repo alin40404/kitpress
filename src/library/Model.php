@@ -418,7 +418,8 @@ class Model {
      * @param string|array $columns 查询字段
      * @return $this
      */
-    public function field($columns) {
+    public function field($columns): Model
+    {
         $this->select = is_array($columns) ? implode(', ', $columns) : $columns;
         return $this;
     }
@@ -591,11 +592,12 @@ class Model {
 
     /**
      * 设置排序
-     * @param string $column 排序字段
+     * @param mixed $column 排序字段
      * @param string $direction 排序方向 (ASC/DESC)
      * @return $this
      */
-    public function order($column, $direction = 'DESC') {
+    public function order($column, string $direction = 'DESC'): Model
+    {
         // 如果是数组，处理多个排序条件
         if (is_array($column)) {
             foreach ($column as $key => $value) {
@@ -618,7 +620,7 @@ class Model {
      * @param string $column 排序字段
      * @param string $direction 排序方向
      */
-    protected function addOrderBy($column, $direction = 'DESC') {
+    protected function addOrderBy(string $column, string $direction = 'DESC') {
         // 验证并标准化排序方向
         $direction = strtoupper($direction);
         if (!in_array($direction, ['ASC', 'DESC', ''])) {

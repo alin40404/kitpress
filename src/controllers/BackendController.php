@@ -261,7 +261,7 @@ class BackendController extends Controller {
 
         // 应用查询条件和分页
         return $query->where($where)
-            ->select($this->getSelectFields())
+            ->field($this->getSelectFields())
             ->page($page, $per_page)
             ->order($this->getDefaultSort());
     }
