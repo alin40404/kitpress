@@ -598,19 +598,27 @@ class Model {
      */
     public function order($column, string $direction = 'DESC'): Model
     {
-        // 如果是数组，处理多个排序条件
+        // 处理数组格式
         if (is_array($column)) {
             foreach ($column as $key => $value) {
                 if (is_numeric($key)) {
-                    $this->addOrderBy($value);
+                    // 处理 ['field', 'direction'] 格式
+                    if (is_array($value) && count($value) == 2) {
+                        $this->addOrderBy($value[0], $value[1]);
+                    }
+                    // 处理 ['field'] 格式
+                    else {
+                        $this->addOrderBy($value);
+                    }
                 } else {
+                    // 处理 'field' => 'direction' 格式
                     $this->addOrderBy($key, $value);
                 }
             }
             return $this;
         }
 
-        // 单个排序条件
+        // 处理单个字符串格式
         $this->addOrderBy($column, $direction);
         return $this;
     }
