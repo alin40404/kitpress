@@ -136,20 +136,16 @@ class MakeCommand extends Command
                 'views' => [
                     $this->kebabName => []
                 ],
-                'component' => [
-                    'vue' => [
-                        'vue.min.js'
-                    ],
-                    'common.js',
-                    'common.css',
-                ],
                 'assets' => [
-                    'js' => [
-                        $this->kebabName . '.js'
+                    'component' => [
+                        'vue' => [
+                            'vue.min.js'
+                        ],
+                        'common.js',
+                        'common.css',
                     ],
-                    'css' => [
-                        $this->kebabName . '.css'
-                    ]
+                    'js' => [],
+                    'css' => []
                 ]
             ]
         ];
@@ -186,29 +182,23 @@ class MakeCommand extends Command
                 }
 
                 // 递归处理子项
-                $this->createStructure($base_path, $item, $current_path . $name . '/');
+                if(!empty($item)) $this->createStructure($base_path, $item, $current_path . $name . '/');
             } else {
 
                 if( $item == 'vue.min.js' || $item == 'common.js' || $item == 'common.css' ){
-
                     $folder = $item == 'vue.min.js' ? 'vue/' : '';
-
                     if( !file_exists($base_path .'backend/assets/component/' . $folder . $item) ){
-                        $common_path = dirname(__DIR__) . '/templates/assets/' . $item . '.stub';
-                        file_put_contents($base_path .'backend/assets/component/'. $folder . $item, $common_path);
+                        $common_file = KITPRESS_PATH . 'core/templates/assets/' . $item . '.stub';
+                        file_put_contents($base_path .'backend/assets/component/'. $folder . $item, $common_file);
                     }
                     continue;
                 }
 
-                if (is_string($item) && Str::endsWith($item, '.php')) {
-                    continue;
-                } else {
-                    // 创建普通目录
-                    $dir_path = $path . $item;
-                    if (!is_dir($dir_path)) {
-                        mkdir($dir_path, 0755, true);
-                        \WP_CLI::line("创建文件夹: " . str_replace($base_path, '', $dir_path));
-                    }
+                // 创建普通目录
+                $dir_path = $path . $item;
+                if (!is_dir($dir_path)) {
+                    mkdir($dir_path, 0755, true);
+                    \WP_CLI::line("创建文件夹: " . str_replace($base_path, '', $dir_path));
                 }
             }
         }
@@ -477,8 +467,7 @@ class MakeCommand extends Command
     private function formatTableComment(string $comment): string
     {
         // 移除末尾的"表"字
-        $comment = rtrim($comment, '表');
-        return $comment;
+        return rtrim($comment, '表');
     }
 
     /**
@@ -489,11 +478,11 @@ class MakeCommand extends Command
         $assets = [
             'js' => [
                 'content' => $this->getAssetContent('js'),
-                'path' => "/backend/assets/js/{$kebabName}.js"
+                'path' => "backend/assets/js/{$kebabName}.js"
             ],
             'css' => [
                 'content' => $this->getAssetContent('css'),
-                'path' => "/backend/assets/css/{$kebabName}.css"
+                'path' => "backend/assets/css/{$kebabName}.css"
             ]
         ];
 
@@ -521,7 +510,7 @@ class MakeCommand extends Command
      */
     protected function getAssetContent(string $type): string
     {
-        $stub_path = dirname(__DIR__) . '/templates/assets/' . $type . '.stub';
+        $stub_path = KITPRESS_PATH . 'core/templates/assets/' . $type . '.stub';
 
         if (!file_exists($stub_path)) {
             return '';

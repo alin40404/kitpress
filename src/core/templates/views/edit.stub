@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
                 保存更改
                 <span v-if="loading" class="spinner is-active"></span>
             </button>
-            <a href="<?php echo admin_url('admin.php?page=wan-api-models'); ?>"
+            <a href="<?php echo $listUrl; ?>"
                class="button">
                 返回列表
             </a>
