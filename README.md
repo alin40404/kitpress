@@ -13,6 +13,82 @@
 - **内置工具**：提供插件开发必需的工具，如设置页面、自定义文章类型等
 - **Composer 支持**：通过 Composer 轻松管理依赖和安装
 
+
+## 系统要求
+
+- PHP 7.4 或更高版本
+- WordPress 5.0 或更高版本
+- Composer 2.0 或更高版本（如果使用 Composer 安装）
+
+## 开发指南
+
+### 目录结构
+```
+your-plugin/             # 你的插件目录
+├── api/                 # API 接口定义
+├── backend/             # 后端业务逻辑
+├── config/              # 配置文件
+├── frontend/            # 前端业务逻辑
+├── functions/           # 辅助函数
+├── languages/           # 多语言文件
+├── library/             # 核心库文件
+├── routes/              # 路由定义
+├── utils/               # 工具类
+├── vendor/              # Composer 依赖
+├── .gitignore
+├── composer.json        # Composer 配置文件
+├── composer.lock        # Composer 锁定文件
+├── license.txt          # 许可证文件
+├── readme.txt           # 说明文档
+└── your-plugin.php      # 插件主文件
+```
+
+每个目录的主要职责：
+
+- **api/**: 存放 API 接口定义和处理逻辑
+- **backend/**: 包含后端管理界面和业务处理逻辑
+- **frontend/**: 前端展示和交互逻辑，如模板、样式和脚本
+- **config/**: 存放配置文件，如数据库配置、应用配置等
+- **functions/**: 通用函数和助手函数
+- **languages/**: 多语言翻译文件
+- **library/**: 框架核心库文件
+- **routes/**: API 路由定义和路由处理器
+- **utils/**: 工具类和通用功能
+- **vendor/**: Composer 安装的第三方依赖包
+
+
+### 插件主文件示例 (your-plugin.php)
+```php
+<?php
+/**
+ * Plugin Name: Your Plugin Name
+ * Plugin URI: https://your-plugin-website.com
+ * Description: Your plugin description
+ * Version: 1.0.0
+ * Author: Your Name
+ * Author URI: https://your-website.com
+ * License: GPL-2.0+
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain: your-plugin
+ * Domain Path: /languages
+ */
+
+// 防止直接访问
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// 引入 Composer 自动加载器
+require_once plugin_dir_path(__FILE__) . 'vendor/autoload.php';
+
+// 初始化插件
+function your_plugin_init() {
+    // 插件初始化代码
+}
+add_action('plugins_loaded', 'your_plugin_init');
+```
+
+
 ## 安装
 
 ### 通过 Composer 安装（推荐）
@@ -131,9 +207,3 @@ KitPress 使用 GPLv2 或更高版本许可证。
 
 ### 支持
 如果您需要帮助或有任何问题，欢迎在 GitHub 代码库上提出 issue，或通过官方支持论坛联系社区。
-
-## 系统要求
-
-- PHP 7.4 或更高版本
-- WordPress 5.0 或更高版本
-- Composer 2.0 或更高版本（如果使用 Composer 安装）
