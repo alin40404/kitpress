@@ -1,5 +1,5 @@
 <?php
-namespace {{NAMESPACE}}\Backend\Controllers;
+namespace {{NAMESPACE}}\backend\controllers;
 
 use kitpress\controllers\BackendController;
 use function kitpress\functions\kp;
