@@ -72,17 +72,17 @@ class BackendController extends Controller {
     protected array $filters = [];
 
     /**
-     * 页面标识符
+     * 当前页面的标识符
      *
      * WordPress后台页面的唯一标识符
      * 用于构建菜单URL和权限检查
      * 格式通常为：{plugin_prefix}-{controller_name}
-     *
+     * 例如：wan-api-models, wan-api-costs 等
      * @since 1.0.0
      * @access protected
      * @var string
      */
-    protected string $page = '';
+    protected string $pageSlug = '';
 
     /**
      * 控制器原始名称
@@ -126,7 +126,7 @@ class BackendController extends Controller {
 
         $this->setControllerName();
 
-        $this->page = $this->plugin->getPrefix() . $this->formatControllerName;
+        $this->pageSlug = $this->plugin->getPrefix() . $this->formatControllerName;
 
         $this->initFilters();
     }
@@ -171,7 +171,7 @@ class BackendController extends Controller {
     public function index(): ?string
     {
         return $this->render('index',[
-            'addUrl' => \admin_url('admin.php?page=' . $this->page . '&action=add'),
+            'addUrl' => \admin_url('admin.php?page=' . $this->pageSlug . '&action=add'),
         ]);
     }
 
@@ -210,7 +210,7 @@ class BackendController extends Controller {
      */
     public function getList(): bool
     {
-        $this->verifyNonce($this->page . '-nonce');
+        $this->verifyNonce($this->pageSlug . '-nonce');
 
         // 获取提示词类型列表
         $page = max(1, intval($this->input('page', 1)));
@@ -222,8 +222,8 @@ class BackendController extends Controller {
 
         if(!empty($items)) {
             foreach ($items as &$item) {
-                $item->edit_url = \admin_url('admin.php?page='. $this->page .'&action=edit&id=' . $item->id);
-                $item->view_url = \admin_url('admin.php?page='. $this->page .'&action=view&id=' . $item->id);
+                $item->edit_url = \admin_url('admin.php?page='. $this->pageSlug .'&action=edit&id=' . $item->id);
+                $item->view_url = \admin_url('admin.php?page='. $this->pageSlug .'&action=view&id=' . $item->id);
             }
         }
 
@@ -470,7 +470,7 @@ class BackendController extends Controller {
     {
         // 处理表单提交
         if($this->isPost()) {
-            $this->verifyNonce($this->page . '-nonce');
+            $this->verifyNonce($this->pageSlug . '-nonce');
 
             // 获取并过滤数据
             $modelData = $this->filterModelData(
@@ -489,13 +489,13 @@ class BackendController extends Controller {
             }
 
             return $this->success([
-                'listUrl' =>  \admin_url('admin.php?page=' . $this->page ),
+                'listUrl' =>  \admin_url('admin.php?page=' . $this->pageSlug ),
             ], Lang::kit('添加成功'));
         }
 
         return $this->render('edit',[
             'detail' => $this->createEmptyModel(),
-            'listUrl' => \admin_url('admin.php?page='. $this->page ),
+            'listUrl' => \admin_url('admin.php?page='. $this->pageSlug ),
         ]);
     }
 
@@ -525,7 +525,7 @@ class BackendController extends Controller {
         // 处理表单提交
         if($this->isPost()) {
 
-            $this->verifyNonce($this->page . '-nonce');
+            $this->verifyNonce($this->pageSlug . '-nonce');
 
             $modelData = $this->input('model', []);
             $id = trim($modelData[$this->model->getPrimaryKey()] ?? 0);
@@ -551,7 +551,7 @@ class BackendController extends Controller {
             }
 
             return $this->success([
-                'listUrl' =>  \admin_url('admin.php?page=' . $this->page ),
+                'listUrl' =>  \admin_url('admin.php?page=' . $this->pageSlug ),
             ], Lang::kit('更新成功'));
         }
 
@@ -567,7 +567,7 @@ class BackendController extends Controller {
 
         return $this->render('edit',[
             'detail' => $detail,
-            'listUrl' => \admin_url('admin.php?page='. $this->page ),
+            'listUrl' => \admin_url('admin.php?page='. $this->pageSlug ),
         ]);
     }
 
@@ -601,8 +601,8 @@ class BackendController extends Controller {
 
         return $this->render('view',[
             'detail' => $detail,
-            'editUrl' => \admin_url('admin.php?page='. $this->page .'&action=edit&id=' . $id),
-            'listUrl' => \admin_url('admin.php?page='. $this->page ),
+            'editUrl' => \admin_url('admin.php?page='. $this->pageSlug .'&action=edit&id=' . $id),
+            'listUrl' => \admin_url('admin.php?page='. $this->pageSlug ),
         ]);
     }
 
@@ -627,7 +627,7 @@ class BackendController extends Controller {
      */
     public function delete(): ?bool
     {
-        $this->verifyNonce($this->page . '-nonce');
+        $this->verifyNonce($this->pageSlug . '-nonce');
 
         // 获取要删除的ID
         $id = trim($this->input($this->model->getPrimaryKey()));
@@ -687,7 +687,7 @@ class BackendController extends Controller {
      */
     public function batch(): ?bool
     {
-        $this->verifyNonce($this->page . '-nonce');
+        $this->verifyNonce($this->pageSlug . '-nonce');
 
         $ids = $this->input('ids', []);
         $operation = $this->input('operation');
@@ -774,7 +774,7 @@ class BackendController extends Controller {
      */
     protected function updateStatus(): ?bool
     {
-        $this->verifyNonce($this->page . '-nonce');
+        $this->verifyNonce($this->pageSlug . '-nonce');
 
         // 获取ID和状态
         $id = trim($this->input($this->model->getPrimaryKey()));
@@ -834,7 +834,7 @@ class BackendController extends Controller {
      */
     protected function updateSort(): ?bool
     {
-        $this->verifyNonce($this->page . '-nonce');
+        $this->verifyNonce($this->pageSlug . '-nonce');
 
         // 获取ID和新的排序值
         $id = trim($this->input($this->model->getPrimaryKey()));
@@ -898,7 +898,7 @@ class BackendController extends Controller {
     protected function setControllerName(): void
     {
         // 获取基础类名（不含命名空间）
-        $className = basename(static::class);
+        $className = (new \ReflectionClass($this))->getShortName();
 
         // 移除 Controller 后缀
         $this->controllerName = str_replace('Controller', '', $className);
@@ -942,14 +942,14 @@ class BackendController extends Controller {
         return [
             'ajaxurl' => \admin_url('admin-ajax.php'),
             'posturl' => \admin_url('admin-post.php'),
-            'action_list' => $this->page . '-list',       // ajax
-            'action_add' => $this->page . '-add',         // post
-            'action_edit' => $this->page . '-edit',       // post
-            'action_delete' => $this->page . '-delete',   // ajax
-            'action_batch' => $this->page . '-batch',     // ajax
-            'action_status' => $this->page . '-status',   // ajax
-            'action_sort' => $this->page . '-sort',       // ajax
-            'nonce' => \wp_create_nonce($this->page .'-nonce'),
+            'action_list' => $this->pageSlug . '-list',       // ajax
+            'action_add' => $this->pageSlug . '-add',         // post
+            'action_edit' => $this->pageSlug . '-edit',       // post
+            'action_delete' => $this->pageSlug . '-delete',   // ajax
+            'action_batch' => $this->pageSlug . '-batch',     // ajax
+            'action_status' => $this->pageSlug . '-status',   // ajax
+            'action_sort' => $this->pageSlug . '-sort',       // ajax
+            'nonce' => \wp_create_nonce($this->pageSlug .'-nonce'),
             'perPage' => $this->config->get('app.features.per_page') ?? 10,
         ];
     }
@@ -962,7 +962,7 @@ class BackendController extends Controller {
     {
         // 添加必要的数据
         \wp_localize_script(
-            $this->page . '-common-script',
+            $this->pageSlug . '-common-script',
             $this->scriptObjectName() ,
             $this->setL10n()
         );
@@ -975,8 +975,8 @@ class BackendController extends Controller {
     {
         // 加载多个样式文件
         $styles = [
-            $this->page . '-common' => 'backend/assets/component/common.css',
-            $this->page  => 'backend/assets/css/'. $this->formatControllerName .'.css',
+            $this->pageSlug . '-common' => 'backend/assets/component/common.css',
+            $this->pageSlug  => 'backend/assets/css/'. $this->formatControllerName .'.css',
         ];
 
         $styles = array_merge($styles, $this->styles);
@@ -1012,7 +1012,7 @@ class BackendController extends Controller {
 
         // 加载工具
         \wp_enqueue_script(
-            $this->page . '-utils-script',
+            $this->pageSlug . '-utils-script',
             $this->plugin->getRootUrl() . 'backend/assets/component/utils.js',
             ['vue', 'jquery'],
             $this->config->get('app.version'),
@@ -1027,8 +1027,8 @@ class BackendController extends Controller {
     {
         // 加载多个样式文件
         $scripts = [
-            $this->page . '-common' => 'backend/assets/component/common.js',
-            $this->page  => 'backend/assets/js/'. $this->formatControllerName .'.js',
+            $this->pageSlug . '-common' => 'backend/assets/component/common.js',
+            $this->pageSlug  => 'backend/assets/js/'. $this->formatControllerName .'.js',
         ];
 
         $scripts = array_merge($scripts, $this->scripts);
@@ -1039,10 +1039,10 @@ class BackendController extends Controller {
             }
 
             // 设置依赖关系
-            $deps = ['vue', 'jquery',$this->page . '-utils-script'];
+            $deps = ['vue', 'jquery',$this->pageSlug . '-utils-script'];
             // 如果不是公共脚本，添加对公共脚本的依赖
-            if ($handle !==  $this->page . '-common') {
-                $deps[] =  $this->page . '-common-script';
+            if ($handle !==  $this->pageSlug . '-common') {
+                $deps[] =  $this->pageSlug . '-common-script';
             }
 
             \wp_enqueue_script(
@@ -1073,7 +1073,7 @@ class BackendController extends Controller {
     public function enqueueAssets($hook): void
     {
 
-        if (stripos($hook,  $this->page) === false) {
+        if (stripos($hook,  $this->pageSlug) === false) {
             return;
         }
 
