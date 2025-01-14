@@ -214,7 +214,7 @@ class BackendController extends Controller {
 
         // 获取提示词类型列表
         $page = max(1, intval($this->input('page', 1)));
-        $per_page = max(10, intval($this->input('per_page', $this->config->get('app.features.per_page'))));
+        $per_page = max(1, intval($this->input('per_page', $this->config->get('app.features.per_page'))));
 
         $where = $this->buildListWhere();
         $total = $this->model->where($where)->count();

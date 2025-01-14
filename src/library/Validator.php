@@ -363,17 +363,11 @@ class Validator
 
     protected function validateMin($value, $parameter): bool
     {
-        if (is_string($value)) {
-            return strlen($value) >= $parameter;
-        }
         return is_numeric($value) && $value >= $parameter;
     }
 
     protected function validateMax($value, $parameter): bool
     {
-        if (is_string($value)) {
-            return strlen($value) <= $parameter;
-        }
         return is_numeric($value) && $value <= $parameter;
     }
 

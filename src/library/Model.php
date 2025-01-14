@@ -470,6 +470,7 @@ class Model {
      * 3. where('column', 'value')                        // 键值对形式
      * 4. where('column', 'operator', 'value')           // 指定运算符形式
      * 5. where(['column' => 'value'], 'OR')             // 数组形式，指定连接符
+     * 6. where([['column', 'operator', 'value']])       // 数组形式，指定运算符
      * 
      * @param array|string $conditions 查询条件
      * @param string|mixed $operatorOrValue 运算符或值
