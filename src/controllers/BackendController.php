@@ -428,7 +428,7 @@ class BackendController extends Controller {
      * @access protected
      *
      */
-    protected function validateModelData(array $data): bool
+    protected function validateModelData(array $data)
     {
         // 获取验证规则
         $rules = $this->validationRules();
@@ -439,7 +439,9 @@ class BackendController extends Controller {
         // 执行验证
         $validator = $this->validate($data, $rules);
         if ($validator->fails()) {
-            return $validator->errors();
+            // 获取第一个错误消息
+            $errors = $validator->errors();
+            return reset($errors)[0] ?? Lang::kit('数据验证失败');
         }
 
         return true;
@@ -480,7 +482,7 @@ class BackendController extends Controller {
             // 验证数据
             $validation = $this->validateModelData($modelData);
             if ($validation !== true) {
-                return $this->error(Lang::kit('数据验证失败'), $validation);
+                return $this->error($validation);
             }
 
             $result = $this->model->insert($modelData);
@@ -538,7 +540,7 @@ class BackendController extends Controller {
             // 验证数据
             $validation = $this->validateModelData($modelData);
             if ($validation !== true) {
-                return $this->error(Lang::kit('数据验证失败'), $validation);
+                return $this->error($validation);
             }
 
             if (!$id || !$this->model->find($id)) {
