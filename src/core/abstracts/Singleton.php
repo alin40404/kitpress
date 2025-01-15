@@ -11,7 +11,7 @@ if (!defined('ABSPATH')) {
  * 单例抽象类
  */
 abstract class Singleton {
-    protected static $instances = [];
+    protected static array $instances = [];
 
     public static function getInstance() {
         // 后期静态绑定
@@ -30,12 +30,22 @@ abstract class Singleton {
     private function __clone() {}
 
     // 防止反序列化
-    private function __wakeup() {
+
+    /**
+     * @throws \Exception
+     */
+    public function __wakeup()
+    {
         throw new \Exception(Lang::kit('无法反序列化单例对象'));
     }
 
     // 防止通过 serialize() 序列化
-    private function __sleep() {
+
+    /**
+     * @throws \Exception
+     */
+    public function __sleep()
+    {
         throw new \Exception(Lang::kit('无法序列化单例对象'));
     }
 }
