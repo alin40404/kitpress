@@ -478,7 +478,8 @@ class Model {
      * @param string $chainOperator 条件连接符 (AND/OR)
      * @return $this
      */
-    public function where($conditions, $operatorOrValue = null, $value = null, $chainOperator = 'AND') {
+    public function where($conditions, $operatorOrValue = null, $value = null, string $chainOperator = 'AND'): Model
+    {
         // 如果是第一次调用where，重置条件
         if (empty($this->where)) {
             $this->where = '';
@@ -487,32 +488,32 @@ class Model {
 
         // 处理数组形式的调用
         if (is_array($conditions)) {
-            // 处理 where(['column', 'operator', 'value']) 形式
-            if (isset($conditions[0]) && isset($conditions[1])) {
+            // 情况2：where(['column', 'operator', 'value'])
+            if (isset($conditions[0]) && !is_array($conditions[0])) {
                 $column = $conditions[0];
-                $operator = $conditions[1];
+                $operator = $conditions[1] ?? '=';
                 $value = $conditions[2] ?? null;
                 $this->addWhereCondition($column, $operator, $value, $chainOperator);
-            } 
-            // 处理 where(['column' => 'value']) 形式
+            }
+            // 情况1和6：where(['column' => 'value']) 或 where([['column', 'operator', 'value']])
             else {
                 foreach ($conditions as $key => $condition) {
                     if (is_array($condition)) {
-                        // 支持嵌套数组条件: ['column', 'operator', 'value']
+                        // 情况6：嵌套数组条件 ['column', 'operator', 'value']
                         $this->addWhereCondition(
                             $condition[0], 
-                            $condition[1], 
-                            $condition[2], 
+                            $condition[1],
+                            $condition[2] ?? null,
                             $chainOperator
                         );
                     } else {
-                        // 普通键值对
+                        // 情况1：简单键值对
                         $this->addWhereCondition($key, '=', $condition, $chainOperator);
                     }
                 }
             }
 
-            // 如果第二个参数是连接符
+            // 如果第二个参数是连接符，则处理
             if (is_string($operatorOrValue) && in_array(strtoupper($operatorOrValue), ['AND', 'OR'])) {
                 $chainOperator = $operatorOrValue;
             }
@@ -955,7 +956,8 @@ class Model {
      * 获取最后执行的 SQL
      * @return string
      */
-    public function getLastSql() {
+    public function getLastSql(): string
+    {
         return $this->lastSql;
     }
 
@@ -963,7 +965,8 @@ class Model {
      * 打印 SQL 并继续执行
      * @return $this
      */
-    public function dumpSql() {
+    public function dumpSql(): Model
+    {
         $this->debug = true;
 
         // 构建 SQL 语句
@@ -973,8 +976,8 @@ class Model {
         $this->log->error("Debug SQL: " . $sql);
 
         // 如果在管理后台，直接输出SQL
-        if (is_admin()) {
-            echo "<pre>Debug SQL: " . esc_html($sql) . "</pre>";
+        if (\is_admin()) {
+            echo "<pre>Debug SQL: " . \esc_html($sql) . "</pre>";
         }
 
         return $this;
@@ -983,11 +986,11 @@ class Model {
     /**
      * 打印 SQL 并停止执行
      */
-    public function ddSql() {
+    public function ddSql()
+    {
         $this->debug = true;
         $result = $this->get();
-        wp_die($this->lastSql);
-        return $result;
+        \wp_die($this->lastSql);
     }
 
     /**
