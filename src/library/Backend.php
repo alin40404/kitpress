@@ -14,11 +14,7 @@ if (!defined('ABSPATH')) {
 class Backend {
     private array $routes = [];
     private array $menus = [];
-    /**
-     * 命名空间
-     * @var string
-     */
-    private string $namespace;
+
     /**
      * 命名空间路径
      * @var string
@@ -57,7 +53,8 @@ class Backend {
     }
 
     // 添加新的辅助方法
-    private function formatActionName(string $action): string {
+    private function formatActionName(string $action): string
+    {
         $prefix = $this->plugin->getPrefix();
         // 将前缀中的连字符转换为下划线
         // $prefix = str_replace('-', '_', $prefix);
@@ -67,7 +64,8 @@ class Backend {
         return $prefix . $action;
     }
 
-    public function registerRoutes() {
+    public function registerRoutes(): void
+    {
         // 注册后台路由
         if ($this->routes) {
             if (isset($this->routes['post']) && !empty($this->routes['post'])) {
@@ -87,7 +85,8 @@ class Backend {
         }
     }
 
-    public function registerAdminMenus() {
+    public function registerAdminMenus(): void
+    {
 
         if (empty($this->menus)) return;
 
@@ -109,7 +108,8 @@ class Backend {
                     $menu['menu_title'] ?? '',
                     $menu['capability'] ?? 'manage_options',
                     ($menu['use_prefix'] ?? true) ? $this->plugin->getPrefix() . ($menu['menu_slug'] ?? '') : ($menu['menu_slug'] ?? ''),
-                    [$this, 'handleMenuCallback']
+                    [$this, 'handleMenuCallback'],
+                    $menu['position'] ?? null
                 );
             }
         }
