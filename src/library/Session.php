@@ -54,7 +54,7 @@ class Session {
         $this->cache = $cache;
 
         $this->cookie = $this->config->get('app.session.cookie', 'kp_session');
-        $this->cookie_expires = $this->config->get('app.session.expires', 48 * self::HOUR_IN_SECONDS);
+        $this->cookie_expires = (int)$this->config->get('app.session.expires', 48 * self::HOUR_IN_SECONDS);
 
         $this->model = new SessionModel($log);
 
@@ -125,7 +125,7 @@ class Session {
             }
 
             // 存入缓存
-            $this->cache->set('session_' . $this->session_id, $this->data, 3600);
+            $this->cache->set('session_' . $this->session_id, $this->data, $this->cookie_expires);
         }
     }
 
@@ -146,7 +146,7 @@ class Session {
             );
         }
 
-        $this->cache->set('session_' . $this->session_id, $this->data, 3600);
+        $this->cache->set('session_' . $this->session_id, $this->data, $this->cookie_expires);
     }
 
     /**
