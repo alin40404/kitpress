@@ -849,7 +849,7 @@ HTML;
         }
 
         if ($type === 'text') {
-            return '<textarea id="' . $column . '" v-model="form.' . $column . '" class="large-text"></textarea>';
+            return '<textarea id="' . $column . '" v-model="form.' . $column . '" class="large-text" rows="6"></textarea>';
         }
 
         return '<input type="text" id="' . $column . '" v-model="form.' . $column . '" class="regular-text" placeholder="'. $label .'">';
